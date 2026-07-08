@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Create social media posts from templates — fill fields or upload Excel, preview, and export for Instagram, TikTok, Facebook, and LinkedIn." />
+  <meta name="theme-color" content="#0a0a0f" />
+  <title>Social Media Template Automation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/style.css" />
+  <script>
+    window.global = window;
+  </script>
+</head>
+<body>
+  <div id="app">
+    <header id="app-header">
+      <div class="header-left">
+        <div class="logo">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+            <rect width="32" height="32" rx="8" fill="url(#logo-grad)" />
+            <path d="M8 10h16M8 16h12M8 22h14" stroke="#fff" stroke-width="2" stroke-linecap="round" />
+            <defs>
+              <linearGradient id="logo-grad" x1="0" y1="0" x2="32" y2="32">
+                <stop stop-color="#6366f1" />
+                <stop offset="1" stop-color="#a855f7" />
+              </linearGradient>
+            </defs>
+          </svg>
+          <h1>Social Media Template Automation</h1>
+        </div>
+        <p class="tagline">Template → Data → Export</p>
+      </div>
+      <nav class="header-nav">
+        <div class="step-indicators" id="step-indicators">
+          <button class="step-btn active" data-step="1">
+            <span class="step-num">1</span>
+            <span class="step-label">Template</span>
+          </button>
+          <div class="step-connector"></div>
+          <button class="step-btn" data-step="2">
+            <span class="step-num">2</span>
+            <span class="step-label">Data</span>
+          </button>
+          <div class="step-connector"></div>
+          <button class="step-btn" data-step="3">
+            <span class="step-num">3</span>
+            <span class="step-label">Export</span>
+          </button>
+        </div>
+      </nav>
+    </header>
+
+    <main id="main-content">
+      <!-- Step 1: Template -->
+      <section class="step-panel active" id="step-1">
+        <div class="panel-card">
+          <div class="panel-header">
+            <h2>Choose a Template</h2>
+            <p class="panel-desc">Click a template to start adding your content.</p>
+          </div>
+
+          <div class="template-grid" id="template-grid"></div>
+        </div>
+      </section>
+
+      <!-- Step 2: Data -->
+      <section class="step-panel" id="step-2">
+        <div class="data-entry-layout">
+          <div class="data-form-pane">
+            <div class="panel-card">
+              <div class="panel-header">
+                <h2>Enter Post Data</h2>
+                <p class="panel-desc" id="data-step-desc">Fill in the fields for your selected template or upload an Excel file.</p>
+              </div>
+
+              <div class="editor-tabs" id="upload-tabs">
+                <button type="button" class="source-tab-btn active" data-source="single">Single Post</button>
+                <button type="button" class="source-tab-btn" data-source="bulk">Bulk (Excel)</button>
+              </div>
+
+              <div class="upload-panel" id="single-panel">
+                <div class="fields-list" id="fields-list"></div>
+              </div>
+
+              <div class="upload-panel hidden" id="bulk-panel">
+                <div class="bulk-sample-download">
+                  <p class="bulk-sample-hint">Download a template Excel file with the correct columns, fill in your rows, then upload below.</p>
+                  <button type="button" class="btn btn-ghost bulk-sample-btn" id="btn-download-sample-excel">
+                    Download sample Excel
+                  </button>
+                </div>
+                <div class="dropzone" id="dropzone">
+                  <div class="dropzone-content">
+                    <p class="dropzone-text">Drop your <strong>.xlsx</strong> file here</p>
+                    <p class="dropzone-subtext">Use the sample file above, or match column names to template fields</p>
+                  </div>
+                </div>
+                <input type="file" id="file-input" accept=".xlsx,.xls" hidden />
+
+                <div class="mismatch-panel hidden" id="mismatch-panel"></div>
+
+                <div class="file-info hidden" id="file-info">
+                  <div class="file-badge">
+                    <span id="file-name"></span>
+                    <span class="file-meta" id="file-meta"></span>
+                    <button type="button" class="btn-icon" id="remove-file" aria-label="Remove file">✕</button>
+                  </div>
+                </div>
+
+                <div class="data-preview hidden" id="data-preview">
+                  <div class="preview-header">
+                    <h3>Data Preview</h3>
+                    <span class="row-count" id="row-count"></span>
+                  </div>
+                  <div class="table-wrapper">
+                    <table>
+                      <thead id="preview-thead"></thead>
+                      <tbody id="preview-tbody"></tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <div class="panel-actions">
+                <button type="button" class="btn btn-ghost" id="btn-back-template">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <path d="M13 8H3M7 4L3 8L7 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  Back
+                </button>
+                <button type="button" class="btn btn-primary" id="btn-to-preview" disabled>
+                  Continue to Export
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <path d="M3 8H13M9 4L13 8L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="preview-pane">
+            <div class="panel-card preview-card">
+              <div class="panel-header">
+                <h3>Live Preview</h3>
+                <div class="preview-nav hidden" id="data-preview-nav" aria-label="Row navigation">
+                  <button type="button" class="preview-nav-btn" id="data-btn-prev-row" aria-label="Previous row" disabled>‹</button>
+                  <span id="data-preview-row-indicator">1 / 1</span>
+                  <button type="button" class="preview-nav-btn" id="data-btn-next-row" aria-label="Next row">›</button>
+                  <span class="preview-format-tag" id="data-preview-format-tag" aria-label="Format: Square">Square</span>
+                </div>
+              </div>
+              <div class="preview-frame-wrapper" id="data-preview-frame-wrapper">
+                <div class="preview-mount" id="data-preview-mount"></div>
+              </div>
+              <p class="preview-hint" id="data-preview-hint">Sample preview — fill fields to see your post</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Step 3: Preview & Export -->
+      <section class="step-panel" id="step-3">
+        <div class="export-page">
+          <header class="export-page-header">
+            <h2>Export</h2>
+            <p class="panel-desc">Preview each format at true size. Uncheck any platform you don't want, then download.</p>
+          </header>
+
+          <div class="preview-nav export-row-nav hidden" id="export-row-nav">
+            <button type="button" class="preview-nav-btn" id="export-row-prev" aria-label="Previous row" disabled>‹</button>
+            <span id="export-row-indicator">Row 1 of 1</span>
+            <button type="button" class="preview-nav-btn" id="export-row-next" aria-label="Next row">›</button>
+          </div>
+
+          <div class="export-ratio-grid" id="export-ratio-grid"></div>
+
+          <section class="export-customize-section">
+            <div class="animation-panel hidden" id="animation-panel">
+              <label class="animation-toggle">
+                <input type="checkbox" id="animate-toggle" />
+                <span>Animate this layout (video export)</span>
+              </label>
+              <div class="setting-group animation-preset-group hidden" id="animation-preset-group">
+                <label for="animation-preset">Animation style</label>
+                <select id="animation-preset" class="select-input">
+                  <option value="fade-slide-headline">Fade + slide up on headline</option>
+                  <option value="news-reel-stagger">News reel — stagger blocks</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="export-media-toggle hidden" id="export-media-toggle">
+              <button type="button" class="source-tab-btn active" data-export-media="image">Image</button>
+              <button type="button" class="source-tab-btn" data-export-media="video">Video</button>
+            </div>
+
+            <details class="customize-panel" id="customize-panel">
+              <summary>Customize template (HTML / CSS)</summary>
+              <div class="template-actions">
+                <button type="button" class="btn btn-ghost" id="btn-save-template" title="Save template">Save template</button>
+              </div>
+              <div class="column-tags" id="column-tags">
+                <span class="tags-label">Insert field:</span>
+                <div class="tags-list" id="tags-list"></div>
+              </div>
+              <div class="editor-tabs">
+                <button type="button" class="tab-btn active" data-tab="html">HTML</button>
+                <button type="button" class="tab-btn" data-tab="css">CSS</button>
+              </div>
+              <div class="code-editor-wrapper">
+                <div class="code-editor active" id="html-editor-container"></div>
+                <div class="code-editor" id="css-editor-container"></div>
+              </div>
+            </details>
+          </section>
+
+          <div class="progress-section hidden" id="progress-section">
+            <div class="progress-bar">
+              <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <p class="progress-text" id="progress-text">Exporting…</p>
+          </div>
+
+          <div class="export-actions export-actions-row">
+            <button type="button" class="btn btn-ghost" id="btn-back-data">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M13 8H3M7 4L3 8L7 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Back
+            </button>
+            <button type="button" class="btn btn-primary btn-export" id="btn-export">
+              Download 0 formats
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div class="toast-container" id="toast-container"></div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

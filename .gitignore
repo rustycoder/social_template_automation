@@ -1,0 +1,24 @@
+# Dependency directories
+node_modules/
+
+# Build outputs
+dist/
+
+# System files
+.DS_Store
+Thumbs.db
+git_helper.js
+generate_excel.js
+public/sample-datasheet.xlsx
+
+# Local env files
+.env*.local
+
+# Editor directories
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
