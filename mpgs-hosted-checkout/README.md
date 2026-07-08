@@ -91,11 +91,27 @@ try {
 }
 ```
 
+## Environment variables
+
+Copy the template and add your credentials:
+
+```bash
+cp .env.example .env
+```
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `MPGS_MERCHANT_ID` | Yes | — | Merchant ID from MPGS portal |
+| `MPGS_API_PASSWORD` | Yes | — | API password from MPGS portal |
+| `MPGS_API_VERSION` | No | `74` | REST API version |
+| `MPGS_REGION` | No | `TEST` | `TEST`, `NA`, `AP`, or `EU` |
+| `PORT` | No | `3000` | Example server port |
+
+`.env` is gitignored. Commit `.env.example` only.
+
 ## Example Express server
 
 ```bash
-MPGS_MERCHANT_ID=your_merchant \
-MPGS_API_PASSWORD=your_password \
 npm run example
 ```
 
