@@ -10,6 +10,11 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:3001',
         changeOrigin: true,
+        bypass(req) {
+          if (req.url === '/api/render') {
+            return req.url;
+          }
+        },
       },
     },
   },

@@ -1,12 +1,8 @@
 /**
- * Social post static image and bulk video export.
+ * Social post static image export via Puppeteer.
  */
 import JSZip from 'jszip';
-import { renderPostToPng } from './imageRenderer.js';
-import { renderPostToVideo } from './videoRenderer.js';
-
-/** Rough client-side render multiplier vs animation duration (html2canvas per-frame). */
-const BULK_VIDEO_RENDER_MULTIPLIER = 12;
+import { renderPostToPng } from './puppeteerExporter.js';
 
 /**
  * @param {Blob} blob
@@ -123,86 +119,6 @@ export async function exportBulkPosts(template, rowEntries, selectedBuckets, onP
   onProgress?.(total, total, 'Packaging zip...');
   const zipBlob = await zip.generateAsync({ type: 'blob' });
   downloadBlob(zipBlob, 'social-posts-export.zip');
-  return zipBlob;
-}
-
-/**
- * Estimate bulk video job size for user confirmation before rendering.
- * @param {object} template
- * @param {{ rowData: Record<string, string>, rowIndex: number }[]} rowEntries
- * @param {string[]} selectedBuckets
- */
-export function estimateBulkVideoJob(template, rowEntries, selectedBuckets) {
-  const videoCount = rowEntries.length * selectedBuckets.length;
-  if (videoCount === 0) {
-    return { videoCount: 0, estimatedMinutes: 0 };
-  }
-
-  let durationSumMs = 0;
-  for (const bucket of selectedBuckets) {
-    const layout = template.layouts?.[bucket];
-    durationSumMs += layout?.animation?.duration ?? 4000;
-  }
-
-  const avgDurationMs = durationSumMs / selectedBuckets.length;
-  const productMs = rowEntries.length * selectedBuckets.length * avgDurationMs;
-  const estimatedMinutes = Math.max(1, Math.ceil((productMs * BULK_VIDEO_RENDER_MULTIPLIER) / 60000));
-
-  return { videoCount, estimatedMinutes };
-}
-
-/**
- * @param {object} template
- * @param {{ rowData: Record<string, string>, rowIndex: number }[]} rowEntries
- * @param {string[]} selectedBuckets
- * @param {(current: number, total: number, message?: string) => void} [onProgress]
- * @param {(bucket: string) => string} [getBucketCss]
- */
-export async function exportBulkVideos(template, rowEntries, selectedBuckets, onProgress, getBucketCss) {
-  const total = rowEntries.length * selectedBuckets.length;
-  let current = 0;
-  const zip = new JSZip();
-
-  for (const { rowData, rowIndex } of rowEntries) {
-    const rowBase = getRowBaseName(rowData, rowIndex);
-
-    for (const bucket of selectedBuckets) {
-      current += 1;
-      const layout = getLayoutForBucket(template, bucket);
-      if (!layout.animation) {
-        throw new Error(`Layout "${bucket}" has no animation configured for video export`);
-      }
-
-      const width = layout.width ?? 1080;
-      const height = layout.height ?? 1080;
-      const templateHtml = template.content?.html ?? '';
-      const layoutCss = getBucketCss?.(bucket) ?? layout.css ?? '';
-
-      onProgress?.(current, total, `Recording video ${current} of ${total} — ${rowBase} · ${bucket}...`);
-
-      const blob = await renderPostToVideo(
-        templateHtml,
-        layoutCss,
-        rowData,
-        width,
-        height,
-        layout.animation,
-        (frame, frames) => {
-          onProgress?.(
-            current,
-            total,
-            `Recording ${rowBase} · ${bucket} — frame ${frame} of ${frames}`
-          );
-        }
-      );
-
-      zip.file(`${rowBase}_${bucket}.webm`, blob);
-    }
-  }
-
-  onProgress?.(total, total, 'Packaging zip...');
-  const zipBlob = await zip.generateAsync({ type: 'blob' });
-  downloadBlob(zipBlob, 'social-posts-videos.zip');
   return zipBlob;
 }
 

@@ -9,15 +9,11 @@ import { UploadStep } from './modules/uploadStep.js';
 import { PostPreview, getDefaultDimensionsForBucket } from './modules/preview.js';
 import { renderGalleryPreview } from './modules/templateGalleryPreview.js';
 import { getSampleRowForTemplate } from './modules/templateSampleData.js';
-import { FORMAT_BUCKETS, PLATFORM_PRESETS, getPresetsSupportingMedia, getPlatformLabelsForBucket } from './modules/social/socialFormats.js';
+import { FORMAT_BUCKETS, getPlatformLabelsForBucket } from './modules/social/socialFormats.js';
 import {
   exportBulkPosts,
   exportSinglePostPresets,
-  exportBulkVideos,
-  estimateBulkVideoJob,
-  exportSingleVideo,
 } from './modules/exporter.js';
-import { ANIMATION_PRESETS, syncTemplateAnimatedFlag } from './modules/social/socialAnimations.js';
 import { ExportGrid } from './modules/social/exportGrid.js';
 import { authService } from './modules/auth.js';
 import { handleCheckoutReturn } from './modules/checkout.js';
@@ -35,7 +31,6 @@ class App {
     this.currentTemplateKey = this.templateStore.getDefaultTemplateId();
     this.currentBucket = 'square';
     this.galleryBucket = 'square';
-    this.exportMediaType = 'image';
     this.templateSearchQuery = '';
     this.templateGalleryLimit = 12;
     this._progressRaf = null;
@@ -62,7 +57,7 @@ class App {
     this.exportGrid = new ExportGrid(this.dataSource, this.preview, {
       getTemplate: () => this._getExportTemplate(),
       getBucketCss: (bucket) => this._getBucketCss(bucket),
-      getMediaType: () => this.exportMediaType,
+      getMediaType: () => 'image',
       getCurrentBucket: () => this.currentBucket,
       onSelectionChange: () => this._updateExportCount(),
     });
@@ -105,7 +100,6 @@ class App {
     this._bindNavigation();
     this._bindTemplateStep();
     this._bindExportUI();
-    this._bindAnimationUI();
     this._bindBucketTabs();
     this._bindToast();
     this._renderTemplateGallery();
@@ -301,36 +295,11 @@ class App {
     });
   }
 
-  _bindAnimationUI() {
-    this.animationPanel = document.getElementById('animation-panel');
-    this.animateToggle = document.getElementById('animate-toggle');
-    this.animationPresetGroup = document.getElementById('animation-preset-group');
-    this.animationPresetSelect = document.getElementById('animation-preset');
-
-    this.animateToggle?.addEventListener('change', () => this._onAnimationToggleChange());
-    this.animationPresetSelect?.addEventListener('change', () => {
-      if (this.animateToggle?.checked) this._saveAnimationToTemplate();
-    });
-  }
-
   _bindExportUI() {
     this.progressSection = document.getElementById('progress-section');
     this.progressFill = document.getElementById('progress-fill');
     this.progressText = document.getElementById('progress-text');
     this.exportBtn = document.getElementById('btn-export');
-    this.exportCustomizeSection = document.getElementById('export-customize-section');
-    this.exportMediaToggle = document.getElementById('export-media-toggle');
-    this.exportMediaBtns = document.querySelectorAll('#export-media-toggle [data-export-media]');
-
-    this.exportMediaBtns.forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const media = btn.dataset.exportMedia;
-        if (!media || media === this.exportMediaType) return;
-        this.exportMediaType = media;
-        this._syncExportMediaButtons();
-        this.exportGrid.render();
-      });
-    });
 
     this.exportBtn?.addEventListener('click', () => this._handleExport());
   }
@@ -379,7 +348,6 @@ class App {
       this.templateEditor.setHeaders(this.dataSource.getHeaders());
       this.exportGrid.resetRowSelection();
       this._syncBucketTabs();
-      this._syncExportMediaType();
       this._syncExportFormatTag();
       setTimeout(() => {
         this.exportGrid.render();
@@ -410,8 +378,6 @@ class App {
     this.templateEditor.setHeaders(this.dataSource.getHeaders());
     this.exportGrid.resetRowSelection();
     this._syncBucketTabs();
-    this._syncAnimationPanel();
-    this._syncExportMediaType();
     this._goToStep(3);
   }
 
@@ -507,7 +473,6 @@ class App {
     this.currentBucket = bucket;
     this.templateEditor.selectTemplate(this.currentTemplateKey);
     this._syncBucketTabs();
-    this._syncAnimationPanel();
     this.exportGrid.render();
   }
 
@@ -521,62 +486,18 @@ class App {
     });
   }
 
-  _bucketSupportsVideo(bucket) {
-    return getPresetsSupportingMedia('video').some((preset) => preset.bucket === bucket);
+  _isBucketAvailable(template, bucket) {
+    const layout = template.layouts[bucket];
+    if (!layout) return false;
+    return getPlatformLabelsForBucket(bucket, 'image').length > 0;
   }
 
-  _canExportVideo(template) {
-    return PLATFORM_PRESETS.some(
-      (preset) =>
-        preset.media.includes('video') &&
-        template.layouts[preset.bucket] != null &&
-        template.layouts[preset.bucket].animation
-    );
-  }
-
-  _getDefaultAnimationPresetKey() {
-    return this.currentTemplateKey === 'news-reel' ? 'news-reel-stagger' : 'fade-slide-headline';
-  }
-
-  _syncAnimationPanel() {
-    if (!this.animationPanel) return;
-    this.animationPanel.classList.add('hidden');
-  }
-
-  _saveAnimationToTemplate() {
+  _getSelectedBuckets() {
     const template = this.templateStore.getTemplate(this.currentTemplateKey);
-    const layout = template.layouts[this.currentBucket];
-    if (!layout) return;
-
-    const presetKey = this.animationPresetSelect?.value || this._getDefaultAnimationPresetKey();
-    const preset = ANIMATION_PRESETS[presetKey];
-    if (!preset) return;
-
-    layout.animation = structuredClone(preset);
-    syncTemplateAnimatedFlag(template);
-    this.templateStore.saveTemplate(this.currentTemplateKey, { ...template, id: this.currentTemplateKey });
-  }
-
-  _onAnimationToggleChange() {
-    const template = this.templateStore.getTemplate(this.currentTemplateKey);
-    const layout = template.layouts[this.currentBucket];
-    if (!layout) return;
-
-    const enabled = !!this.animateToggle?.checked;
-    this.animationPresetGroup?.classList.toggle('hidden', !enabled);
-
-    if (enabled) {
-      const presetKey = this._getDefaultAnimationPresetKey();
-      if (this.animationPresetSelect) this.animationPresetSelect.value = presetKey;
-      layout.animation = structuredClone(ANIMATION_PRESETS[presetKey]);
-    } else {
-      delete layout.animation;
+    if (this._isBucketAvailable(template, this.currentBucket)) {
+      return [this.currentBucket];
     }
-
-    syncTemplateAnimatedFlag(template);
-    this.templateStore.saveTemplate(this.currentTemplateKey, { ...template, id: this.currentTemplateKey });
-    this._syncExportMediaType();
-    this.exportGrid.render();
+    return [];
   }
 
   _getExportTemplate() {
@@ -584,44 +505,6 @@ class App {
     const template = this.templateStore.getTemplate(this.currentTemplateKey);
     template.content.html = this.templateEditor.getHTML();
     return template;
-  }
-
-  _isBucketAvailable(template, bucket, mediaType = 'image') {
-    const layout = template.layouts[bucket];
-    if (!layout) return false;
-    if (getPlatformLabelsForBucket(bucket, mediaType).length === 0) return false;
-    if (mediaType === 'video') return !!layout.animation;
-    return true;
-  }
-
-  _getAvailableBuckets(template, mediaType = 'image') {
-    return BUCKET_IDS.filter((bucket) => this._isBucketAvailable(template, bucket, mediaType));
-  }
-
-  _syncExportMediaType() {
-    const template = this._getExportTemplate();
-    const canVideo = this._canExportVideo(template);
-
-    this.exportMediaToggle?.classList.toggle('hidden', !canVideo);
-    this.exportCustomizeSection?.classList.toggle('hidden', !canVideo);
-    if (!canVideo && this.exportMediaType === 'video') {
-      this.exportMediaType = 'image';
-    }
-    this._syncExportMediaButtons();
-  }
-
-  _syncExportMediaButtons() {
-    this.exportMediaBtns?.forEach((btn) => {
-      btn.classList.toggle('active', btn.dataset.exportMedia === this.exportMediaType);
-    });
-  }
-
-  _getSelectedBuckets() {
-    const template = this.templateStore.getTemplate(this.currentTemplateKey);
-    if (this._isBucketAvailable(template, this.currentBucket, this.exportMediaType)) {
-      return [this.currentBucket];
-    }
-    return [];
   }
 
   _setExportProgress(current, total, message) {
@@ -662,31 +545,14 @@ class App {
     const template = this._getExportTemplate();
     const getBucketCss = (bucket) => this._getBucketCss(bucket);
 
-    if (this.exportMediaType === 'video' && this.dataSource.mode === 'bulk') {
-      const { videoCount, estimatedMinutes } = estimateBulkVideoJob(template, selectedRows, selectedBuckets);
-      const confirmed = window.confirm(
-        `This will render approximately ${videoCount} video(s), estimated ${estimatedMinutes} minute(s). Continue?`
-      );
-      if (!confirmed) return;
-    }
-
     document.body.classList.add('social-exporting');
     this.progressSection?.classList.remove('hidden');
     this.progressFill.style.width = '0%';
-      this.progressText.textContent = 'Preparing export…';
+    this.progressText.textContent = 'Preparing export…';
     this.exportBtn.disabled = true;
 
     try {
-      if (this.exportMediaType === 'video' && this.dataSource.mode === 'single') {
-        const { rowData } = selectedRows[0];
-        await exportSingleVideo(template, rowData, selectedBuckets[0], (c, t, m) =>
-          this._setExportProgress(c, t, m), getBucketCss
-        );
-      } else if (this.exportMediaType === 'video') {
-        await exportBulkVideos(template, selectedRows, selectedBuckets, (c, t, m) =>
-          this._setExportProgress(c, t, m), getBucketCss
-        );
-      } else if (this.dataSource.mode === 'single') {
+      if (this.dataSource.mode === 'single') {
         const { rowData } = selectedRows[0];
         await exportSinglePostPresets(template, rowData, selectedBuckets, (c, t, m) =>
           this._setExportProgress(c, t, m), getBucketCss

@@ -156,3 +156,12 @@ export const stampBreakingCardTemplate = parseHtmlTemplate(stampHtml, {
     { key: 'SOURCE',         label: 'Source',           type: 'text',     required: false },
   ],
 });
+
+export const DEFAULT_TEMPLATE_ID = 'viral-shock-card';
+
+export const HTML_TEMPLATES = {
+  'viral-shock-card': viralShockCardTemplate,
+  'highlight-wire-card': highlightWireCardTemplate,
+  'banner-bold-card': bannerBoldCardTemplate,
+  'stamp-breaking-card': stampBreakingCardTemplate,
+};

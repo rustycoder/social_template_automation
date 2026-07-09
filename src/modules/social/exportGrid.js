@@ -49,14 +49,10 @@ export class ExportGrid {
    * @param {string} mediaType
    * @returns {boolean}
    */
-  _isBucketAvailable(template, bucket, mediaType) {
+  _isBucketAvailable(template, bucket) {
     const layout = template.layouts[bucket];
     if (!layout) return false;
-
-    const platformLabels = getPlatformLabelsForBucket(bucket, mediaType);
-    if (platformLabels.length === 0) return false;
-    if (mediaType === 'video') return !!layout.animation;
-    return true;
+    return getPlatformLabelsForBucket(bucket, 'image').length > 0;
   }
 
   resetRowSelection() {
@@ -168,7 +164,7 @@ export class ExportGrid {
     this._syncCheckedRows(rows.length);
     this.gridEl.innerHTML = '';
 
-    if (!this._isBucketAvailable(template, bucket, mediaType)) {
+    if (!this._isBucketAvailable(template, bucket)) {
       const empty = document.createElement('div');
       empty.className = 'ratio-tile-empty export-grid-empty';
       const bucketLabel = FORMAT_BUCKETS[bucket]?.label ?? bucket;
@@ -188,8 +184,7 @@ export class ExportGrid {
   getSelectedBucketIds() {
     const template = this.getTemplate();
     const bucket = this.getCurrentBucket();
-    const mediaType = this.getMediaType();
-    if (this._isBucketAvailable(template, bucket, mediaType)) {
+    if (this._isBucketAvailable(template, bucket)) {
       return [bucket];
     }
     return [];
