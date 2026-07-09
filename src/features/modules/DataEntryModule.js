@@ -479,7 +479,7 @@ export class DataEntryModule {
   }
 
   /**
-   * @description Enables/disables the footer Next button based on tab-specific validation.
+   * @description Enables the footer Next button once bulk rows exist or single form has any input.
    * @returns {void}
    * @private
    */
@@ -488,8 +488,7 @@ export class DataEntryModule {
 
     if (this.activeSource === 'bulk') {
       const hasRows = this.dataSource.getRowCount() > 0;
-      const valid = this.lastValidation?.isValid ?? false;
-      this.btnContinue.disabled = !hasRows || !valid;
+      this.btnContinue.disabled = !hasRows;
       return;
     }
 
@@ -497,7 +496,11 @@ export class DataEntryModule {
     const fieldValues = this._collectFieldValues();
     const validation = validateManualFields(template, fieldValues);
     this.lastValidation = validation;
-    this.btnContinue.disabled = !validation.isValid;
+
+    const hasValue = Object.values(fieldValues).some(
+      (v) => v !== null && v !== undefined && String(v).trim() !== ''
+    );
+    this.btnContinue.disabled = !hasValue;
   }
 
   /**

@@ -120,6 +120,7 @@ body {
   background: var(--color-bg);
   color: var(--color-text);
   min-height: 100vh;
+  width: 100%;
   overflow-x: hidden;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
@@ -127,6 +128,7 @@ body {
 
 #app {
   min-height: 100vh;
+  width: 100%;
   display: flex;
   flex-direction: column;
 }
@@ -892,10 +894,11 @@ body {
 #main-content {
   flex: 1;
   padding: 24px;
-  max-width: var(--content-max-width);
-  margin: 0 auto;
   width: 100%;
+  max-width: none;
+  margin: 0;
   position: relative;
+  box-sizing: border-box;
 }
 
 /* Step Panels */
@@ -2123,7 +2126,9 @@ body.social-exporting * {
   color: #f87171;
 }
 
-.template-card.selected {
+.template-card.selected,
+.export-post-tile.selected,
+.export-post-tile.post-card--selected {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 2px var(--color-primary-glow);
 }
@@ -2276,8 +2281,9 @@ body.social-exporting * {
   flex-direction: column;
   gap: 16px;
   height: calc(100vh - var(--header-height) - 48px);
-  max-width: var(--content-max-width);
-  margin: 0 auto;
+  width: 100%;
+  max-width: none;
+  margin: 0;
   padding-bottom: 0;
 }
 
@@ -2348,23 +2354,13 @@ body.social-exporting * {
   flex-direction: column;
 }
 
-.export-post-select {
-  width: 100%;
-  margin-top: 6px;
+.export-post-tile:not(:has(input:checked)),
+.export-post-tile.post-card--unchecked {
+  opacity: 0.65;
 }
 
-.export-post-select span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  min-width: 0;
-}
-
-.export-post-tile:not(:has(input:checked)) {
-  opacity: 0.55;
-}
-
-.export-post-tile:not(:has(input:checked)) .ratio-tile-box {
+.export-post-tile:not(:has(input:checked)) .ratio-tile-box,
+.export-post-tile.post-card--unchecked .template-preview-container {
   filter: grayscale(0.15);
 }
 

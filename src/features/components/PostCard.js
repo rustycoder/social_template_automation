@@ -83,7 +83,7 @@ export function getPostCardClasses(modifiers = {}) {
   else classes.push('template-card');
 
   if (hasHoverOverlay) classes.push('post-card--has-hover-overlay');
-  if (selected) classes.push('selected', 'post-card--selected');
+  if (selected || (hasCheckbox && checked)) classes.push('selected', 'post-card--selected');
   if (unavailable) classes.push('template-card--unavailable', 'post-card--unavailable');
   if (hasCheckbox && !checked) classes.push('post-card--unchecked');
 
@@ -193,9 +193,12 @@ export function createExportCard({
   checkbox.setAttribute('aria-label', `Select ${rowLabel}`);
   checkbox.addEventListener('click', (e) => e.stopPropagation());
   checkbox.addEventListener('change', () => {
-    tile.classList.toggle('post-card--unchecked', !checkbox.checked);
+    const isChecked = checkbox.checked;
+    tile.classList.toggle('post-card--unchecked', !isChecked);
+    tile.classList.toggle('post-card--selected', isChecked);
+    tile.classList.toggle('selected', isChecked);
     if (typeof onCheckChange === 'function') {
-      onCheckChange(rowIndex, checkbox.checked);
+      onCheckChange(rowIndex, isChecked);
     }
   });
   tile.appendChild(checkbox);

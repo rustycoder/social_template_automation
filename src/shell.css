@@ -23,6 +23,7 @@
 /* ---------- Fixed shell ---------- */
 #app {
   min-height: 100dvh;
+  width: 100%;
 }
 
 #app-header {
@@ -73,12 +74,13 @@
   flex: 1;
   margin-top: var(--header-height);
   margin-bottom: var(--footer-height);
-  max-width: var(--content-max-width);
-  margin-left: auto;
-  margin-right: auto;
   width: 100%;
+  max-width: none;
+  margin-left: 0;
+  margin-right: 0;
   padding: var(--shell-padding);
   overflow-y: auto;
+  box-sizing: border-box;
 }
 
 /* Step 2 split layout: height subtracts fixed header (72px) + footer (64px) so the preview
@@ -125,7 +127,7 @@
 .footer-panel {
   display: none;
   width: 100%;
-  max-width: var(--content-max-width);
+  max-width: none;
   align-items: center;
 }
 
@@ -533,9 +535,14 @@
 }
 
 .post-card--selected,
-.template-card.selected {
+.template-card.selected,
+.export-post-tile.selected,
+.export-post-tile.post-card--selected {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px var(--color-primary-glow);
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
+  opacity: 1;
 }
 
 .template-page__empty {
@@ -682,6 +689,11 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--transition-base), box-shadow var(--transition-base), opacity var(--transition-base);
 }
 
 .export-post-tile .template-preview-container,
@@ -747,11 +759,13 @@
   white-space: nowrap;
 }
 
-.export-post-tile:not(:has(.export-post-checkbox:checked)) {
+.export-post-tile:not(:has(.export-post-checkbox:checked)),
+.export-post-tile.post-card--unchecked {
   opacity: 0.65;
 }
 
-.export-post-tile:not(:has(.export-post-checkbox:checked)) .ratio-tile-box {
+.export-post-tile:not(:has(.export-post-checkbox:checked)) .ratio-tile-box,
+.export-post-tile.post-card--unchecked .template-preview-container {
   filter: grayscale(0.1);
 }
 
