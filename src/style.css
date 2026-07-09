@@ -2140,6 +2140,55 @@ body.social-exporting * {
   letter-spacing: -0.01em;
 }
 
+.template-card-platforms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.platform-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.platform-tag--icon {
+  width: 26px;
+  height: 26px;
+  color: var(--color-text-muted);
+  background: var(--color-bg-hover);
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  cursor: default;
+  transition: color var(--transition-fast), border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.platform-tag--icon svg {
+  width: 14px;
+  height: 14px;
+  display: block;
+}
+
+.platform-tag--instagram:hover { color: #e1306c; border-color: rgba(225, 48, 108, 0.35); background: rgba(225, 48, 108, 0.08); }
+.platform-tag--tiktok:hover { color: #010101; border-color: rgba(1, 1, 1, 0.2); background: rgba(1, 1, 1, 0.06); }
+.platform-tag--facebook:hover { color: #1877f2; border-color: rgba(24, 119, 242, 0.35); background: rgba(24, 119, 242, 0.08); }
+.platform-tag--linkedin:hover { color: #0a66c2; border-color: rgba(10, 102, 194, 0.35); background: rgba(10, 102, 194, 0.08); }
+.platform-tag--x:hover { color: #000; border-color: rgba(0, 0, 0, 0.2); background: rgba(0, 0, 0, 0.06); }
+
+.platform-tag--muted,
+.platform-tag--fallback {
+  width: 26px;
+  height: 26px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  background: var(--color-bg-hover);
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+}
+
 .template-card-fields {
   font-size: 13px;
   color: var(--color-text-muted);

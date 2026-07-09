@@ -6,6 +6,57 @@
  */
 
 import { BUCKET_RATIO_LABELS } from '../shared/constants.js';
+import { createPlatformIcon } from '../shared/platformIcons.js';
+import { getPlatformLabelsForBucket } from '../rendering/socialFormats.js';
+
+/**
+ * @description Creates a row of platform icon badges for the active aspect-ratio bucket.
+ * @param {string} bucket Format bucket id (square, portrait, story, landscape).
+ * @param {'image' | 'video'} [mediaType='image'] Media type filter for platform presets.
+ * @returns {HTMLElement} Platform icons container.
+ */
+export function createPlatformTags(bucket, mediaType = 'image') {
+  const platforms = getPlatformLabelsForBucket(bucket, mediaType);
+  const row = document.createElement('div');
+  row.className = 'template-card-platforms post-card__platforms';
+  row.setAttribute('aria-label', 'Supported social platforms for this aspect ratio');
+
+  if (platforms.length === 0) {
+    const empty = document.createElement('span');
+    empty.className = 'platform-tag platform-tag--muted';
+    empty.textContent = '—';
+    empty.title = 'No platforms';
+    row.appendChild(empty);
+    return row;
+  }
+
+  for (const name of platforms) {
+    row.appendChild(createPlatformIcon(name));
+  }
+
+  return row;
+}
+
+/**
+ * @description Builds the card body with title and optional platform tags.
+ * @param {string} title Card heading text.
+ * @param {string} [bucket] When set, renders platform tags for this aspect bucket.
+ * @returns {HTMLElement}
+ */
+function createCardBody(title, bucket = '') {
+  const body = document.createElement('div');
+  body.className = 'template-card-body post-card__body';
+
+  const heading = document.createElement('h4');
+  heading.textContent = title;
+  body.appendChild(heading);
+
+  if (bucket) {
+    body.appendChild(createPlatformTags(bucket));
+  }
+
+  return body;
+}
 
 /**
  * @description Builds the modifier class list for a post card from boolean flags.
@@ -98,10 +149,7 @@ export function createTemplateCard({
   const preview = createPostCardPreview({ bucket, templateId: templateKey });
   card.appendChild(preview);
 
-  const body = document.createElement('div');
-  body.className = 'template-card-body post-card__body';
-  body.innerHTML = `<h4>${title}</h4>`;
-  card.appendChild(body);
+  card.appendChild(createCardBody(title, bucket));
 
   if (!unavailable && typeof onSelect === 'function') {
     card.addEventListener('click', () => onSelect(templateKey));
@@ -152,10 +200,7 @@ export function createExportCard({
   });
   tile.appendChild(checkbox);
 
-  const body = document.createElement('div');
-  body.className = 'template-card-body post-card__body';
-  body.innerHTML = `<h4>${rowLabel}</h4>`;
-  tile.appendChild(body);
+  tile.appendChild(createCardBody(rowLabel, bucket));
 
   return tile;
 }

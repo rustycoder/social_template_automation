@@ -690,6 +690,27 @@
   box-shadow: none;
 }
 
+.template-card-platforms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.platform-tag--icon {
+  width: 26px;
+  height: 26px;
+  color: var(--color-text-muted);
+  background: var(--color-bg-hover);
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+}
+
+.platform-tag--icon svg {
+  width: 14px;
+  height: 14px;
+}
+
 .export-post-checkbox {
   position: absolute;
   top: 12px;
