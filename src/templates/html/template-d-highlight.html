@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Highlight / Wire</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{width:1080px;height:1080px;overflow:hidden;font-family:'Inter',sans-serif;}
+  .card{position:relative;width:1080px;height:1080px;background:#0b0b0c;}
+  .t-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  .scrim{position:absolute;inset:0;background:linear-gradient(to top, rgba(3,3,4,0.94) 0%, rgba(3,3,4,0.75) 30%, rgba(3,3,4,0.20) 55%, transparent 75%);}
+  .top-tag{position:absolute;top:48px;left:56px;background:rgba(255,255,255,0.12);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,0.14);border-radius:4px;padding:6px 18px 5px;font-family:'Inter',sans-serif;font-size:16px;font-weight:600;color:#e0e1e4;letter-spacing:.07em;text-transform:uppercase;}
+  .lower{position:absolute;left:60px;right:60px;bottom:120px;}
+  .t-headline{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:46px;line-height:1.18;color:#fff;margin-bottom:16px;}
+  .t-headline mark{background:#FFD600;color:#0a0a0b;padding:2px 8px;border-radius:2px;}
+  .t-headline .highlight-red{background:#D6293E;color:#fff;padding:2px 8px;border-radius:2px;}
+  .t-subtext{font-size:22px;color:#b4b5b9;line-height:1.45;}
+  .cta-bar{position:absolute;left:0;right:0;bottom:0;height:80px;background:rgba(10,10,12,0.80);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;font-weight:500;letter-spacing:.02em;}
+  .cta-bar strong{font-weight:700;color:#FFD600;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <img class="t-photo" src="{{PHOTO}}" alt="">
+    <div class="scrim"></div>
+    <div class="top-tag">{{TAG}}</div>
+    <div class="lower">
+      <div class="t-headline">{{HEADLINE}}</div>
+      <div class="t-subtext">{{SUBTEXT}}</div>
+    </div>
+    <div class="cta-bar">Follow <strong>&nbsp;{{SOURCE}}&nbsp;</strong> For Real-Time Updates!</div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Banner / Bold</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{width:1080px;height:1080px;overflow:hidden;font-family:'Inter',sans-serif;}
+  .card{position:relative;width:1080px;height:1080px;background:#fff;}
+  .banner{position:absolute;top:0;left:0;right:0;height:100px;background:#FFD600;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:42px;color:#0a0a0b;letter-spacing:.06em;text-transform:uppercase;}
+  .t-photo{position:absolute;top:100px;left:0;right:0;height:calc(65% - 100px);object-fit:cover;width:100%;}
+  .bottom-panel{position:absolute;top:65%;left:0;right:0;bottom:0;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 70px 56px;text-align:center;}
+  .t-headline{font-family:'Inter',sans-serif;font-weight:600;font-size:40px;line-height:1.35;color:#1a1a1a;margin-bottom:18px;}
+  .t-headline mark{background:none;color:#D6293E;font-weight:700;}
+  .t-headline .highlight-bold{font-weight:800;color:#D6293E;}
+  .source-line{font-size:16px;color:#999;letter-spacing:.04em;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="banner">{{BANNER_TEXT}}</div>
+    <img class="t-photo" src="{{PHOTO}}" alt="">
+    <div class="bottom-panel">
+      <div class="t-headline">{{HEADLINE}}</div>
+      <div class="source-line">{{SOURCE}}</div>
+    </div>
+  </div>
+</body>
+</html>

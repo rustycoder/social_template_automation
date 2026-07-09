@@ -155,6 +155,18 @@ export class SocialPreview {
     frame.style.transform = `scale(${scale})`;
   }
 
+  _looksLikeUrl(value) {
+    const v = String(value).trim().toLowerCase();
+    return v.startsWith('http://') || v.startsWith('https://') || v.startsWith('data:') || v.startsWith('file:') || v.startsWith('blob:');
+  }
+
+  _applyHighlights(value) {
+    if (this._looksLikeUrl(value)) return String(value);
+    return String(value)
+      .replace(/\[\[(.+?)\]\]/g, '<span class="highlight-red">$1</span>')
+      .replace(/\[(.+?)\]/g, '<mark>$1</mark>');
+  }
+
   _escapeHtml(str) {
     return String(str)
       .replace(/&/g, '&amp;')
@@ -279,7 +291,7 @@ export class SocialPreview {
         return this._formatSpecification(specsHeader ? rowData[specsHeader] : value);
       }
 
-      return value;
+      return this._applyHighlights(value);
     });
   }
 

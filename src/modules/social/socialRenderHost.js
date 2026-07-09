@@ -18,6 +18,23 @@ function expandRowData(rowData) {
   return { ...rowData };
 }
 
+function looksLikeUrl(value) {
+  const v = String(value).trim().toLowerCase();
+  return v.startsWith('http://') || v.startsWith('https://') || v.startsWith('data:') || v.startsWith('file:') || v.startsWith('blob:');
+}
+
+/**
+ * Convert bracket-based highlight syntax to HTML:
+ *   [[text]] → <span class="highlight-red">text</span>
+ *   [text]  → <mark>text</mark>
+ */
+function applyHighlights(value) {
+  if (looksLikeUrl(value)) return String(value);
+  return String(value)
+    .replace(/\[\[(.+?)\]\]/g, '<span class="highlight-red">$1</span>')
+    .replace(/\[(.+?)\]/g, '<mark>$1</mark>');
+}
+
 /**
  * @param {string} templateStr
  * @param {Record<string, string>} rowData
@@ -51,7 +68,8 @@ export function replacePlaceholders(templateStr, rowData) {
     const trimmedKey = key.trim();
     const header = Object.keys(data).find((h) => h.trim().toLowerCase() === trimmedKey.toLowerCase());
     if (!header) return '';
-    return data[header] ?? '';
+    const value = data[header] ?? '';
+    return applyHighlights(value);
   });
 }
 
@@ -134,6 +152,8 @@ export function setupRenderHost(templateHtml, layoutCss, rowData, width, height)
   Object.assign(renderRoot.style, {
     width: `${width}px`,
     height: `${height}px`,
+    minWidth: `${width}px`,
+    minHeight: `${height}px`,
     overflow: 'hidden',
     position: 'relative',
   });
@@ -167,6 +187,8 @@ export async function captureRenderRootToCanvas(renderRoot, width, height) {
     scale: 1,
     width,
     height,
+    windowWidth: Math.max(width, window.innerWidth),
+    windowHeight: Math.max(height, window.innerHeight),
     useCORS: true,
     allowTaint: true,
     logging: false,
@@ -174,7 +196,14 @@ export async function captureRenderRootToCanvas(renderRoot, width, height) {
     imageTimeout: 15000,
     scrollX: 0,
     scrollY: 0,
+    x: 0,
+    y: 0,
     onclone: (clonedDoc) => {
+      const stagingRoot = clonedDoc.getElementById('social-staging-root');
+      if (stagingRoot) {
+        stagingRoot.style.transform = 'none';
+        stagingRoot.style.overflow = 'visible';
+      }
       clonedDoc.querySelectorAll('.social-export-render-root, .social-export-frame').forEach((el) => {
         el.style.opacity = '1';
         el.style.visibility = 'visible';

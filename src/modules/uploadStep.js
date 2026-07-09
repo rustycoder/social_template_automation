@@ -99,6 +99,12 @@ export class UploadStep {
       }
     });
 
+    this.fieldsList?.addEventListener('input', (e) => {
+      if (e.target.matches('.field-url')) {
+        this._handleImageUrl(e.target);
+      }
+    });
+
     this.btnContinue?.addEventListener('click', () => {
       if (!this.btnContinue.disabled && this.onContinue) {
         this.onContinue();
@@ -136,7 +142,8 @@ export class UploadStep {
           <div class="field-grid">
             <div class="setting-group">
               <label for="field-file-${field.key}">${field.label}${field.required ? ' <span class="required-badge">*</span>' : ''}</label>
-              <input type="file" id="field-file-${field.key}" class="text-input field-file" accept="image/*" data-key="${field.key}" />
+              <input type="text" id="field-url-${field.key}" class="text-input field-url" data-key="${field.key}" placeholder="Paste image URL…" autocomplete="off" />
+              <input type="file" id="field-file-${field.key}" class="text-input field-file" accept="image/*" data-key="${field.key}" style="margin-top:6px" />
               <input type="hidden" class="field-value" data-key="${field.key}" value="" />
             </div>
           </div>
@@ -234,13 +241,27 @@ export class UploadStep {
   }
 
   /**
+   * @param {HTMLInputElement} urlInput
+   */
+  _handleImageUrl(urlInput) {
+    const key = urlInput.dataset.key;
+    const valueInput = this.fieldsList?.querySelector(`input.field-value[data-key="${key}"]`);
+    if (!valueInput) return;
+    valueInput.value = urlInput.value.trim();
+    this._syncManualFields();
+  }
+
+  /**
    * @param {HTMLInputElement} fileInput
    */
   _handleImageFile(fileInput) {
     const file = fileInput.files?.[0];
     const key = fileInput.dataset.key;
-    const valueInput = this.fieldsList?.querySelector(`.field-value[data-key="${key}"]`);
+    const valueInput = this.fieldsList?.querySelector(`input.field-value[data-key="${key}"]`);
     if (!file || !valueInput) return;
+
+    const urlInput = this.fieldsList?.querySelector(`.field-url[data-key="${key}"]`);
+    if (urlInput) urlInput.value = '';
 
     const reader = new FileReader();
     reader.onload = () => {
