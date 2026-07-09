@@ -33,7 +33,7 @@ export class DataPage {
   prepareForEntry() {
     if (!this.descEl) return;
     const template = this.getTemplate();
-    this.descEl.textContent = `Fill in fields for "${template.name}" or upload Excel with matching column names.`;
+    this.descEl.textContent = `Upload Excel for "${template.name}" or switch to Single Data to type one post.`;
   }
 
   /**

@@ -111,6 +111,8 @@
 
 html {
   font-size: 16px;
+  height: 100%;
+  overflow: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -119,34 +121,27 @@ body {
   font-family: var(--font-sans);
   background: var(--color-bg);
   color: var(--color-text);
-  min-height: 100vh;
+  height: 100%;
   width: 100%;
-  overflow-x: hidden;
+  overflow: hidden;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
 
 #app {
-  min-height: 100vh;
+  height: 100dvh;
+  min-height: 0;
   width: 100%;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
-/* ---------- Header ---------- */
-#app-header {
-  height: var(--header-height);
-  padding: 0 24px;
-  padding-left: calc(24px + env(safe-area-inset-left, 0px));
-  padding-right: calc(24px + env(safe-area-inset-right, 0px));
+/* Header layout is owned by shell.css (fixed grid). Keep only non-conflicting overrides here. */
+#app-header .logo {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  background: var(--color-bg-raised);
-  border-bottom: 1px solid var(--color-border);
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  gap: 10px;
 }
 
 .header-left {
@@ -859,20 +854,6 @@ body {
 }
 
 @media (max-width: 768px) {
-  #app-header {
-    flex-wrap: wrap;
-    height: auto;
-    min-height: var(--header-height);
-    padding-top: 12px;
-    padding-bottom: 12px;
-    gap: 10px;
-  }
-
-  .header-right {
-    margin-left: auto;
-    gap: 12px;
-  }
-
   .step-label {
     display: none;
   }
@@ -881,24 +862,15 @@ body {
     padding: 8px 10px;
   }
 
-  .user-name {
-    display: none;
-  }
-
   .profile-trigger {
     padding: 4px;
   }
 }
 
 /* ---------- Main Content ---------- */
+/* Shell layout (margin-top, overflow) lives in shell.css — only add non-conflicting extras here */
 #main-content {
-  flex: 1;
-  padding: 24px;
-  width: 100%;
-  max-width: none;
-  margin: 0;
   position: relative;
-  box-sizing: border-box;
 }
 
 /* Step Panels */
@@ -991,6 +963,13 @@ body {
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-border);
   background: var(--color-bg-hover);
+}
+
+.data-split__form .bulk-sample-download {
+  margin-bottom: 0;
+  padding: 0;
+  border: none;
+  background: none;
 }
 
 .bulk-sample-hint {
@@ -1172,6 +1151,13 @@ body {
   cursor: pointer;
   transition: background var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast), border-color var(--transition-fast);
   white-space: nowrap;
+}
+
+.btn.btn-outline,
+.btn-outline {
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-raised);
+  color: var(--color-text);
 }
 
 .btn:disabled {
@@ -1535,6 +1521,10 @@ body.social-exporting {
   overflow: hidden;
 }
 
+body.social-exporting #main-content {
+  overflow: hidden;
+}
+
 body.social-exporting * {
   transition: none !important;
   animation: none !important;
@@ -1655,18 +1645,11 @@ body.social-exporting * {
 }
 
 @media (max-width: 768px) {
-  #app-header {
-    flex-direction: column;
-    height: auto;
-    padding: 12px 16px;
-    gap: 12px;
-  }
-
   .step-label {
     display: none;
   }
 
-  #main-content {
+  #main-content:not([data-layout-mode="split"]) {
     padding: 12px;
   }
 
@@ -1676,6 +1659,23 @@ body.social-exporting * {
 
   .panel-header {
     flex-direction: column;
+  }
+
+  .modal-card {
+    width: min(100%, calc(100vw - 24px));
+    max-height: calc(100dvh - 48px);
+    overflow-y: auto;
+  }
+
+  .toast-container {
+    left: 12px;
+    right: 12px;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    align-items: stretch;
+  }
+
+  .toast {
+    width: 100%;
   }
 }
 
@@ -2280,7 +2280,6 @@ body.social-exporting * {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  height: calc(100vh - var(--header-height) - 48px);
   width: 100%;
   max-width: none;
   margin: 0;
@@ -2310,7 +2309,7 @@ body.social-exporting * {
   font-size: 0.72rem;
   font-weight: 500;
   color: var(--color-text-muted);
-  margin-left: auto;
+  flex-shrink: 0;
   padding: 4px 10px;
   background: var(--color-bg-hover);
   border: 1px solid var(--color-border);
@@ -2318,12 +2317,9 @@ body.social-exporting * {
 }
 
 .export-ratio-grid {
-  flex: 1;
   display: grid;
   gap: 12px;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  overflow-y: auto;
-  min-height: 0;
   align-content: start;
 }
 
@@ -2590,10 +2586,6 @@ body.social-exporting * {
 @media (max-width: 960px) {
   .export-ratio-grid {
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  }
-  .export-page {
-    height: auto;
-    min-height: calc(100vh - var(--header-height) - 48px);
   }
 }
 

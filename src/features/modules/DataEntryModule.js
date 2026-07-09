@@ -20,7 +20,7 @@ export class DataEntryModule {
     this.getTemplate = getTemplate;
 
     /** @type {'single' | 'bulk'} */
-    this.activeSource = 'single';
+    this.activeSource = 'bulk';
 
     /** @type {(() => void) | null} */
     this.onContinue = null;
@@ -178,7 +178,7 @@ export class DataEntryModule {
           <div class="field-grid">
             <div class="setting-group">
               <label for="field-${field.key}">${field.label}${field.required ? ' <span class="required-badge">*</span>' : ''}</label>
-              <textarea id="field-${field.key}" class="text-input field-textarea field-value" data-key="${field.key}" rows="3" placeholder="Enter ${field.label.toLowerCase()}…" name="${field.key}" autocomplete="off"></textarea>
+              <textarea id="field-${field.key}" class="text-input field-textarea field-value" data-key="${field.key}" rows="2" placeholder="Enter ${field.label.toLowerCase()}…" name="${field.key}" autocomplete="off"></textarea>
             </div>
           </div>
         `;

@@ -12,6 +12,72 @@ import {
   exportSinglePostPresets,
 } from '../rendering/exporter.js';
 
+/**
+ * @description Formats milliseconds into a short human-readable duration.
+ * @param {number} ms
+ * @returns {string}
+ */
+function formatEta(ms) {
+  if (!Number.isFinite(ms) || ms <= 0) return '';
+
+  const sec = Math.ceil(ms / 1000);
+  if (sec < 5) return 'less than 5 sec remaining';
+  if (sec < 60) return `~${sec} sec remaining`;
+
+  const min = Math.ceil(sec / 60);
+  if (min < 60) return min === 1 ? '~1 min remaining' : `~${min} min remaining`;
+
+  const hr = Math.floor(min / 60);
+  const remMin = min % 60;
+  return remMin > 0 ? `~${hr} hr ${remMin} min remaining` : `~${hr} hr remaining`;
+}
+
+/**
+ * @description Builds the export progress label with file count and ETA.
+ * @param {number} current Completed file count.
+ * @param {number} total Total files to export.
+ * @param {number | null} startedAt Export start timestamp (ms).
+ * @param {string} [detailMessage] Optional status from the exporter.
+ * @returns {string}
+ */
+function buildExportProgressLabel(current, total, startedAt, detailMessage = '') {
+  const detail = detailMessage.toLowerCase();
+
+  if (detail.includes('preparing')) {
+    return detailMessage || 'Preparing export…';
+  }
+
+  if (detail.includes('packaging')) {
+    return 'Packaging files… · almost done';
+  }
+
+  if (detail.includes('complete') && current >= total) {
+    return 'Export complete!';
+  }
+
+  if (total <= 0) {
+    return 'Preparing export…';
+  }
+
+  const completed = Math.min(Math.max(0, current), total);
+  const remaining = Math.max(0, total - completed);
+
+  let label = `${completed}/${total} completed`;
+  if (remaining > 0) {
+    label += ` · ${remaining} more to go`;
+  }
+
+  if (startedAt && completed > 0 && remaining > 0) {
+    const elapsed = Date.now() - startedAt;
+    const eta = formatEta((elapsed / completed) * remaining);
+    if (eta) label += ` · ${eta}`;
+  } else if (remaining > 0 && completed === 0) {
+    label += ' · estimating time…';
+  }
+
+  return label;
+}
+
 export class ExportPage {
   /**
    * @description Creates the Export Page controller.
@@ -39,7 +105,9 @@ export class ExportPage {
     this.progressFill = document.getElementById('progress-fill');
     this.progressText = document.getElementById('progress-text');
     this.exportBtn = document.getElementById('btn-export');
+    this.exportCountEl = this.exportBtn?.querySelector('.btn-export-count');
     this.formatTag = document.getElementById('export-format-tag');
+    this._exportStartedAt = null;
 
     this.exportBtn?.addEventListener('click', () => this.handleExport());
   }
@@ -67,14 +135,18 @@ export class ExportPage {
     const selectedCount = this.selection.getSelectedCount();
     const buckets = this.getSelectedBuckets();
 
+    if (this.exportCountEl) {
+      this.exportCountEl.textContent = `(${selectedCount})`;
+    }
+
     if (buckets.length === 0 || selectedCount === 0) {
-      this.exportBtn.textContent = 'Export Selected (0)';
       this.exportBtn.disabled = buckets.length === 0 || selectedCount === 0;
+      this.exportBtn.setAttribute('aria-label', `Export selected (${selectedCount})`);
       return;
     }
 
-    this.exportBtn.textContent = `Export Selected (${selectedCount})`;
     this.exportBtn.disabled = false;
+    this.exportBtn.setAttribute('aria-label', `Export selected (${selectedCount})`);
     this.syncFormatTag();
   }
 
@@ -101,8 +173,10 @@ export class ExportPage {
   _showExportProgress(current, total, message) {
     document.body.classList.add('social-exporting');
     this.progressSection?.classList.remove('hidden');
-    if (message && this.progressText) {
-      this.progressText.textContent = message;
+    if (this.progressText) {
+      this.progressText.textContent =
+        message ??
+        buildExportProgressLabel(current, total, this._exportStartedAt);
     }
     if (!this.progressFill) return;
 
@@ -115,6 +189,19 @@ export class ExportPage {
   }
 
   /**
+   * @description Updates progress with file count and estimated time remaining.
+   * @param {number} current Completed units.
+   * @param {number} total Total units.
+   * @param {string} [detailMessage] Optional exporter status detail.
+   * @returns {void}
+   * @private
+   */
+  _updateExportProgress(current, total, detailMessage = '') {
+    const label = buildExportProgressLabel(current, total, this._exportStartedAt, detailMessage);
+    this._showExportProgress(current, total, label);
+  }
+
+  /**
    * @description Hides the export progress overlay.
    * @returns {void}
    * @private
@@ -123,6 +210,7 @@ export class ExportPage {
     document.body.classList.remove('social-exporting');
     this.progressSection?.classList.add('hidden');
     if (this.progressFill) this.progressFill.style.width = '0%';
+    this._exportStartedAt = null;
   }
 
   /**
@@ -167,13 +255,12 @@ export class ExportPage {
     const getBucketCss = (bucket) => this.getBucketCss(bucket);
     const totalRenders = selectedRows.length * selectedBuckets.length;
 
-    this._showExportProgress(0, totalRenders, `Exporting 0 of ${totalRenders}…`);
+    this._exportStartedAt = Date.now();
+    this._updateExportProgress(0, totalRenders);
 
     try {
-      const onProgress = (current, total, message) => {
-        const label =
-          message ?? `Exporting ${current} of ${total}…`;
-        this._showExportProgress(current, total, label);
+      const onProgress = (current, total, detailMessage) => {
+        this._updateExportProgress(current, total, detailMessage);
       };
 
       if (this.dataSource.mode === 'single') {
@@ -183,13 +270,13 @@ export class ExportPage {
         await exportBulkPosts(template, selectedRows, selectedBuckets, onProgress, getBucketCss);
       }
 
-      this._showExportProgress(totalRenders, totalRenders, 'Export complete!');
+      this._updateExportProgress(totalRenders, totalRenders, 'Export complete');
       window.dispatchEvent(
         new CustomEvent('toast', { detail: { message: 'Export successful', type: 'success' } })
       );
     } catch (error) {
       console.error('Export error:', error);
-      this._showExportProgress(0, totalRenders, `Error: ${error.message}`);
+      this._showExportProgress(0, totalRenders, `Export failed: ${error.message}`);
       window.dispatchEvent(
         new CustomEvent('toast', { detail: { message: `Export failed: ${error.message}`, type: 'error' } })
       );
