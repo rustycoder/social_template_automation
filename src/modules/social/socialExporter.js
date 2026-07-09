@@ -61,30 +61,43 @@ function getLayoutForBucket(template, bucket) {
 /**
  * @param {object} template
  * @param {Record<string, string>} rowData
- * @param {typeof import('./socialFormats.js').PLATFORM_PRESETS[number]} preset
+ * @param {string} bucket
+ * @param {(bucket: string) => string} [getBucketCss]
  */
-export async function exportSinglePost(template, rowData, preset) {
-  const layout = getLayoutForBucket(template, preset.bucket);
-  const width = layout.width ?? preset.width;
-  const height = layout.height ?? preset.height;
+export async function exportBucketImage(template, rowData, bucket, getBucketCss) {
+  const layout = getLayoutForBucket(template, bucket);
+  const width = layout.width ?? 1080;
+  const height = layout.height ?? 1080;
   const templateHtml = template.content?.html ?? '';
-  const layoutCss = layout.css ?? '';
+  const layoutCss = getBucketCss?.(bucket) ?? layout.css ?? '';
 
   const canvas = await renderPostToCanvas(templateHtml, layoutCss, rowData, width, height);
   const blob = await canvasToBlob(canvas);
-  const filename = `post_${preset.id}.png`;
-  downloadBlob(blob, filename);
-  return { filename, blob, preset, width, height };
+  const filename = `post_${bucket}.png`;
+  return { filename, blob, bucket, width, height };
+}
+
+/**
+ * @param {object} template
+ * @param {Record<string, string>} rowData
+ * @param {string} bucket
+ * @param {(bucket: string) => string} [getBucketCss]
+ */
+export async function exportSinglePost(template, rowData, bucket, getBucketCss) {
+  const result = await exportBucketImage(template, rowData, bucket, getBucketCss);
+  downloadBlob(result.blob, result.filename);
+  return result;
 }
 
 /**
  * @param {object} template
  * @param {Record<string, string>[]} rows
- * @param {typeof import('./socialFormats.js').PLATFORM_PRESETS[number][]} selectedPresets
+ * @param {string[]} selectedBuckets
  * @param {(current: number, total: number, message?: string) => void} [onProgress]
+ * @param {(bucket: string) => string} [getBucketCss]
  */
-export async function exportBulkPosts(template, rows, selectedPresets, onProgress) {
-  const total = rows.length * selectedPresets.length;
+export async function exportBulkPosts(template, rows, selectedBuckets, onProgress, getBucketCss) {
+  const total = rows.length * selectedBuckets.length;
   let current = 0;
   const zip = new JSZip();
 
@@ -92,19 +105,12 @@ export async function exportBulkPosts(template, rows, selectedPresets, onProgres
     const rowData = rows[rowIndex];
     const rowBase = getRowBaseName(rowData, rowIndex);
 
-    for (const preset of selectedPresets) {
+    for (const bucket of selectedBuckets) {
       current += 1;
-      onProgress?.(current, total, `Rendering ${rowBase} · ${preset.platform} ${preset.id}...`);
+      onProgress?.(current, total, `Rendering ${rowBase} · ${bucket}...`);
 
-      const layout = getLayoutForBucket(template, preset.bucket);
-      const width = layout.width ?? preset.width;
-      const height = layout.height ?? preset.height;
-      const templateHtml = template.content?.html ?? '';
-      const layoutCss = layout.css ?? '';
-
-      const canvas = await renderPostToCanvas(templateHtml, layoutCss, rowData, width, height);
-      const blob = await canvasToBlob(canvas);
-      const filename = `${rowBase}_${preset.id}.png`;
+      const { blob } = await exportBucketImage(template, rowData, bucket, getBucketCss);
+      const filename = `${rowBase}_${bucket}.png`;
       zip.file(filename, blob);
     }
   }
@@ -119,22 +125,22 @@ export async function exportBulkPosts(template, rows, selectedPresets, onProgres
  * Estimate bulk video job size for user confirmation before rendering.
  * @param {object} template
  * @param {Record<string, string>[]} rows
- * @param {typeof import('./socialFormats.js').PLATFORM_PRESETS[number][]} selectedPresets
+ * @param {string[]} selectedBuckets
  */
-export function estimateBulkVideoJob(template, rows, selectedPresets) {
-  const videoCount = rows.length * selectedPresets.length;
+export function estimateBulkVideoJob(template, rows, selectedBuckets) {
+  const videoCount = rows.length * selectedBuckets.length;
   if (videoCount === 0) {
     return { videoCount: 0, estimatedMinutes: 0 };
   }
 
   let durationSumMs = 0;
-  for (const preset of selectedPresets) {
-    const layout = template.layouts?.[preset.bucket];
+  for (const bucket of selectedBuckets) {
+    const layout = template.layouts?.[bucket];
     durationSumMs += layout?.animation?.duration ?? 4000;
   }
 
-  const avgDurationMs = durationSumMs / selectedPresets.length;
-  const productMs = rows.length * selectedPresets.length * avgDurationMs;
+  const avgDurationMs = durationSumMs / selectedBuckets.length;
+  const productMs = rows.length * selectedBuckets.length * avgDurationMs;
   const estimatedMinutes = Math.max(1, Math.ceil((productMs * BULK_VIDEO_RENDER_MULTIPLIER) / 60000));
 
   return { videoCount, estimatedMinutes };
@@ -143,11 +149,12 @@ export function estimateBulkVideoJob(template, rows, selectedPresets) {
 /**
  * @param {object} template
  * @param {Record<string, string>[]} rows
- * @param {typeof import('./socialFormats.js').PLATFORM_PRESETS[number][]} selectedPresets
+ * @param {string[]} selectedBuckets
  * @param {(current: number, total: number, message?: string) => void} [onProgress]
+ * @param {(bucket: string) => string} [getBucketCss]
  */
-export async function exportBulkVideos(template, rows, selectedPresets, onProgress) {
-  const total = rows.length * selectedPresets.length;
+export async function exportBulkVideos(template, rows, selectedBuckets, onProgress, getBucketCss) {
+  const total = rows.length * selectedBuckets.length;
   let current = 0;
   const zip = new JSZip();
 
@@ -155,19 +162,19 @@ export async function exportBulkVideos(template, rows, selectedPresets, onProgre
     const rowData = rows[rowIndex];
     const rowBase = getRowBaseName(rowData, rowIndex);
 
-    for (const preset of selectedPresets) {
+    for (const bucket of selectedBuckets) {
       current += 1;
-      const layout = getLayoutForBucket(template, preset.bucket);
+      const layout = getLayoutForBucket(template, bucket);
       if (!layout.animation) {
-        throw new Error(`Layout "${preset.bucket}" has no animation configured for video export`);
+        throw new Error(`Layout "${bucket}" has no animation configured for video export`);
       }
 
-      const width = layout.width ?? preset.width;
-      const height = layout.height ?? preset.height;
+      const width = layout.width ?? 1080;
+      const height = layout.height ?? 1080;
       const templateHtml = template.content?.html ?? '';
-      const layoutCss = layout.css ?? '';
+      const layoutCss = getBucketCss?.(bucket) ?? layout.css ?? '';
 
-      onProgress?.(current, total, `Recording video ${current} of ${total} — ${rowBase} · ${preset.id}...`);
+      onProgress?.(current, total, `Recording video ${current} of ${total} — ${rowBase} · ${bucket}...`);
 
       const blob = await renderPostToVideo(
         templateHtml,
@@ -180,12 +187,12 @@ export async function exportBulkVideos(template, rows, selectedPresets, onProgre
           onProgress?.(
             current,
             total,
-            `Recording ${rowBase} · ${preset.id} — frame ${frame} of ${frames}`
+            `Recording ${rowBase} · ${bucket} — frame ${frame} of ${frames}`
           );
         }
       );
 
-      zip.file(`${rowBase}_${preset.id}.webm`, blob);
+      zip.file(`${rowBase}_${bucket}.webm`, blob);
     }
   }
 
@@ -198,34 +205,28 @@ export async function exportBulkVideos(template, rows, selectedPresets, onProgre
 /**
  * @param {object} template
  * @param {Record<string, string>} rowData
- * @param {typeof import('./socialFormats.js').PLATFORM_PRESETS[number][]} selectedPresets
+ * @param {string[]} selectedBuckets
  * @param {(current: number, total: number, message?: string) => void} [onProgress]
+ * @param {(bucket: string) => string} [getBucketCss]
  */
-export async function exportSinglePostPresets(template, rowData, selectedPresets, onProgress) {
-  if (selectedPresets.length === 1) {
-    onProgress?.(0, 1, `Rendering ${selectedPresets[0].id}...`);
-    const result = await exportSinglePost(template, rowData, selectedPresets[0]);
+export async function exportSinglePostPresets(template, rowData, selectedBuckets, onProgress, getBucketCss) {
+  if (selectedBuckets.length === 1) {
+    onProgress?.(0, 1, `Rendering ${selectedBuckets[0]}...`);
+    const result = await exportSinglePost(template, rowData, selectedBuckets[0], getBucketCss);
     onProgress?.(1, 1, 'Export complete');
     return result;
   }
 
   const zip = new JSZip();
-  const total = selectedPresets.length;
+  const total = selectedBuckets.length;
   let current = 0;
 
-  for (const preset of selectedPresets) {
+  for (const bucket of selectedBuckets) {
     current += 1;
-    onProgress?.(current, total, `Rendering ${preset.id}...`);
+    onProgress?.(current, total, `Rendering ${bucket}...`);
 
-    const layout = getLayoutForBucket(template, preset.bucket);
-    const width = layout.width ?? preset.width;
-    const height = layout.height ?? preset.height;
-    const templateHtml = template.content?.html ?? '';
-    const layoutCss = layout.css ?? '';
-
-    const canvas = await renderPostToCanvas(templateHtml, layoutCss, rowData, width, height);
-    const blob = await canvasToBlob(canvas);
-    zip.file(`post_${preset.id}.png`, blob);
+    const { blob } = await exportBucketImage(template, rowData, bucket, getBucketCss);
+    zip.file(`post_${bucket}.png`, blob);
   }
 
   onProgress?.(total, total, 'Packaging zip...');

@@ -25,7 +25,7 @@ const SHARED_BASE = `${FONT_IMPORT}
   position: relative;
   overflow: hidden;
   font-family: 'Inter', system-ui, sans-serif;
-  background: #131a2b;
+  background: #1c2333;
   display: flex;
   flex-direction: column;
 }

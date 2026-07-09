@@ -23,7 +23,7 @@ const SHARED_BASE = `${FONT_IMPORT}
   position: relative;
   overflow: hidden;
   font-family: 'Inter', system-ui, sans-serif;
-  background: #ede7da;
+  background: #f4f2ed;
 }
 
 .t-photo {

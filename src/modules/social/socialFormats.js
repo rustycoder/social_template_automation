@@ -108,3 +108,16 @@ export function getPreset(id) {
 export function getPresetsSupportingMedia(mediaType) {
   return PLATFORM_PRESETS.filter((preset) => preset.media.includes(mediaType));
 }
+
+/**
+ * Unique platform display names for a bucket and media type.
+ * @param {string} bucket
+ * @param {'image' | 'video'} mediaType
+ * @returns {string[]}
+ */
+export function getPlatformLabelsForBucket(bucket, mediaType) {
+  const names = PLATFORM_PRESETS.filter(
+    (preset) => preset.bucket === bucket && preset.media.includes(mediaType)
+  ).map((preset) => preset.platform);
+  return [...new Set(names)];
+}

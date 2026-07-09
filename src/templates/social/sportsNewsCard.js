@@ -25,7 +25,7 @@ const SHARED_BASE = `* {
   position: relative;
   overflow: hidden;
   font-family: 'Helvetica Neue', Arial, sans-serif;
-  background: #000;
+  background: #1a3a2a;
 }
 
 .card-bg {
@@ -40,8 +40,8 @@ const SHARED_BASE = `* {
 .date-badge {
   position: absolute;
   z-index: 3;
-  background: #d81f27;
-  color: #fff;
+  background: #e8a33d;
+  color: #1a1817;
   font-weight: 800;
   letter-spacing: 0.02em;
   text-transform: none;
@@ -76,8 +76,8 @@ const SHARED_BASE = `* {
   width: 100%;
   background: linear-gradient(
     to right,
-    #d81f27 0%,
-    #d81f27 33%,
+    #cc2233 0%,
+    #cc2233 33%,
     #ffffff 33%,
     #ffffff 100%
   );

@@ -35,7 +35,7 @@ export async function renderPostToVideo(
   animation,
   onProgress
 ) {
-  const { renderRoot, cleanup } = setupRenderHost(templateHtml, layoutCss, rowData, width, height);
+  const { renderRoot, captureEl, cleanup } = setupRenderHost(templateHtml, layoutCss, rowData, width, height);
 
   const duration = animation.duration ?? 4000;
   const fps = animation.fps ?? 15;
@@ -71,7 +71,7 @@ export async function renderPostToVideo(
       const progress = totalFrames === 1 ? 1 : frameIndex / (totalFrames - 1);
       applyAnimationFrame(renderRoot, animation.steps, progress);
 
-      const frameCanvas = await captureRenderRootToCanvas(renderRoot, width, height);
+      const frameCanvas = await captureRenderRootToCanvas(captureEl, width, height);
       ctx.clearRect(0, 0, width, height);
       ctx.drawImage(frameCanvas, 0, 0, width, height);
 
@@ -108,22 +108,23 @@ function downloadBlob(blob, filename) {
 /**
  * @param {object} template
  * @param {Record<string, string>} rowData
- * @param {typeof import('./socialFormats.js').PLATFORM_PRESETS[number]} preset
+ * @param {string} bucket
  * @param {(current: number, total: number, message?: string) => void} [onProgress]
+ * @param {(bucket: string) => string} [getBucketCss]
  */
-export async function exportSingleVideo(template, rowData, preset, onProgress) {
-  const layout = template.layouts?.[preset.bucket];
+export async function exportSingleVideo(template, rowData, bucket, onProgress, getBucketCss) {
+  const layout = template.layouts?.[bucket];
   if (!layout) {
-    throw new Error(`Template has no layout defined for bucket "${preset.bucket}"`);
+    throw new Error(`Template has no layout defined for bucket "${bucket}"`);
   }
   if (!layout.animation) {
     throw new Error('Selected layout has no animation configured');
   }
 
-  const width = layout.width ?? preset.width;
-  const height = layout.height ?? preset.height;
+  const width = layout.width ?? 1080;
+  const height = layout.height ?? 1080;
   const templateHtml = template.content?.html ?? '';
-  const layoutCss = layout.css ?? '';
+  const layoutCss = getBucketCss?.(bucket) ?? layout.css ?? '';
 
   onProgress?.(0, 1, `Recording video (${layout.animation.fps} fps)...`);
 
@@ -139,8 +140,8 @@ export async function exportSingleVideo(template, rowData, preset, onProgress) {
     }
   );
 
-  const filename = `post_${preset.id}.webm`;
+  const filename = `post_${bucket}.webm`;
   downloadBlob(blob, filename);
   onProgress?.(1, 1, 'Video export complete');
-  return { filename, blob, preset, width, height };
+  return { filename, blob, bucket, width, height };
 }

@@ -53,7 +53,7 @@ export class DataSource {
         this.imageColumns.add(key.toLowerCase());
       }
     }
-    this.fileName = 'Single Post';
+    this.fileName = 'Single post';
     this.mode = 'single';
 
     if (this.onDataLoaded) {

@@ -3,6 +3,26 @@
  */
 import html2canvas from 'html2canvas';
 
+const EXPORT_FRAME_CSS = `
+.social-export-host {
+  overflow: hidden;
+  position: relative;
+  flex-shrink: 0;
+}
+.social-export-frame {
+  overflow: hidden;
+  position: relative;
+  flex-shrink: 0;
+}
+.social-export-frame > .card,
+.social-export-frame > .wire-breaking-card,
+.social-export-frame > .social-post,
+.social-export-frame > .breaking-news-card {
+  width: 100% !important;
+  height: 100% !important;
+}
+`;
+
 function getSocialStagingRoot() {
   let root = document.getElementById('social-staging-root');
   if (!root) {
@@ -112,9 +132,9 @@ export function setupRenderHost(templateHtml, layoutCss, rowData, width, height)
   const htmlContent = replacePlaceholders(templateHtml, rowData);
   const cssContent = replacePlaceholders(layoutCss, rowData);
 
-  const captureHost = document.createElement('div');
-  captureHost.className = 'social-export-frame';
-  Object.assign(captureHost.style, {
+  const host = document.createElement('div');
+  host.className = 'social-export-host';
+  Object.assign(host.style, {
     width: `${width}px`,
     height: `${height}px`,
     minWidth: `${width}px`,
@@ -123,47 +143,42 @@ export function setupRenderHost(templateHtml, layoutCss, rowData, width, height)
     position: 'relative',
     opacity: '1',
     visibility: 'visible',
-    background: 'transparent',
-  });
-
-  const shadow = captureHost.attachShadow({ mode: 'open' });
-  shadow.innerHTML = `<style>${cssContent}</style>${htmlContent}`;
-
-  const renderRoot = document.createElement('div');
-  renderRoot.className = 'social-export-render-root';
-  Object.assign(renderRoot.style, {
-    width: `${width}px`,
-    height: `${height}px`,
-    overflow: 'hidden',
-    position: 'relative',
   });
 
   const styleEl = document.createElement('style');
-  styleEl.textContent = cssContent;
-  renderRoot.appendChild(styleEl);
+  styleEl.textContent = `${EXPORT_FRAME_CSS}\n${cssContent}`;
+  host.appendChild(styleEl);
 
-  const contentEl = document.createElement('div');
-  contentEl.innerHTML = htmlContent;
-  renderRoot.appendChild(contentEl);
+  const captureEl = document.createElement('div');
+  captureEl.className = 'social-export-frame';
+  Object.assign(captureEl.style, {
+    width: `${width}px`,
+    height: `${height}px`,
+    minWidth: `${width}px`,
+    minHeight: `${height}px`,
+    overflow: 'hidden',
+    position: 'relative',
+  });
+  captureEl.innerHTML = htmlContent;
+  host.appendChild(captureEl);
 
-  stagingRoot.appendChild(renderRoot);
-  hideUnresolvedImages(renderRoot);
+  stagingRoot.appendChild(host);
+  hideUnresolvedImages(host);
 
   const cleanup = () => {
-    renderRoot.remove();
-    captureHost.remove();
+    host.remove();
   };
 
-  return { renderRoot, captureHost, cleanup, htmlContent, cssContent };
+  return { renderRoot: host, captureEl, cleanup, htmlContent, cssContent };
 }
 
 /**
- * @param {HTMLElement} renderRoot
+ * @param {HTMLElement} captureEl
  * @param {number} width
  * @param {number} height
  */
-export async function captureRenderRootToCanvas(renderRoot, width, height) {
-  return html2canvas(renderRoot, {
+export async function captureRenderRootToCanvas(captureEl, width, height) {
+  return html2canvas(captureEl, {
     scale: 1,
     width,
     height,
@@ -175,7 +190,7 @@ export async function captureRenderRootToCanvas(renderRoot, width, height) {
     scrollX: 0,
     scrollY: 0,
     onclone: (clonedDoc) => {
-      clonedDoc.querySelectorAll('.social-export-render-root, .social-export-frame').forEach((el) => {
+      clonedDoc.querySelectorAll('.social-export-host, .social-export-frame').forEach((el) => {
         el.style.opacity = '1';
         el.style.visibility = 'visible';
       });

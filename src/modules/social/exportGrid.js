@@ -1,7 +1,7 @@
 /**
- * Export Grid — 4-column ratio tile previews with per-bucket preset chips.
+ * Export Grid — 4-column ratio tile previews with per-bucket selection.
  */
-import { FORMAT_BUCKETS, PLATFORM_PRESETS } from './socialFormats.js';
+import { FORMAT_BUCKETS, getPlatformLabelsForBucket } from './socialFormats.js';
 import { getDefaultDimensionsForBucket } from './socialPreview.js';
 
 const BUCKET_IDS = ['square', 'portrait', 'story', 'landscape'];
@@ -29,7 +29,7 @@ export class ExportGrid {
     this.onSelectionChange = callbacks.onSelectionChange ?? (() => {});
 
     this.currentRow = 0;
-    this.checkedPresetIds = new Set();
+    this.checkedBucketIds = new Set();
 
     this.gridEl = document.getElementById('export-ratio-grid');
     this.rowNavEl = document.getElementById('export-row-nav');
@@ -59,55 +59,57 @@ export class ExportGrid {
 
   /**
    * @param {object} template
+   * @param {string} bucket
    * @param {string} mediaType
-   * @returns {typeof PLATFORM_PRESETS[number][]}
+   * @returns {boolean}
    */
-  _getAvailablePresetsForBucket(template, bucket, mediaType) {
+  _isBucketAvailable(template, bucket, mediaType) {
     const layout = template.layouts[bucket];
-    if (!layout) return [];
+    if (!layout) return false;
 
-    return PLATFORM_PRESETS.filter((preset) => {
-      if (preset.bucket !== bucket) return false;
-      if (!preset.media.includes(mediaType)) return false;
-      if (mediaType === 'video') return !!layout.animation;
-      return true;
-    });
+    const platformLabels = getPlatformLabelsForBucket(bucket, mediaType);
+    if (platformLabels.length === 0) return false;
+    if (mediaType === 'video') return !!layout.animation;
+    return true;
+  }
+
+  /**
+   * @param {object} template
+   * @param {string} mediaType
+   * @returns {string[]}
+   */
+  _getAvailableBuckets(template, mediaType) {
+    return BUCKET_IDS.filter((bucket) => this._isBucketAvailable(template, bucket, mediaType));
   }
 
   /**
    * @param {object} template
    * @param {string} mediaType
    */
-  _syncCheckedPresets(template, mediaType) {
-    const availablePresets = [];
-    const availableIds = new Set();
+  _syncCheckedBuckets(template, mediaType) {
+    const availableBuckets = this._getAvailableBuckets(template, mediaType);
+    const availableIds = new Set(availableBuckets);
 
-    for (const bucket of BUCKET_IDS) {
-      for (const preset of this._getAvailablePresetsForBucket(template, bucket, mediaType)) {
-        availableIds.add(preset.id);
-        availablePresets.push(preset);
-      }
-    }
-
-    for (const id of [...this.checkedPresetIds]) {
+    for (const id of [...this.checkedBucketIds]) {
       if (!availableIds.has(id)) {
-        this.checkedPresetIds.delete(id);
+        this.checkedBucketIds.delete(id);
       }
     }
 
     const isSingleVideo = mediaType === 'video' && this.dataSource.mode === 'single';
     if (isSingleVideo) {
-      const kept = availablePresets.find((preset) => this.checkedPresetIds.has(preset.id)) ?? availablePresets[0];
-      this.checkedPresetIds.clear();
+      const kept =
+        availableBuckets.find((bucket) => this.checkedBucketIds.has(bucket)) ?? availableBuckets[0];
+      this.checkedBucketIds.clear();
       if (kept) {
-        this.checkedPresetIds.add(kept.id);
+        this.checkedBucketIds.add(kept);
       }
       return;
     }
 
     for (const id of availableIds) {
-      if (!this.checkedPresetIds.has(id)) {
-        this.checkedPresetIds.add(id);
+      if (!this.checkedBucketIds.has(id)) {
+        this.checkedBucketIds.add(id);
       }
     }
   }
@@ -140,43 +142,56 @@ export class ExportGrid {
     if (this.nextRowBtn) this.nextRowBtn.disabled = atEnd;
   }
 
-  _buildChip(preset, mediaType) {
+  _buildBucketSelect(bucket, template, mediaType) {
     const isSingleVideo = mediaType === 'video' && this.dataSource.mode === 'single';
     const inputType = isSingleVideo ? 'radio' : 'checkbox';
-    const inputName = isSingleVideo ? 'export-preset-video' : 'export-preset';
-    const isChecked = this.checkedPresetIds.has(preset.id);
+    const inputName = isSingleVideo ? 'export-bucket-video' : 'export-bucket';
+    const isChecked = this.checkedBucketIds.has(bucket);
+    const bucketLabel = FORMAT_BUCKETS[bucket]?.label ?? bucket;
+    const platformLabels = getPlatformLabelsForBucket(bucket, mediaType);
 
-    const chip = document.createElement('label');
-    chip.className = `ratio-chip${isChecked ? ' selected' : ''}`;
-    chip.innerHTML = `
-      <input type="${inputType}" name="${inputName}" value="${preset.id}" ${isChecked ? 'checked' : ''} />
-      <span>${preset.platform}</span>
+    const strip = document.createElement('div');
+    strip.className = 'ratio-control-strip';
+
+    if (platformLabels.length > 0) {
+      const tags = document.createElement('div');
+      tags.className = 'ratio-platform-tags';
+      tags.textContent = platformLabels.join(' · ');
+      strip.appendChild(tags);
+    }
+
+    const select = document.createElement('label');
+    select.className = `ratio-bucket-select${isChecked ? ' selected' : ''}`;
+    select.innerHTML = `
+      <input type="${inputType}" name="${inputName}" value="${bucket}" ${isChecked ? 'checked' : ''} />
+      <span>Include ${bucketLabel}</span>
     `;
 
-    const input = chip.querySelector('input');
+    const input = select.querySelector('input');
     input.addEventListener('change', () => {
       if (isSingleVideo) {
-        this.checkedPresetIds.clear();
+        this.checkedBucketIds.clear();
         if (input.checked) {
-          this.checkedPresetIds.add(preset.id);
+          this.checkedBucketIds.add(bucket);
         }
-        this.gridEl?.querySelectorAll('.ratio-chip input').forEach((el) => {
+        this.gridEl?.querySelectorAll('.ratio-bucket-select input').forEach((el) => {
           if (el !== input) el.checked = false;
         });
-        this.gridEl?.querySelectorAll('.ratio-chip').forEach((el) => {
+        this.gridEl?.querySelectorAll('.ratio-bucket-select').forEach((el) => {
           el.classList.toggle('selected', el.querySelector('input')?.checked);
         });
       } else if (input.checked) {
-        this.checkedPresetIds.add(preset.id);
-        chip.classList.add('selected');
+        this.checkedBucketIds.add(bucket);
+        select.classList.add('selected');
       } else {
-        this.checkedPresetIds.delete(preset.id);
-        chip.classList.remove('selected');
+        this.checkedBucketIds.delete(bucket);
+        select.classList.remove('selected');
       }
       this.onSelectionChange();
     });
 
-    return chip;
+    strip.appendChild(select);
+    return strip;
   }
 
   _buildTile(bucket, template, rowData, mediaType) {
@@ -194,9 +209,9 @@ export class ExportGrid {
     labelRow.className = 'ratio-tile-label';
     labelRow.innerHTML = `<span class="ratio-tile-name">${label}</span><span class="ratio-tile-ratio">${ratioLabel}</span>`;
 
+    const currentBucket = this.getCurrentBucket();
     const box = document.createElement('div');
-    box.className = 'ratio-tile-box';
-    box.style.aspectRatio = `${realW} / ${realH}`;
+    box.className = `ratio-tile-box${bucket === currentBucket ? ' active' : ''}`;
 
     if (!layout) {
       const empty = document.createElement('div');
@@ -214,21 +229,16 @@ export class ExportGrid {
       });
     }
 
-    const strip = document.createElement('div');
-    strip.className = 'ratio-control-strip';
-    const presets = this._getAvailablePresetsForBucket(template, bucket, mediaType);
-
-    if (presets.length === 0) {
-      strip.classList.add('ratio-control-strip--empty');
-    } else {
-      for (const preset of presets) {
-        strip.appendChild(this._buildChip(preset, mediaType));
-      }
-    }
-
     tile.appendChild(labelRow);
     tile.appendChild(box);
-    tile.appendChild(strip);
+
+    if (this._isBucketAvailable(template, bucket, mediaType)) {
+      tile.appendChild(this._buildBucketSelect(bucket, template, mediaType));
+    } else {
+      const strip = document.createElement('div');
+      strip.className = 'ratio-control-strip ratio-control-strip--empty';
+      tile.appendChild(strip);
+    }
 
     return tile;
   }
@@ -252,7 +262,7 @@ export class ExportGrid {
     const mediaType = this.getMediaType();
     const rowData = this.dataSource.getRows()[this.currentRow];
 
-    this._syncCheckedPresets(template, mediaType);
+    this._syncCheckedBuckets(template, mediaType);
     this._updateRowNav(rowCount);
 
     this.gridEl.innerHTML = '';
@@ -263,11 +273,11 @@ export class ExportGrid {
     this.onSelectionChange();
   }
 
-  getSelectedPresetIds() {
-    return [...this.checkedPresetIds];
+  getSelectedBucketIds() {
+    return [...this.checkedBucketIds];
   }
 
   getSelectedCount() {
-    return this.checkedPresetIds.size;
+    return this.checkedBucketIds.size;
   }
 }

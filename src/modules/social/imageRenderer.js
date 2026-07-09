@@ -18,7 +18,13 @@ export { replacePlaceholders } from './socialRenderHost.js';
  * @param {number} height
  */
 export async function renderPostToCanvas(templateHtml, layoutCss, rowData, width, height) {
-  const { renderRoot, cleanup } = setupRenderHost(templateHtml, layoutCss, rowData, width, height);
+  const { renderRoot, captureEl, cleanup } = setupRenderHost(
+    templateHtml,
+    layoutCss,
+    rowData,
+    width,
+    height
+  );
 
   try {
     await waitForImages(renderRoot);
@@ -27,7 +33,7 @@ export async function renderPostToCanvas(templateHtml, layoutCss, rowData, width
       requestAnimationFrame(() => requestAnimationFrame(resolve));
     });
 
-    const canvas = await captureRenderRootToCanvas(renderRoot, width, height);
+    const canvas = await captureRenderRootToCanvas(captureEl, width, height);
     if (!canvas.width || !canvas.height) {
       throw new Error('Image render failed (empty canvas). Check template images and try again.');
     }

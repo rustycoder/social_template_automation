@@ -10,7 +10,7 @@ import { PostPreview, getDefaultDimensionsForBucket } from './modules/preview.js
 import { getTemplateFields } from './modules/templateFields.js';
 import { renderGalleryPreview } from './modules/templateGalleryPreview.js';
 import { getSampleRowForTemplate } from './modules/templateSampleData.js';
-import { FORMAT_BUCKETS, PLATFORM_PRESETS, getPresetsSupportingMedia } from './modules/social/socialFormats.js';
+import { FORMAT_BUCKETS, PLATFORM_PRESETS, getPresetsSupportingMedia, getPlatformLabelsForBucket } from './modules/social/socialFormats.js';
 import {
   exportBulkPosts,
   exportSinglePostPresets,
@@ -343,7 +343,7 @@ class App {
   _updateExportCount() {
     if (!this.exportBtn) return;
     const count = this.exportGrid.getSelectedCount();
-    const label = count === 1 ? 'Download 1 format' : `Download ${count} formats`;
+    const label = count === 0 ? 'Export posts' : count === 1 ? 'Export 1 format' : `Export ${count} formats`;
     this.exportBtn.textContent = label;
   }
 
@@ -483,14 +483,16 @@ class App {
     return template;
   }
 
-  _getAvailablePresets(template, mediaType = 'image') {
-    return PLATFORM_PRESETS.filter((preset) => {
-      const layout = template.layouts[preset.bucket];
-      if (!layout) return false;
-      if (!preset.media.includes(mediaType)) return false;
-      if (mediaType === 'video') return !!layout.animation;
-      return true;
-    });
+  _isBucketAvailable(template, bucket, mediaType = 'image') {
+    const layout = template.layouts[bucket];
+    if (!layout) return false;
+    if (getPlatformLabelsForBucket(bucket, mediaType).length === 0) return false;
+    if (mediaType === 'video') return !!layout.animation;
+    return true;
+  }
+
+  _getAvailableBuckets(template, mediaType = 'image') {
+    return BUCKET_IDS.filter((bucket) => this._isBucketAvailable(template, bucket, mediaType));
   }
 
   _syncExportMediaType() {
@@ -510,16 +512,13 @@ class App {
     });
   }
 
-  _getSelectedPresets() {
+  _getSelectedBuckets() {
     const template = this.templateStore.getTemplate(this.currentTemplateKey);
-    const availableIds = new Set(
-      this._getAvailablePresets(template, this.exportMediaType).map((preset) => preset.id)
-    );
+    const availableIds = new Set(this._getAvailableBuckets(template, this.exportMediaType));
 
     return this.exportGrid
-      .getSelectedPresetIds()
-      .map((id) => PLATFORM_PRESETS.find((preset) => preset.id === id))
-      .filter((preset) => preset && availableIds.has(preset.id));
+      .getSelectedBucketIds()
+      .filter((bucket) => availableIds.has(bucket));
   }
 
   _setExportProgress(current, total, message) {
@@ -537,8 +536,8 @@ class App {
   }
 
   async _handleExport() {
-    const selectedPresets = this._getSelectedPresets();
-    if (selectedPresets.length === 0) {
+    const selectedBuckets = this._getSelectedBuckets();
+    if (selectedBuckets.length === 0) {
       window.dispatchEvent(
         new CustomEvent('toast', { detail: { message: 'Select at least one export format', type: 'error' } })
       );
@@ -554,9 +553,10 @@ class App {
     }
 
     const template = this._getExportTemplate();
+    const getBucketCss = (bucket) => this._getBucketCss(bucket);
 
     if (this.exportMediaType === 'video' && this.dataSource.mode === 'bulk') {
-      const { videoCount, estimatedMinutes } = estimateBulkVideoJob(template, rows, selectedPresets);
+      const { videoCount, estimatedMinutes } = estimateBulkVideoJob(template, rows, selectedBuckets);
       const confirmed = window.confirm(
         `This will render approximately ${videoCount} video(s), estimated ${estimatedMinutes} minute(s). Continue?`
       );
@@ -571,20 +571,20 @@ class App {
 
     try {
       if (this.exportMediaType === 'video' && this.dataSource.mode === 'single') {
-        await exportSingleVideo(template, rows[0], selectedPresets[0], (c, t, m) =>
-          this._setExportProgress(c, t, m)
+        await exportSingleVideo(template, rows[0], selectedBuckets[0], (c, t, m) =>
+          this._setExportProgress(c, t, m), getBucketCss
         );
       } else if (this.exportMediaType === 'video') {
-        await exportBulkVideos(template, rows, selectedPresets, (c, t, m) =>
-          this._setExportProgress(c, t, m)
+        await exportBulkVideos(template, rows, selectedBuckets, (c, t, m) =>
+          this._setExportProgress(c, t, m), getBucketCss
         );
       } else if (this.dataSource.mode === 'single') {
-        await exportSinglePostPresets(template, rows[0], selectedPresets, (c, t, m) =>
-          this._setExportProgress(c, t, m)
+        await exportSinglePostPresets(template, rows[0], selectedBuckets, (c, t, m) =>
+          this._setExportProgress(c, t, m), getBucketCss
         );
       } else {
-        await exportBulkPosts(template, rows, selectedPresets, (c, t, m) =>
-          this._setExportProgress(c, t, m)
+        await exportBulkPosts(template, rows, selectedBuckets, (c, t, m) =>
+          this._setExportProgress(c, t, m), getBucketCss
         );
       }
 
