@@ -48,6 +48,10 @@ export class BillingUI {
     this._previousStep = document.querySelector('.step-panel.active')?.id?.replace('step-', '') || '1';
     this._visible = true;
 
+    const app = document.getElementById('app');
+    if (app) app.dataset.billing = 'true';
+    document.getElementById('app-footer')?.classList.add('hidden');
+
     document.querySelectorAll('.step-panel').forEach((panel) => panel.classList.remove('active'));
     document.querySelector('.header-nav')?.classList.add('hidden');
     this.page?.classList.add('active');
@@ -59,16 +63,28 @@ export class BillingUI {
   hide() {
     this._visible = false;
     this.page?.classList.remove('active');
-    document.querySelector('.header-nav')?.classList.remove('hidden');
 
     const step = parseInt(this._previousStep, 10) || 1;
+    const app = document.getElementById('app');
+    if (app) {
+      delete app.dataset.billing;
+      app.dataset.activeStep = String(step);
+    }
+    document.getElementById('app-footer')?.classList.remove('hidden');
+
+    document.querySelector('.header-nav')?.classList.remove('hidden');
+
     document.getElementById(`step-${step}`)?.classList.add('active');
 
-    document.querySelectorAll('.step-btn').forEach((btn) => {
+    document.querySelectorAll('.step-btn, .step-node').forEach((btn) => {
       const btnStep = parseInt(btn.dataset.step, 10);
       btn.classList.remove('active', 'completed');
       if (btnStep === step) btn.classList.add('active');
       else if (btnStep < step) btn.classList.add('completed');
+    });
+
+    document.getElementById('app-footer')?.querySelectorAll('.footer-panel').forEach((panel) => {
+      panel.classList.toggle('active', panel.dataset.footerStep === String(step));
     });
   }
 

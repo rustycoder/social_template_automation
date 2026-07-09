@@ -23,7 +23,7 @@ export class UploadStep {
   }
 
   _bindElements() {
-    this.sourceTabBtns = document.querySelectorAll('#upload-tabs .source-tab-btn');
+    this.sourceTabBtns = document.querySelectorAll('#upload-tabs .tab-switcher__btn');
     this.bulkPanel = document.getElementById('bulk-panel');
     this.singlePanel = document.getElementById('single-panel');
 
@@ -183,7 +183,9 @@ export class UploadStep {
   _switchSourceTab(source) {
     this.activeSource = source;
     this.sourceTabBtns.forEach((btn) => {
-      btn.classList.toggle('active', btn.dataset.source === source);
+      const isActive = btn.dataset.source === source;
+      btn.classList.toggle('active', isActive);
+      btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
     });
     this.bulkPanel?.classList.toggle('hidden', source !== 'bulk');
     this.singlePanel?.classList.toggle('hidden', source !== 'single');

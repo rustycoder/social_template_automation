@@ -36,6 +36,8 @@ class App {
     this.currentBucket = 'square';
     this.galleryBucket = 'square';
     this.exportMediaType = 'image';
+    this.templateSearchQuery = '';
+    this.templateGalleryLimit = 12;
     this._progressRaf = null;
 
     this.editorStore = this._createEditorStoreAdapter();
@@ -45,7 +47,7 @@ class App {
       tagsListId: 'tags-list',
       templateSelectId: 'template-select-hidden',
       saveTemplateBtnId: 'btn-save-template',
-      tabBtnsSelector: '#customize-panel .editor-tabs .tab-btn',
+      tabBtnsSelector: '#customize-panel .tab-switcher .tab-btn',
       codeEditorsSelector: '#customize-panel .code-editor-wrapper .code-editor',
       defaultTemplateKey: this.currentTemplateKey,
     });
@@ -110,6 +112,7 @@ class App {
     this._selectInitialBucket(this.currentTemplateKey);
     this.templateEditor.selectTemplate(this.currentTemplateKey);
     this._selectTemplate(this.currentTemplateKey);
+    this._syncFooter(1);
   }
 
   _createEditorStoreAdapter() {
@@ -144,7 +147,7 @@ class App {
   }
 
   _bindNavigation() {
-    document.querySelectorAll('.step-btn').forEach((btn) => {
+    document.querySelectorAll('.step-node').forEach((btn) => {
       btn.addEventListener('click', () => {
         const step = parseInt(btn.dataset.step, 10);
         if (step <= this._getMaxAccessibleStep()) {
@@ -159,13 +162,27 @@ class App {
 
   _bindTemplateStep() {
     this.templateGrid = document.getElementById('template-grid');
+    this.templateSearchInput = document.getElementById('template-search');
+    this.loadMoreBtn = document.getElementById('btn-load-more-templates');
     this.galleryFormatTabBtns = document.querySelectorAll('#template-format-tabs [data-gallery-bucket]');
+
+    this.templateSearchInput?.addEventListener('input', () => {
+      this.templateSearchQuery = this.templateSearchInput.value.trim().toLowerCase();
+      this.templateGalleryLimit = 12;
+      this._renderTemplateGallery();
+    });
+
+    this.loadMoreBtn?.addEventListener('click', () => {
+      this.templateGalleryLimit += 12;
+      this._renderTemplateGallery();
+    });
 
     this.galleryFormatTabBtns.forEach((btn) => {
       btn.addEventListener('click', () => {
         const bucket = btn.dataset.galleryBucket;
         if (!bucket || bucket === this.galleryBucket) return;
         this.galleryBucket = bucket;
+        this.templateGalleryLimit = 12;
         this._syncGalleryFormatTabs();
         this._renderTemplateGallery();
       });
@@ -192,15 +209,35 @@ class App {
   _renderTemplateGallery() {
     if (!this.templateGrid) return;
 
-    const keys = this.templateStore.getVisibleTemplateKeys();
+    const allKeys = this.templateStore.getVisibleTemplateKeys();
+    const filteredKeys = allKeys.filter((key) => {
+      if (!this.templateSearchQuery) return true;
+      const template = this.templateStore.getTemplate(key);
+      return template.name.toLowerCase().includes(this.templateSearchQuery);
+    });
+
+    const visibleKeys = filteredKeys.slice(0, this.templateGalleryLimit);
+    const hasMore = filteredKeys.length > visibleKeys.length;
+
     this.templateGrid.innerHTML = '';
     this.templateGrid.dataset.galleryBucket = this.galleryBucket;
     this._syncGalleryFormatTabs();
 
+    if (filteredKeys.length === 0) {
+      const empty = document.createElement('p');
+      empty.className = 'template-page__empty';
+      empty.textContent = this.templateSearchQuery
+        ? 'No templates match your search.'
+        : 'No templates available.';
+      this.templateGrid.appendChild(empty);
+      this.loadMoreBtn?.classList.add('hidden');
+      return;
+    }
+
     const ratioLabels = { square: '1:1', portrait: '4:5', story: '9:16', landscape: '1.91:1' };
     const aspectLabel = ratioLabels[this.galleryBucket] ?? '';
 
-    for (const key of keys) {
+    for (const key of visibleKeys) {
       const template = this.templateStore.getTemplate(key);
       const hasLayout = template.layouts?.[this.galleryBucket] != null;
       const card = document.createElement('div');
@@ -236,6 +273,10 @@ class App {
         previewMount.innerHTML =
           '<span class="gallery-preview-unavailable">Not available in this format</span>';
       }
+    }
+
+    if (this.loadMoreBtn) {
+      this.loadMoreBtn.classList.toggle('hidden', !hasMore);
     }
   }
 
@@ -300,18 +341,30 @@ class App {
     return 3;
   }
 
+  _syncFooter(step) {
+    const app = document.getElementById('app');
+    const footer = document.getElementById('app-footer');
+    if (app) app.dataset.activeStep = String(step);
+
+    footer?.querySelectorAll('.footer-panel').forEach((panel) => {
+      panel.classList.toggle('active', panel.dataset.footerStep === String(step));
+    });
+  }
+
   _goToStep(step) {
     this.currentStep = step;
 
     document.querySelectorAll('.step-panel').forEach((panel) => panel.classList.remove('active'));
     document.getElementById(`step-${step}`)?.classList.add('active');
 
-    document.querySelectorAll('.step-btn').forEach((btn) => {
+    document.querySelectorAll('.step-node').forEach((btn) => {
       const btnStep = parseInt(btn.dataset.step, 10);
       btn.classList.remove('active', 'completed');
       if (btnStep === step) btn.classList.add('active');
       else if (btnStep < step) btn.classList.add('completed');
     });
+
+    this._syncFooter(step);
 
     if (step === 2) {
       this.templateEditor.selectTemplate(this.currentTemplateKey);
@@ -388,13 +441,12 @@ class App {
     const buckets = this._getSelectedBuckets();
 
     if (buckets.length === 0 || selectedCount === 0) {
-      this.exportBtn.textContent = 'Export posts';
+      this.exportBtn.textContent = 'Export Selected (0)';
       this.exportBtn.disabled = buckets.length === 0 || selectedCount === 0;
       return;
     }
 
-    this.exportBtn.textContent =
-      selectedCount === 1 ? 'Export 1 post' : `Export ${selectedCount} posts`;
+    this.exportBtn.textContent = `Export Selected (${selectedCount})`;
     this.exportBtn.disabled = false;
 
     this._syncExportFormatTag();

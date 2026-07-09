@@ -1,5 +1,5 @@
 /**
- * Export Grid — single-format previews for all posts (locked to Step 1 format choice).
+ * Export Grid — batch preview tiles with overlay selection.
  */
 import { FORMAT_BUCKETS, getPlatformLabelsForBucket } from './socialFormats.js';
 import { getDefaultDimensionsForBucket } from './socialPreview.js';
@@ -85,64 +85,40 @@ export class ExportGrid {
     return getDefaultDimensionsForBucket(bucket);
   }
 
-  _buildPlatformTags(bucket, mediaType) {
-    const platformLabels = getPlatformLabelsForBucket(bucket, mediaType);
-    if (platformLabels.length === 0) return null;
-
-    const strip = document.createElement('div');
-    strip.className = 'ratio-control-strip ratio-control-strip--tags-only';
-    const tags = document.createElement('div');
-    tags.className = 'ratio-platform-tags';
-    tags.textContent = platformLabels.join(' · ');
-    strip.appendChild(tags);
-    return strip;
-  }
-
   _buildPostSelect(rowData, rowIndex) {
     const isChecked = this.checkedRowIndices.has(rowIndex);
-    const label = document.createElement('label');
-    label.className = `ratio-bucket-select export-post-select${isChecked ? ' selected' : ''}`;
-
     const input = document.createElement('input');
     input.type = 'checkbox';
+    input.className = 'export-post-checkbox';
     input.checked = isChecked;
+    input.setAttribute('aria-label', `Select ${getRowLabel(rowData, rowIndex)}`);
+    input.addEventListener('click', (e) => e.stopPropagation());
     input.addEventListener('change', () => {
       if (input.checked) {
         this.checkedRowIndices.add(rowIndex);
-        label.classList.add('selected');
       } else {
         this.checkedRowIndices.delete(rowIndex);
-        label.classList.remove('selected');
       }
       this.onSelectionChange();
     });
 
-    const text = document.createElement('span');
-    text.textContent = getRowLabel(rowData, rowIndex);
+    const label = document.createElement('p');
+    label.className = 'export-post-label';
+    label.textContent = getRowLabel(rowData, rowIndex);
 
-    label.appendChild(input);
-    label.appendChild(text);
-    return label;
+    return { input, label };
   }
 
-  _buildPostTile(bucket, template, rowData, rowIndex, mediaType, showFormatHeader) {
+  _buildPostTile(bucket, template, rowData, rowIndex, mediaType) {
     const bucketMeta = FORMAT_BUCKETS[bucket];
     const label = bucketMeta?.label ?? bucket;
-    const ratioLabel = BUCKET_RATIO_LABELS[bucket] ?? '';
     const layout = template.layouts[bucket];
     const { width: realW, height: realH } = this._getLayoutDimensions(template, bucket);
 
     const tile = document.createElement('div');
-    tile.className = 'export-post-tile ratio-tile';
+    tile.className = 'export-post-tile';
     tile.dataset.bucket = bucket;
     tile.dataset.rowIndex = String(rowIndex);
-
-    if (showFormatHeader) {
-      const labelRow = document.createElement('div');
-      labelRow.className = 'ratio-tile-label';
-      labelRow.innerHTML = `<span class="ratio-tile-name">${label}</span><span class="ratio-tile-ratio">${ratioLabel}</span>`;
-      tile.appendChild(labelRow);
-    }
 
     const box = document.createElement('div');
     box.className = 'ratio-tile-box active export-post-preview-box';
@@ -165,12 +141,9 @@ export class ExportGrid {
 
     tile.appendChild(box);
 
-    const tags = this._buildPlatformTags(bucket, mediaType);
-    if (tags && (showFormatHeader || rowIndex === 0)) {
-      tile.appendChild(tags);
-    }
-
-    tile.appendChild(this._buildPostSelect(rowData, rowIndex));
+    const { input, label: nameLabel } = this._buildPostSelect(rowData, rowIndex);
+    tile.appendChild(input);
+    tile.appendChild(nameLabel);
 
     return tile;
   }
@@ -205,11 +178,8 @@ export class ExportGrid {
       return;
     }
 
-    const showFormatHeader = rows.length === 1;
     for (let i = 0; i < rows.length; i++) {
-      this.gridEl.appendChild(
-        this._buildPostTile(bucket, template, rows[i], i, mediaType, showFormatHeader)
-      );
+      this.gridEl.appendChild(this._buildPostTile(bucket, template, rows[i], i, mediaType));
     }
 
     this.onSelectionChange();
