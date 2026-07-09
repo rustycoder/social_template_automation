@@ -8,10 +8,10 @@
  * swap width/height on html,body and .card selectors per layout bucket.
  */
 
-import viralHtml from '../html/template-c-viral.html?raw';
-import highlightHtml from '../html/template-d-highlight.html?raw';
-import bannerHtml from '../html/template-e-banner.html?raw';
-import stampHtml from '../html/template-f-stamp.html?raw';
+import viralHtml from './template-c-viral.html?raw';
+import highlightHtml from './template-d-highlight.html?raw';
+import bannerHtml from './template-e-banner.html?raw';
+import stampHtml from './template-f-stamp.html?raw';
 
 const LAYOUTS = {
   square:    { width: 1080, height: 1080 },

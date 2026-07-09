@@ -2016,8 +2016,7 @@ body.pdf-exporting .progress-fill {
 
 .template-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
+  gap: 12px;
   width: 100%;
 }
 
@@ -2025,7 +2024,7 @@ body.pdf-exporting .progress-fill {
   position: relative;
   background: var(--color-bg-card);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  border-radius: 0;
   overflow: hidden;
   transition: transform var(--transition-base), border-color var(--transition-base), box-shadow var(--transition-base);
   display: flex;
@@ -2114,16 +2113,22 @@ body.pdf-exporting .progress-fill {
   box-shadow: var(--shadow-sm);
 }
 
-.template-grid[data-gallery-bucket="portrait"] .template-preview-container {
+.template-grid[data-gallery-bucket="portrait"] .template-preview-container,
+#template-grid[data-gallery-bucket="portrait"] .template-preview-container,
+.template-masonry[data-gallery-bucket="portrait"] .template-preview-container {
   aspect-ratio: 4 / 5;
 }
 
-.template-grid[data-gallery-bucket="story"] .template-preview-container {
+.template-grid[data-gallery-bucket="story"] .template-preview-container,
+#template-grid[data-gallery-bucket="story"] .template-preview-container,
+.template-masonry[data-gallery-bucket="story"] .template-preview-container {
   aspect-ratio: 9 / 16;
 }
 
-.template-grid[data-gallery-bucket="landscape"] .template-preview-container {
-  aspect-ratio: 1.91 / 1;
+.template-grid[data-gallery-bucket="landscape"] .template-preview-container,
+#template-grid[data-gallery-bucket="landscape"] .template-preview-container,
+.template-masonry[data-gallery-bucket="landscape"] .template-preview-container {
+  aspect-ratio: 1200 / 628;
 }
 
 .template-preview-mount {
@@ -2842,7 +2847,7 @@ body.pdf-exporting .progress-fill {
 }
 
 .template-card-body {
-  padding: 14px 16px;
+  padding: 10px 12px;
 }
 
 .template-card-body h4 {
@@ -2946,12 +2951,6 @@ body.pdf-exporting .progress-fill {
 
 .upload-panel {
   margin-top: 16px;
-}
-
-#template-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
 }
 
 /* ---------- Export Step — Monitor Wall ---------- */

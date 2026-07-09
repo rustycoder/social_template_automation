@@ -7,7 +7,7 @@
   --footer-height: 64px;
   --shell-padding: 32px;
   --color-preview-stage: #f3f4f6;
-  --radius-card: 12px;
+  --radius-card: 0;
   --shadow-elevated: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --shadow-card-hover: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
@@ -86,6 +86,10 @@
   padding: 0;
   max-width: none;
   height: calc(100dvh - var(--header-height) - var(--footer-height));
+}
+
+#app[data-active-step="2"] #step-2.step-panel.active {
+  height: 100%;
 }
 
 #app[data-active-step="billing"] #main-content,
@@ -407,14 +411,34 @@
 .template-masonry,
 #template-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 24px;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+#template-grid[data-gallery-bucket="square"],
+.template-masonry[data-gallery-bucket="square"] {
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+#template-grid[data-gallery-bucket="portrait"],
+.template-masonry[data-gallery-bucket="portrait"] {
+  grid-template-columns: repeat(auto-fill, minmax(176px, 1fr));
+}
+
+#template-grid[data-gallery-bucket="story"],
+.template-masonry[data-gallery-bucket="story"] {
+  grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+}
+
+#template-grid[data-gallery-bucket="landscape"],
+.template-masonry[data-gallery-bucket="landscape"] {
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
 }
 
 .template-page__more {
   display: flex;
   justify-content: center;
-  margin-top: 40px;
+  margin-top: 24px;
 }
 
 .template-card {
@@ -443,7 +467,7 @@
 /* ---------- Page 2: Data split ---------- */
 .data-split {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 2fr 1fr;
   height: 100%;
   min-height: 0;
 }
@@ -451,6 +475,8 @@
 .data-split__form {
   padding: var(--shell-padding);
   overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
   border-right: 1px solid var(--color-border);
   background: var(--color-bg-raised);
 }
@@ -459,6 +485,7 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
+  overflow: hidden;
   background: var(--color-preview-stage);
 }
 
@@ -469,15 +496,18 @@
   justify-content: center;
   padding: var(--shell-padding);
   min-height: 0;
+  overflow: hidden;
   position: relative;
+  aspect-ratio: unset;
 }
 
 .preview-stage .preview-mount {
-  position: relative;
-  inset: auto;
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   padding: 0;
+  overflow: hidden;
 }
 
 .preview-stage-footer {

@@ -74,6 +74,26 @@ function fitGalleryPreview(mount, frameWidthPx, frameHeightPx) {
 }
 
 /**
+ * @param {HTMLElement} mount
+ * @param {number} frameWidthPx
+ * @param {number} frameHeightPx
+ */
+function bindGalleryResize(mount, frameWidthPx, frameHeightPx) {
+  const wrapper = mount.parentElement;
+  if (!wrapper || typeof ResizeObserver === 'undefined') return;
+
+  if (mount._galleryResizeObserver) {
+    mount._galleryResizeObserver.disconnect();
+  }
+
+  const observer = new ResizeObserver(() => {
+    fitGalleryPreview(mount, frameWidthPx, frameHeightPx);
+  });
+  observer.observe(wrapper);
+  mount._galleryResizeObserver = observer;
+}
+
+/**
  * @param {object} template
  * @param {HTMLElement | null} mountEl
  * @param {{ rowData?: Record<string, string>, bucket?: string }} [options]
@@ -102,6 +122,7 @@ export function renderGalleryPreview(template, mountEl, options = {}) {
   root.innerHTML = `<style>${cssContent}\n${GALLERY_SHADOW_CSS}</style><div class="gallery-sheet"><div class="gallery-frame">${htmlContent}</div></div>`;
 
   hideUnresolvedImages(root);
+  bindGalleryResize(mountEl, width, height);
 
   requestAnimationFrame(() => {
     fitGalleryPreview(mountEl, width, height);

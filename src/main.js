@@ -75,6 +75,7 @@ class App {
         nextRowBtnId: 'data-btn-next-row',
         rowIndicatorId: 'data-preview-row-indicator',
         formatTagId: 'data-preview-format-tag',
+        skipWrapperAspectRatio: true,
       }
     );
 

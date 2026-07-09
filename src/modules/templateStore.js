@@ -5,7 +5,7 @@
 import {
   HTML_TEMPLATES,
   DEFAULT_TEMPLATE_ID,
-} from '../templates/social/htmlTemplateLoader.js';
+} from '../templates/htmlTemplateLoader.js';
 
 const STORAGE_KEY = 'social-media-template-automation-templates';
 const TEMPLATE_VERSION_KEY = 'social-media-template-automation-version';

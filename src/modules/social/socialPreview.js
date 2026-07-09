@@ -24,7 +24,7 @@ const SOCIAL_PREVIEW_SHADOW_CSS = `
   flex-shrink: 0;
   margin: 0 !important;
   box-shadow: 0 8px 24px rgba(9, 9, 11, 0.12);
-  border-radius: 8px;
+  border-radius: 0;
   transform-origin: center center;
   transition: transform 0.2s ease;
   will-change: transform;
@@ -142,16 +142,20 @@ export class SocialPreview {
     const frame = root?.querySelector('.social-frame');
     if (!wrapper || !frame || wrapper.clientWidth < 1 || wrapper.clientHeight < 1) return;
 
-    frame.style.width = `${frameWidthPx}px`;
-    frame.style.height = `${frameHeightPx}px`;
+    const layoutDims = this.getLayoutDimensions();
+    const width = frameWidthPx || layoutDims.width;
+    const height = frameHeightPx || layoutDims.height;
+
+    frame.style.width = `${width}px`;
+    frame.style.height = `${height}px`;
     frame.style.transform = 'none';
 
-    const frameW = frame.offsetWidth || frameWidthPx;
-    const frameH = frame.offsetHeight || frameHeightPx;
-    const pad = 12;
+    const frameW = frame.offsetWidth || width;
+    const frameH = frame.offsetHeight || height;
+    const pad = this.options.skipWrapperAspectRatio ? 24 : 12;
     const availW = wrapper.clientWidth - pad;
     const availH = wrapper.clientHeight - pad;
-    const scale = Math.min(availW / frameW, availH / frameH);
+    const scale = Math.min(availW / frameW, availH / frameH, 1);
 
     frame.style.transform = `scale(${scale})`;
   }
@@ -381,7 +385,7 @@ export class SocialPreview {
     const { width, height } = this.getLayoutDimensions();
     const bucketLabel = FORMAT_BUCKETS[bucket]?.label ?? bucket;
 
-    if (this.previewFrameWrapper) {
+    if (this.previewFrameWrapper && !this.options.skipWrapperAspectRatio) {
       this.previewFrameWrapper.style.aspectRatio = `${width} / ${height}`;
     }
     if (this.formatTag) {
