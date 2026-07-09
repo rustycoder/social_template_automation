@@ -14,6 +14,12 @@ const EXPORT_FRAME_CSS = `
   position: relative;
   flex-shrink: 0;
 }
+.social-export-frame > * {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+}
 .social-export-frame > .card,
 .social-export-frame > .wire-breaking-card,
 .social-export-frame > .social-post,
@@ -23,19 +29,90 @@ const EXPORT_FRAME_CSS = `
 }
 `;
 
-function getSocialStagingRoot() {
-  let root = document.getElementById('social-staging-root');
-  if (!root) {
-    root = document.createElement('div');
-    root.id = 'social-staging-root';
-    root.setAttribute('aria-hidden', 'true');
-    document.body.appendChild(root);
+const BG_URL_RE = /url\(['"]?(.*?)['"]?\)/i;
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function normalizeSpecValue(val) {
+  if (val === null || val === undefined) return '';
+  if (typeof val === 'boolean') return val ? 'Yes' : 'No';
+  if (typeof val === 'number') return String(val);
+  if (Array.isArray(val)) return val.map((v) => normalizeSpecValue(v)).join(', ');
+  if (typeof val === 'object') return JSON.stringify(val);
+  return String(val);
+}
+
+function parseSpecsJson(specStr) {
+  if (specStr === undefined || specStr === null || specStr === '') return null;
+  if (typeof specStr === 'object' && !Array.isArray(specStr)) return specStr;
+
+  let raw = String(specStr).trim().replace(/^\uFEFF/, '');
+  if (!raw) return null;
+  if (raw.includes('<table') || raw.includes('<tr')) return null;
+
+  raw = raw.replace(/[\u201C\u201D]/g, '"').replace(/[\u2018\u2019]/g, "'");
+  if (raw.includes('""')) raw = raw.replace(/""/g, '"');
+
+  try {
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) return parsed;
+  } catch {
+    /* fallback below */
   }
-  return root;
+
+  return null;
+}
+
+function flattenSpecsEntries(obj) {
+  const entries = [];
+  for (const [key, val] of Object.entries(obj)) {
+    if (val !== null && typeof val === 'object' && !Array.isArray(val)) {
+      for (const [subKey, subVal] of Object.entries(val)) {
+        entries.push([`${key} — ${subKey}`, subVal]);
+      }
+    } else {
+      entries.push([key, val]);
+    }
+  }
+  return entries;
 }
 
 function expandRowData(rowData) {
-  return { ...rowData };
+  const expanded = { ...rowData };
+  const specsHeader = Object.keys(rowData).find((h) => {
+    const n = h.trim().toLowerCase();
+    return n === 'specs' || n === 'specification';
+  });
+  if (!specsHeader) return expanded;
+
+  const parsed = parseSpecsJson(rowData[specsHeader]);
+  if (!parsed) return expanded;
+
+  for (const [key, val] of flattenSpecsEntries(parsed)) {
+    expanded[key] = normalizeSpecValue(val);
+  }
+  return expanded;
+}
+
+function formatSpecification(specStr) {
+  if (specStr === undefined || specStr === null || specStr === '') return '';
+
+  const jsonObj = parseSpecsJson(specStr);
+  if (jsonObj) {
+    const rows = flattenSpecsEntries(jsonObj).map(([key, val]) => {
+      const display = normalizeSpecValue(val);
+      return `<tr><td class="spec-key">${escapeHtml(key)}</td><td class="spec-val">${escapeHtml(display)}</td></tr>`;
+    });
+    return `<table class="specs-table"><tbody>${rows.join('')}</tbody></table>`;
+  }
+
+  return escapeHtml(String(specStr));
 }
 
 /**
@@ -71,8 +148,121 @@ export function replacePlaceholders(templateStr, rowData) {
     const trimmedKey = key.trim();
     const header = Object.keys(data).find((h) => h.trim().toLowerCase() === trimmedKey.toLowerCase());
     if (!header) return '';
-    return data[header] ?? '';
+
+    const value = data[header] ?? '';
+
+    if (trimmedKey.toLowerCase() === 'specification' || trimmedKey.toLowerCase() === 'specs') {
+      const specsHeader = Object.keys(rowData).find((h) => {
+        const n = h.trim().toLowerCase();
+        return n === 'specs' || n === 'specification';
+      });
+      return formatSpecification(specsHeader ? rowData[specsHeader] : value);
+    }
+
+    return value;
   });
+}
+
+function getSocialStagingRoot() {
+  let root = document.getElementById('social-staging-root');
+  if (!root) {
+    root = document.createElement('div');
+    root.id = 'social-staging-root';
+    root.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(root);
+  }
+  return root;
+}
+
+/**
+ * @param {HTMLElement} el
+ * @returns {string | null}
+ */
+function extractBackgroundUrl(el) {
+  const inline = el.style?.backgroundImage || '';
+  if (inline && inline !== 'none') {
+    const match = inline.match(BG_URL_RE);
+    if (match?.[1]) return match[1].trim();
+  }
+
+  if (typeof getComputedStyle === 'function') {
+    const computed = getComputedStyle(el).backgroundImage;
+    if (computed && computed !== 'none') {
+      const match = computed.match(BG_URL_RE);
+      if (match?.[1]) return match[1].trim();
+    }
+  }
+
+  return null;
+}
+
+/**
+ * @param {string} url
+ */
+function isResolvableImageUrl(url) {
+  if (!url || url.includes('{{')) return false;
+  const trimmed = url.trim();
+  return trimmed.length > 0 && trimmed !== 'none';
+}
+
+/**
+ * Convert background-image layers to real img tags so html2canvas captures cover correctly.
+ * @param {ParentNode} root
+ */
+export async function normalizeImagesForCapture(root) {
+  const candidates = root.querySelectorAll(
+    '.bg-image, .background-image, [style*="background-image"]'
+  );
+
+  for (const el of candidates) {
+    if (!(el instanceof HTMLElement)) continue;
+    const url = extractBackgroundUrl(el);
+    if (!isResolvableImageUrl(url)) continue;
+    if (el.querySelector('img.export-capture-img')) continue;
+
+    const img = document.createElement('img');
+    img.className = 'export-capture-img';
+    img.alt = '';
+    if (!url.startsWith('data:') && !url.startsWith('blob:')) {
+      img.crossOrigin = 'anonymous';
+    }
+    img.src = url;
+
+    Object.assign(img.style, {
+      position: 'absolute',
+      top: '0',
+      left: '0',
+      width: '100%',
+      height: '100%',
+      objectFit: 'cover',
+      objectPosition: 'center',
+      display: 'block',
+      pointerEvents: 'none',
+    });
+
+    const position = typeof getComputedStyle === 'function' ? getComputedStyle(el).position : el.style.position;
+    if (!position || position === 'static') {
+      el.style.position = 'relative';
+    }
+
+    el.style.backgroundImage = 'none';
+    el.insertBefore(img, el.firstChild);
+  }
+
+  root.querySelectorAll('img:not(.export-capture-img)').forEach((img) => {
+    const src = img.getAttribute('src');
+    if (!src || src.includes('{{')) return;
+
+    if (!src.startsWith('data:') && !src.startsWith('blob:') && !img.crossOrigin) {
+      img.crossOrigin = 'anonymous';
+    }
+
+    if (!img.style.objectFit && (img.classList.contains('bg-image') || img.classList.contains('hero-image'))) {
+      img.style.objectFit = 'cover';
+    }
+  });
+
+  await waitForImages(root);
 }
 
 /**
@@ -94,6 +284,7 @@ export async function waitForImages(container) {
   const images = Array.from(container.querySelectorAll('img'));
   await Promise.all(
     images.map(async (img) => {
+      if (img.style.display === 'none') return;
       if (img.complete && img.naturalWidth > 0) return;
       try {
         if (img.decode) await img.decode();
@@ -186,7 +377,7 @@ export async function captureRenderRootToCanvas(captureEl, width, height) {
     allowTaint: true,
     logging: false,
     backgroundColor: null,
-    imageTimeout: 15000,
+    imageTimeout: 20000,
     scrollX: 0,
     scrollY: 0,
     onclone: (clonedDoc) => {

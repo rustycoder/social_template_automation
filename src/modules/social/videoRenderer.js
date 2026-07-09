@@ -9,6 +9,7 @@ import {
   setupRenderHost,
   waitForImages,
   captureRenderRootToCanvas,
+  normalizeImagesForCapture,
 } from './socialRenderHost.js';
 import { applyAnimationFrame } from './socialAnimations.js';
 
@@ -49,6 +50,7 @@ export async function renderPostToVideo(
   const ctx = outputCanvas.getContext('2d');
 
   try {
+    await normalizeImagesForCapture(renderRoot);
     await waitForImages(renderRoot);
     await new Promise((resolve) => {
       requestAnimationFrame(() => requestAnimationFrame(resolve));

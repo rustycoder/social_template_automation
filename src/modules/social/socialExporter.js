@@ -91,18 +91,17 @@ export async function exportSinglePost(template, rowData, bucket, getBucketCss) 
 
 /**
  * @param {object} template
- * @param {Record<string, string>[]} rows
+ * @param {{ rowData: Record<string, string>, rowIndex: number }[]} rowEntries
  * @param {string[]} selectedBuckets
  * @param {(current: number, total: number, message?: string) => void} [onProgress]
  * @param {(bucket: string) => string} [getBucketCss]
  */
-export async function exportBulkPosts(template, rows, selectedBuckets, onProgress, getBucketCss) {
-  const total = rows.length * selectedBuckets.length;
+export async function exportBulkPosts(template, rowEntries, selectedBuckets, onProgress, getBucketCss) {
+  const total = rowEntries.length * selectedBuckets.length;
   let current = 0;
   const zip = new JSZip();
 
-  for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
-    const rowData = rows[rowIndex];
+  for (const { rowData, rowIndex } of rowEntries) {
     const rowBase = getRowBaseName(rowData, rowIndex);
 
     for (const bucket of selectedBuckets) {
@@ -124,11 +123,11 @@ export async function exportBulkPosts(template, rows, selectedBuckets, onProgres
 /**
  * Estimate bulk video job size for user confirmation before rendering.
  * @param {object} template
- * @param {Record<string, string>[]} rows
+ * @param {{ rowData: Record<string, string>, rowIndex: number }[]} rowEntries
  * @param {string[]} selectedBuckets
  */
-export function estimateBulkVideoJob(template, rows, selectedBuckets) {
-  const videoCount = rows.length * selectedBuckets.length;
+export function estimateBulkVideoJob(template, rowEntries, selectedBuckets) {
+  const videoCount = rowEntries.length * selectedBuckets.length;
   if (videoCount === 0) {
     return { videoCount: 0, estimatedMinutes: 0 };
   }
@@ -140,7 +139,7 @@ export function estimateBulkVideoJob(template, rows, selectedBuckets) {
   }
 
   const avgDurationMs = durationSumMs / selectedBuckets.length;
-  const productMs = rows.length * selectedBuckets.length * avgDurationMs;
+  const productMs = rowEntries.length * selectedBuckets.length * avgDurationMs;
   const estimatedMinutes = Math.max(1, Math.ceil((productMs * BULK_VIDEO_RENDER_MULTIPLIER) / 60000));
 
   return { videoCount, estimatedMinutes };
@@ -148,18 +147,17 @@ export function estimateBulkVideoJob(template, rows, selectedBuckets) {
 
 /**
  * @param {object} template
- * @param {Record<string, string>[]} rows
+ * @param {{ rowData: Record<string, string>, rowIndex: number }[]} rowEntries
  * @param {string[]} selectedBuckets
  * @param {(current: number, total: number, message?: string) => void} [onProgress]
  * @param {(bucket: string) => string} [getBucketCss]
  */
-export async function exportBulkVideos(template, rows, selectedBuckets, onProgress, getBucketCss) {
-  const total = rows.length * selectedBuckets.length;
+export async function exportBulkVideos(template, rowEntries, selectedBuckets, onProgress, getBucketCss) {
+  const total = rowEntries.length * selectedBuckets.length;
   let current = 0;
   const zip = new JSZip();
 
-  for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
-    const rowData = rows[rowIndex];
+  for (const { rowData, rowIndex } of rowEntries) {
     const rowBase = getRowBaseName(rowData, rowIndex);
 
     for (const bucket of selectedBuckets) {

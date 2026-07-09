@@ -1,10 +1,8 @@
 /**
- * Export Grid — 4-column ratio tile previews with per-bucket selection.
+ * Export Grid — single-format previews for all posts (locked to Step 1 format choice).
  */
 import { FORMAT_BUCKETS, getPlatformLabelsForBucket } from './socialFormats.js';
 import { getDefaultDimensionsForBucket } from './socialPreview.js';
-
-const BUCKET_IDS = ['square', 'portrait', 'story', 'landscape'];
 
 const BUCKET_RATIO_LABELS = {
   square: '1:1',
@@ -12,6 +10,19 @@ const BUCKET_RATIO_LABELS = {
   story: '9:16',
   landscape: '1.91:1',
 };
+
+/**
+ * @param {Record<string, string>} rowData
+ * @param {number} index
+ */
+function getRowLabel(rowData, index) {
+  const preferred = rowData.CODE || rowData.HEADLINE || rowData.headline || rowData.NAME || rowData.name;
+  if (preferred) {
+    const cleaned = String(preferred).trim();
+    if (cleaned) return cleaned.slice(0, 48);
+  }
+  return `Post ${index + 1}`;
+}
 
 export class ExportGrid {
   /**
@@ -28,33 +39,8 @@ export class ExportGrid {
     this.getCurrentBucket = callbacks.getCurrentBucket;
     this.onSelectionChange = callbacks.onSelectionChange ?? (() => {});
 
-    this.currentRow = 0;
-    this.checkedBucketIds = new Set();
-
+    this.checkedRowIndices = new Set();
     this.gridEl = document.getElementById('export-ratio-grid');
-    this.rowNavEl = document.getElementById('export-row-nav');
-    this.prevRowBtn = document.getElementById('export-row-prev');
-    this.nextRowBtn = document.getElementById('export-row-next');
-    this.rowIndicator = document.getElementById('export-row-indicator');
-
-    this._bindRowNav();
-  }
-
-  _bindRowNav() {
-    this.prevRowBtn?.addEventListener('click', () => {
-      if (this.currentRow > 0) {
-        this.currentRow--;
-        this.render();
-      }
-    });
-
-    this.nextRowBtn?.addEventListener('click', () => {
-      const rowCount = this.dataSource.getRowCount();
-      if (this.currentRow < rowCount - 1) {
-        this.currentRow++;
-        this.render();
-      }
-    });
   }
 
   /**
@@ -73,43 +59,20 @@ export class ExportGrid {
     return true;
   }
 
-  /**
-   * @param {object} template
-   * @param {string} mediaType
-   * @returns {string[]}
-   */
-  _getAvailableBuckets(template, mediaType) {
-    return BUCKET_IDS.filter((bucket) => this._isBucketAvailable(template, bucket, mediaType));
+  resetRowSelection() {
+    this.checkedRowIndices.clear();
   }
 
-  /**
-   * @param {object} template
-   * @param {string} mediaType
-   */
-  _syncCheckedBuckets(template, mediaType) {
-    const availableBuckets = this._getAvailableBuckets(template, mediaType);
-    const availableIds = new Set(availableBuckets);
-
-    for (const id of [...this.checkedBucketIds]) {
-      if (!availableIds.has(id)) {
-        this.checkedBucketIds.delete(id);
+  _syncCheckedRows(rowCount) {
+    for (const index of [...this.checkedRowIndices]) {
+      if (index >= rowCount) {
+        this.checkedRowIndices.delete(index);
       }
     }
 
-    const isSingleVideo = mediaType === 'video' && this.dataSource.mode === 'single';
-    if (isSingleVideo) {
-      const kept =
-        availableBuckets.find((bucket) => this.checkedBucketIds.has(bucket)) ?? availableBuckets[0];
-      this.checkedBucketIds.clear();
-      if (kept) {
-        this.checkedBucketIds.add(kept);
-      }
-      return;
-    }
-
-    for (const id of availableIds) {
-      if (!this.checkedBucketIds.has(id)) {
-        this.checkedBucketIds.add(id);
+    for (let i = 0; i < rowCount; i++) {
+      if (!this.checkedRowIndices.has(i)) {
+        this.checkedRowIndices.add(i);
       }
     }
   }
@@ -122,79 +85,47 @@ export class ExportGrid {
     return getDefaultDimensionsForBucket(bucket);
   }
 
-  _updateRowNav(rowCount) {
-    const showNav = this.dataSource.mode === 'bulk' && rowCount > 1;
-    this.rowNavEl?.classList.toggle('hidden', !showNav);
-
-    if (!showNav) return;
-
-    if (this.currentRow >= rowCount) {
-      this.currentRow = Math.max(0, rowCount - 1);
-    }
-
-    const atStart = this.currentRow === 0;
-    const atEnd = this.currentRow >= rowCount - 1;
-
-    if (this.rowIndicator) {
-      this.rowIndicator.textContent = `Row ${this.currentRow + 1} of ${rowCount}`;
-    }
-    if (this.prevRowBtn) this.prevRowBtn.disabled = atStart;
-    if (this.nextRowBtn) this.nextRowBtn.disabled = atEnd;
-  }
-
-  _buildBucketSelect(bucket, template, mediaType) {
-    const isSingleVideo = mediaType === 'video' && this.dataSource.mode === 'single';
-    const inputType = isSingleVideo ? 'radio' : 'checkbox';
-    const inputName = isSingleVideo ? 'export-bucket-video' : 'export-bucket';
-    const isChecked = this.checkedBucketIds.has(bucket);
-    const bucketLabel = FORMAT_BUCKETS[bucket]?.label ?? bucket;
+  _buildPlatformTags(bucket, mediaType) {
     const platformLabels = getPlatformLabelsForBucket(bucket, mediaType);
+    if (platformLabels.length === 0) return null;
 
     const strip = document.createElement('div');
-    strip.className = 'ratio-control-strip';
+    strip.className = 'ratio-control-strip ratio-control-strip--tags-only';
+    const tags = document.createElement('div');
+    tags.className = 'ratio-platform-tags';
+    tags.textContent = platformLabels.join(' · ');
+    strip.appendChild(tags);
+    return strip;
+  }
 
-    if (platformLabels.length > 0) {
-      const tags = document.createElement('div');
-      tags.className = 'ratio-platform-tags';
-      tags.textContent = platformLabels.join(' · ');
-      strip.appendChild(tags);
-    }
+  _buildPostSelect(rowData, rowIndex) {
+    const isChecked = this.checkedRowIndices.has(rowIndex);
+    const label = document.createElement('label');
+    label.className = `ratio-bucket-select export-post-select${isChecked ? ' selected' : ''}`;
 
-    const select = document.createElement('label');
-    select.className = `ratio-bucket-select${isChecked ? ' selected' : ''}`;
-    select.innerHTML = `
-      <input type="${inputType}" name="${inputName}" value="${bucket}" ${isChecked ? 'checked' : ''} />
-      <span>Include ${bucketLabel}</span>
-    `;
-
-    const input = select.querySelector('input');
+    const input = document.createElement('input');
+    input.type = 'checkbox';
+    input.checked = isChecked;
     input.addEventListener('change', () => {
-      if (isSingleVideo) {
-        this.checkedBucketIds.clear();
-        if (input.checked) {
-          this.checkedBucketIds.add(bucket);
-        }
-        this.gridEl?.querySelectorAll('.ratio-bucket-select input').forEach((el) => {
-          if (el !== input) el.checked = false;
-        });
-        this.gridEl?.querySelectorAll('.ratio-bucket-select').forEach((el) => {
-          el.classList.toggle('selected', el.querySelector('input')?.checked);
-        });
-      } else if (input.checked) {
-        this.checkedBucketIds.add(bucket);
-        select.classList.add('selected');
+      if (input.checked) {
+        this.checkedRowIndices.add(rowIndex);
+        label.classList.add('selected');
       } else {
-        this.checkedBucketIds.delete(bucket);
-        select.classList.remove('selected');
+        this.checkedRowIndices.delete(rowIndex);
+        label.classList.remove('selected');
       }
       this.onSelectionChange();
     });
 
-    strip.appendChild(select);
-    return strip;
+    const text = document.createElement('span');
+    text.textContent = getRowLabel(rowData, rowIndex);
+
+    label.appendChild(input);
+    label.appendChild(text);
+    return label;
   }
 
-  _buildTile(bucket, template, rowData, mediaType) {
+  _buildPostTile(bucket, template, rowData, rowIndex, mediaType, showFormatHeader) {
     const bucketMeta = FORMAT_BUCKETS[bucket];
     const label = bucketMeta?.label ?? bucket;
     const ratioLabel = BUCKET_RATIO_LABELS[bucket] ?? '';
@@ -202,16 +133,19 @@ export class ExportGrid {
     const { width: realW, height: realH } = this._getLayoutDimensions(template, bucket);
 
     const tile = document.createElement('div');
-    tile.className = 'ratio-tile';
+    tile.className = 'export-post-tile ratio-tile';
     tile.dataset.bucket = bucket;
+    tile.dataset.rowIndex = String(rowIndex);
 
-    const labelRow = document.createElement('div');
-    labelRow.className = 'ratio-tile-label';
-    labelRow.innerHTML = `<span class="ratio-tile-name">${label}</span><span class="ratio-tile-ratio">${ratioLabel}</span>`;
+    if (showFormatHeader) {
+      const labelRow = document.createElement('div');
+      labelRow.className = 'ratio-tile-label';
+      labelRow.innerHTML = `<span class="ratio-tile-name">${label}</span><span class="ratio-tile-ratio">${ratioLabel}</span>`;
+      tile.appendChild(labelRow);
+    }
 
-    const currentBucket = this.getCurrentBucket();
     const box = document.createElement('div');
-    box.className = `ratio-tile-box${bucket === currentBucket ? ' active' : ''}`;
+    box.className = 'ratio-tile-box active export-post-preview-box';
 
     if (!layout) {
       const empty = document.createElement('div');
@@ -229,16 +163,14 @@ export class ExportGrid {
       });
     }
 
-    tile.appendChild(labelRow);
     tile.appendChild(box);
 
-    if (this._isBucketAvailable(template, bucket, mediaType)) {
-      tile.appendChild(this._buildBucketSelect(bucket, template, mediaType));
-    } else {
-      const strip = document.createElement('div');
-      strip.className = 'ratio-control-strip ratio-control-strip--empty';
-      tile.appendChild(strip);
+    const tags = this._buildPlatformTags(bucket, mediaType);
+    if (tags && (showFormatHeader || rowIndex === 0)) {
+      tile.appendChild(tags);
     }
+
+    tile.appendChild(this._buildPostSelect(rowData, rowIndex));
 
     return tile;
   }
@@ -246,38 +178,70 @@ export class ExportGrid {
   render() {
     if (!this.gridEl) return;
 
-    const rowCount = this.dataSource.getRowCount();
-    if (rowCount === 0) {
+    const rows = this.dataSource.getRows();
+    const bucket = this.getCurrentBucket();
+    const template = this.getTemplate();
+    const mediaType = this.getMediaType();
+
+    this.gridEl.dataset.exportBucket = bucket;
+
+    if (rows.length === 0) {
       this.gridEl.innerHTML = '';
-      this._updateRowNav(0);
+      this.checkedRowIndices.clear();
       this.onSelectionChange();
       return;
     }
 
-    if (this.currentRow >= rowCount) {
-      this.currentRow = rowCount - 1;
+    this._syncCheckedRows(rows.length);
+    this.gridEl.innerHTML = '';
+
+    if (!this._isBucketAvailable(template, bucket, mediaType)) {
+      const empty = document.createElement('div');
+      empty.className = 'ratio-tile-empty export-grid-empty';
+      const bucketLabel = FORMAT_BUCKETS[bucket]?.label ?? bucket;
+      empty.textContent = `This template has no ${bucketLabel.toLowerCase()} layout for export.`;
+      this.gridEl.appendChild(empty);
+      this.onSelectionChange();
+      return;
     }
 
-    const template = this.getTemplate();
-    const mediaType = this.getMediaType();
-    const rowData = this.dataSource.getRows()[this.currentRow];
-
-    this._syncCheckedBuckets(template, mediaType);
-    this._updateRowNav(rowCount);
-
-    this.gridEl.innerHTML = '';
-    for (const bucket of BUCKET_IDS) {
-      this.gridEl.appendChild(this._buildTile(bucket, template, rowData, mediaType));
+    const showFormatHeader = rows.length === 1;
+    for (let i = 0; i < rows.length; i++) {
+      this.gridEl.appendChild(
+        this._buildPostTile(bucket, template, rows[i], i, mediaType, showFormatHeader)
+      );
     }
 
     this.onSelectionChange();
   }
 
   getSelectedBucketIds() {
-    return [...this.checkedBucketIds];
+    const template = this.getTemplate();
+    const bucket = this.getCurrentBucket();
+    const mediaType = this.getMediaType();
+    if (this._isBucketAvailable(template, bucket, mediaType)) {
+      return [bucket];
+    }
+    return [];
+  }
+
+  hasSelection() {
+    return this.checkedRowIndices.size > 0 && this.getSelectedBucketIds().length > 0;
   }
 
   getSelectedCount() {
-    return this.checkedBucketIds.size;
+    if (this.getSelectedBucketIds().length === 0) return 0;
+    return this.checkedRowIndices.size;
+  }
+
+  /**
+   * @returns {{ rowData: Record<string, string>, rowIndex: number }[]}
+   */
+  getSelectedRows() {
+    const rows = this.dataSource.getRows();
+    return [...this.checkedRowIndices]
+      .sort((a, b) => a - b)
+      .filter((index) => index < rows.length)
+      .map((rowIndex) => ({ rowData: rows[rowIndex], rowIndex }));
   }
 }

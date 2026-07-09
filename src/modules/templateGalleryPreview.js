@@ -4,8 +4,6 @@
 import { replacePlaceholders, hideUnresolvedImages, waitForImages } from './social/socialRenderHost.js';
 import { getSampleRowForTemplate } from './templateSampleData.js';
 
-const BUCKET_ORDER = ['square', 'story', 'portrait', 'landscape'];
-
 const GALLERY_SHADOW_CSS = `
 :host {
   display: flex;
@@ -31,12 +29,9 @@ const GALLERY_SHADOW_CSS = `
 
 /**
  * @param {object} template
+ * @param {string} bucket
  */
-function getPreviewLayout(template) {
-  const bucket =
-    template.previewBucket ||
-    BUCKET_ORDER.find((id) => template.layouts?.[id] != null) ||
-    'square';
+function getPreviewLayout(template, bucket) {
   const layout = template.layouts?.[bucket];
   if (!layout) return null;
   return { bucket, layout };
@@ -70,7 +65,7 @@ function fitGalleryPreview(mount, frameWidthPx, frameHeightPx) {
 
   const frameW = frame.offsetWidth || frameWidthPx;
   const frameH = frame.offsetHeight || frameHeightPx;
-  const pad = 8;
+  const pad = 0;
   const availW = wrapper.clientWidth - pad;
   const availH = wrapper.clientHeight - pad;
   const scale = Math.min(availW / frameW, availH / frameH, 1);
@@ -81,12 +76,13 @@ function fitGalleryPreview(mount, frameWidthPx, frameHeightPx) {
 /**
  * @param {object} template
  * @param {HTMLElement | null} mountEl
- * @param {{ rowData?: Record<string, string> }} [options]
+ * @param {{ rowData?: Record<string, string>, bucket?: string }} [options]
  */
 export function renderGalleryPreview(template, mountEl, options = {}) {
   if (!mountEl) return;
 
-  const layoutInfo = getPreviewLayout(template);
+  const bucket = options.bucket ?? template.previewBucket ?? 'square';
+  const layoutInfo = getPreviewLayout(template, bucket);
   if (!layoutInfo) {
     mountEl.innerHTML = '<span class="gallery-preview-empty">No layout</span>';
     return;

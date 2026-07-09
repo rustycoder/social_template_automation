@@ -6,6 +6,7 @@ import {
   waitForImages,
   waitForFonts,
   captureRenderRootToCanvas,
+  normalizeImagesForCapture,
 } from './socialRenderHost.js';
 
 export { replacePlaceholders } from './socialRenderHost.js';
@@ -27,6 +28,7 @@ export async function renderPostToCanvas(templateHtml, layoutCss, rowData, width
   );
 
   try {
+    await normalizeImagesForCapture(renderRoot);
     await waitForImages(renderRoot);
     await waitForFonts();
     await new Promise((resolve) => {

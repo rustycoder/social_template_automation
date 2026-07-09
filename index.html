@@ -62,6 +62,13 @@
             <p class="panel-desc">Choose a layout, then fill in your content.</p>
           </div>
 
+          <div class="template-format-tabs editor-tabs" id="template-format-tabs">
+            <button type="button" class="source-tab-btn active" data-gallery-bucket="square">Square</button>
+            <button type="button" class="source-tab-btn" data-gallery-bucket="portrait">Portrait</button>
+            <button type="button" class="source-tab-btn" data-gallery-bucket="story">Story/Reel</button>
+            <button type="button" class="source-tab-btn" data-gallery-bucket="landscape">Landscape</button>
+          </div>
+
           <div class="template-grid" id="template-grid"></div>
         </div>
       </section>
@@ -166,16 +173,12 @@
         <div class="export-page">
           <div class="export-bar">
             <h2 class="export-bar-title">Export</h2>
-            <div class="preview-nav export-row-nav hidden" id="export-row-nav">
-              <button type="button" class="preview-nav-btn" id="export-row-prev" aria-label="Previous row" disabled>‹</button>
-              <span id="export-row-indicator">1 / 1</span>
-              <button type="button" class="preview-nav-btn" id="export-row-next" aria-label="Next row">›</button>
-            </div>
+            <span class="export-format-tag" id="export-format-tag"></span>
           </div>
 
           <div class="export-ratio-grid" id="export-ratio-grid"></div>
 
-          <section class="export-customize-section">
+          <section class="export-customize-section hidden" id="export-customize-section">
             <div class="animation-panel hidden" id="animation-panel">
               <label class="animation-toggle">
                 <input type="checkbox" id="animate-toggle" />
@@ -195,7 +198,7 @@
               <button type="button" class="source-tab-btn" data-export-media="video">Video</button>
             </div>
 
-            <details class="customize-panel" id="customize-panel">
+            <details class="customize-panel hidden" id="customize-panel">
               <summary>Edit template (HTML / CSS)</summary>
               <div class="template-actions">
                 <button type="button" class="btn btn-ghost" id="btn-save-template" title="Save template">Save template</button>
