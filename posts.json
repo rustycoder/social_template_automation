@@ -1,0 +1,73 @@
+[
+  {
+    "template": "a-wire",
+    "output": "post_01_breaking.png",
+    "tag": "BREAKING",
+    "dateline": "WASHINGTON, D.C.",
+    "photo_url": "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=1080&q=80",
+    "headline": "Senate Passes Infrastructure Bill in Late-Night Vote",
+    "subtext": "The 68\u201332 vote clears the way for $1.2 trillion in nationwide spending.",
+    "source": "REUTERS WIRE",
+    "date": "07 JUL 2026",
+    "time": "23:14 GMT"
+  },
+  {
+    "template": "b-editorial",
+    "output": "post_02_feature.png",
+    "tag": "LONG READ",
+    "photo_url": "https://images.unsplash.com/photo-1495020689067-958852a7765e?auto=format&fit=crop&w=1080&q=80",
+    "headline": "The Quiet Return of Small-Town Newsrooms",
+    "subtext": "As national outlets retreat from local coverage, a new generation of reporters is betting on hyper-local trust.",
+    "author": "Maria Ontiveros",
+    "read_time": "6 min read"
+  },
+  {
+    "template": "c-data",
+    "output": "post_03_data.png",
+    "tag": "BY THE NUMBERS",
+    "stat": "42%",
+    "subtext": "of Americans now get breaking news alerts directly from social apps rather than news websites, up from 19% in 2020.",
+    "axis_1": "2020",
+    "axis_2": "2022",
+    "axis_3": "2024",
+    "axis_4": "2026",
+    "source": "Pew Research, 2026"
+  },
+  {
+    "template": "c-viral",
+    "output": "post_04_viral.png",
+    "photo_url": "https://images.unsplash.com/photo-1504711434969-e33886168d6c?auto=format&fit=crop&w=1080&q=80",
+    "badge": "SHOCKED",
+    "headline": "Entire Country [Goes Dark] After [[Power Grid]] Fails Without Warning",
+    "description": "Millions left without electricity as engineers scramble to restore the national grid amid record-breaking summer heatwave.",
+    "source": "@chazupaa"
+  },
+  {
+    "template": "d-highlight",
+    "output": "post_05_highlight.png",
+    "photo_url": "file:///D:/template/Gemini_Generated_Image_kqtv8nkqtv8nkqtv.png",
+    "tag": "GEOPOLITICS",
+    "headline": "[India] Signs Historic [[$80 Billion]] Defence Pact With France",
+    "subtext": "The landmark agreement covers fighter jets, submarines, and joint satellite systems over a 15-year timeline.",
+    "source": "India.Wire"
+  },
+  {
+    "template": "e-banner",
+    "output": "post_06_banner.png",
+    "photo_url": "https://images.unsplash.com/photo-1606761568499-6d2451b23c66?auto=format&fit=crop&w=1080&q=80",
+    "banner_text": "UPSC CURRENT AFFAIRS — JULY 2026",
+    "headline": "[Chandrayaan-5] successfully lands near the lunar south pole, making India the [first nation] to achieve a soft landing in the permanently shadowed region",
+    "source": "Source: ISRO Press Release, July 2026"
+  },
+  {
+    "template": "f-stamp",
+    "output": "post_07_stamp.png",
+    "photo_url": "https://images.unsplash.com/photo-1569025690938-a00729c9e1f9?auto=format&fit=crop&w=1080&q=80",
+    "dateline": "08 JUL 2026",
+    "stamp_text": "VERIFIED",
+    "headline_big": "EARTHQUAKE",
+    "headline_accent": "ROCKS CAPITAL",
+    "description": "A [magnitude 6.4 earthquake] struck the capital region at dawn, damaging hundreds of structures and triggering nationwide emergency protocols.",
+    "source": "FollowNepal Times"
+  }
+]

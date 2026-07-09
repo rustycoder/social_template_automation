@@ -1,5 +1,6 @@
 /**
- * Off-screen social post image rendering via html2canvas.
+ * Off-screen social post image rendering via html2canvas (legacy)
+ * and Puppeteer server-side rendering (preferred).
  */
 import {
   setupRenderHost,
@@ -7,6 +8,7 @@ import {
   waitForFonts,
   captureRenderRootToCanvas,
 } from './socialRenderHost.js';
+export { renderPostToPng } from './puppeteerExporter.js';
 
 export { replacePlaceholders } from './socialRenderHost.js';
 

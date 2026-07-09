@@ -24,10 +24,16 @@ import { breakingNewsCardTemplate } from '../templates/social/breakingNewsCard.j
 import { wireBreakingCardTemplate } from '../templates/social/wireBreakingCard.js';
 import { editorialFeatureCardTemplate } from '../templates/social/editorialFeatureCard.js';
 import { dataAnalysisCardTemplate } from '../templates/social/dataAnalysisCard.js';
+import {
+  viralShockCardTemplate,
+  highlightWireCardTemplate,
+  bannerBoldCardTemplate,
+  stampBreakingCardTemplate,
+} from '../templates/social/htmlTemplateLoader.js';
 
 const STORAGE_KEY = 'social-media-template-automation-templates';
 const TEMPLATE_VERSION_KEY = 'social-media-template-automation-version';
-const TEMPLATE_VERSION = 13;
+const TEMPLATE_VERSION = 15;
 
 const DEFAULT_TEMPLATE_ID = 'gradient-basic';
 
@@ -45,6 +51,10 @@ const DEFAULT_TEMPLATES = {
   'wire-breaking-card': wireBreakingCardTemplate,
   'editorial-feature-card': editorialFeatureCardTemplate,
   'data-analysis-card': dataAnalysisCardTemplate,
+  'viral-shock-card': viralShockCardTemplate,
+  'highlight-wire-card': highlightWireCardTemplate,
+  'banner-bold-card': bannerBoldCardTemplate,
+  'stamp-breaking-card': stampBreakingCardTemplate,
 };
 
 function cloneTemplate(template) {

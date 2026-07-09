@@ -2,7 +2,7 @@
  * Social post static image and bulk video export.
  */
 import JSZip from 'jszip';
-import { renderPostToCanvas, canvasToBlob } from './imageRenderer.js';
+import { renderPostToPng } from './imageRenderer.js';
 import { renderPostToVideo } from './videoRenderer.js';
 
 /** Rough client-side render multiplier vs animation duration (html2canvas per-frame). */
@@ -70,8 +70,7 @@ export async function exportSinglePost(template, rowData, preset) {
   const templateHtml = template.content?.html ?? '';
   const layoutCss = layout.css ?? '';
 
-  const canvas = await renderPostToCanvas(templateHtml, layoutCss, rowData, width, height);
-  const blob = await canvasToBlob(canvas);
+  const blob = await renderPostToPng(templateHtml, layoutCss, rowData, width, height);
   const filename = `post_${preset.id}.png`;
   downloadBlob(blob, filename);
   return { filename, blob, preset, width, height };
@@ -102,8 +101,7 @@ export async function exportBulkPosts(template, rows, selectedPresets, onProgres
       const templateHtml = template.content?.html ?? '';
       const layoutCss = layout.css ?? '';
 
-      const canvas = await renderPostToCanvas(templateHtml, layoutCss, rowData, width, height);
-      const blob = await canvasToBlob(canvas);
+      const blob = await renderPostToPng(templateHtml, layoutCss, rowData, width, height);
       const filename = `${rowBase}_${preset.id}.png`;
       zip.file(filename, blob);
     }
@@ -223,8 +221,7 @@ export async function exportSinglePostPresets(template, rowData, selectedPresets
     const templateHtml = template.content?.html ?? '';
     const layoutCss = layout.css ?? '';
 
-    const canvas = await renderPostToCanvas(templateHtml, layoutCss, rowData, width, height);
-    const blob = await canvasToBlob(canvas);
+    const blob = await renderPostToPng(templateHtml, layoutCss, rowData, width, height);
     zip.file(`post_${preset.id}.png`, blob);
   }
 
