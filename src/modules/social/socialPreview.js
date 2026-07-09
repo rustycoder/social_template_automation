@@ -23,8 +23,8 @@ const SOCIAL_PREVIEW_SHADOW_CSS = `
 .social-frame {
   flex-shrink: 0;
   margin: 0 !important;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
-  border-radius: 2px;
+  box-shadow: 0 8px 24px rgba(9, 9, 11, 0.12);
+  border-radius: 8px;
   transform-origin: center center;
   transition: transform 0.2s ease;
   will-change: transform;

@@ -197,6 +197,9 @@ class App {
     this.templateGrid.dataset.galleryBucket = this.galleryBucket;
     this._syncGalleryFormatTabs();
 
+    const ratioLabels = { square: '1:1', portrait: '4:5', story: '9:16', landscape: '1.91:1' };
+    const aspectLabel = ratioLabels[this.galleryBucket] ?? '';
+
     for (const key of keys) {
       const template = this.templateStore.getTemplate(key);
       const hasLayout = template.layouts?.[this.galleryBucket] != null;
@@ -209,6 +212,7 @@ class App {
 
       card.innerHTML = `
         <div class="template-preview-container">
+          <span class="template-aspect-badge">${aspectLabel}</span>
           <div class="template-preview-mount" data-template-id="${key}"></div>
         </div>
         <div class="template-card-body">
