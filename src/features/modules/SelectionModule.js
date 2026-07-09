@@ -103,6 +103,14 @@ export class SelectionModule {
   /**
    * @description Emits selection change with current count.
    * @returns {void}
+   */
+  notify() {
+    this._notify();
+  }
+
+  /**
+   * @description Emits selection change with current count.
+   * @returns {void}
    * @private
    */
   _notify() {

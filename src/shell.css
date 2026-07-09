@@ -81,7 +81,10 @@
   overflow-y: auto;
 }
 
-#app[data-active-step="2"] #main-content {
+/* Step 2 split layout: height subtracts fixed header (72px) + footer (64px) so the preview
+   column never pushes content below the viewport fold. */
+#app[data-active-step="2"] #main-content,
+#main-content[data-layout-mode="split"] {
   overflow: hidden;
   padding: 0;
   max-width: none;
@@ -135,6 +138,32 @@
 .footer-panel--nav {
   justify-content: space-between;
   gap: 16px;
+}
+
+/* Three-slot footer layout — leftActions / centerActions / rightActions */
+.footer-panel--nav:has(.footer-slot) {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 16px;
+}
+
+.footer-slot {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.footer-slot--left {
+  justify-content: flex-start;
+}
+
+.footer-slot--center {
+  justify-content: center;
+}
+
+.footer-slot--right {
+  justify-content: flex-end;
 }
 
 /* ---------- Step track ---------- */
@@ -441,19 +470,52 @@
   margin-top: 24px;
 }
 
+/* ---------- Unified post card (Template + Export pages) ---------- */
+.post-card,
 .template-card {
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-elevated);
-  transition: transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
+  transition: transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base), opacity var(--transition-base);
 }
 
+.post-card:hover,
 .template-card:hover {
   transform: scale(1.02);
   box-shadow: var(--shadow-card-hover);
 }
 
+.post-card::after,
 .template-card::after {
   border-radius: var(--radius-card);
+}
+
+.post-card--has-checkbox {
+  position: relative;
+}
+
+.post-card--has-checkbox:hover {
+  transform: none;
+}
+
+.post-card--unchecked {
+  opacity: 0.65;
+}
+
+.post-card--unchecked .ratio-tile-box,
+.post-card--unchecked .post-card__preview-box {
+  filter: grayscale(0.1);
+}
+
+.post-card--unavailable,
+.template-card--unavailable {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.post-card--selected,
+.template-card.selected {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .template-page__empty {
@@ -555,11 +617,13 @@
   gap: 24px;
 }
 
-.export-post-tile {
+.export-post-tile,
+.post-card--has-checkbox {
   position: relative;
 }
 
-.export-post-tile .ratio-tile-box {
+.export-post-tile .ratio-tile-box,
+.post-card--has-checkbox .post-card__preview-box {
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-elevated);
 }

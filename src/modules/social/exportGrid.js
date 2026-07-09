@@ -1,19 +1,20 @@
 /**
- * Export Grid — batch preview tiles with overlay selection.
+ * @file modules/social/exportGrid.js
+ * @description Export grid renderer — builds post tiles using PostCard primitives and delegates
+ *              selection state to SelectionModule.
+ * @dependencies features/components/PostCard.js, features/modules/SelectionModule.js
+ * @state Stateless renderer; SelectionModule owns checkedRowIndices.
  */
+
+import { createExportCard } from '../../features/components/PostCard.js';
 import { FORMAT_BUCKETS, getPlatformLabelsForBucket } from './socialFormats.js';
 import { getDefaultDimensionsForBucket } from './socialPreview.js';
 
-const BUCKET_RATIO_LABELS = {
-  square: '1:1',
-  portrait: '4:5',
-  story: '9:16',
-  landscape: '1.91:1',
-};
-
 /**
- * @param {Record<string, string>} rowData
- * @param {number} index
+ * @description Derives a display label for an export tile from row data.
+ * @param {Record<string, string>} rowData Spreadsheet / form row values.
+ * @param {number} index Zero-based row index.
+ * @returns {string} Truncated label for the tile footer.
  */
 function getRowLabel(rowData, index) {
   const preferred = rowData.CODE || rowData.HEADLINE || rowData.headline || rowData.NAME || rowData.name;
@@ -26,28 +27,34 @@ function getRowLabel(rowData, index) {
 
 export class ExportGrid {
   /**
-   * @param {import('../dataSource.js').DataSource} dataSource
-   * @param {import('./socialPreview.js').SocialPreview} preview
+   * @description Creates the export grid renderer.
+   * @param {import('../dataSource.js').DataSource} dataSource Shared row store.
+   * @param {import('./socialPreview.js').SocialPreview} preview Live preview renderer.
+   * @param {import('../../features/modules/SelectionModule.js').SelectionModule} selection Selection state module.
    * @param {object} callbacks
+   * @param {() => object} callbacks.getTemplate Active template resolver.
+   * @param {(bucket: string) => string} callbacks.getBucketCss CSS per bucket.
+   * @param {() => string} callbacks.getMediaType Media type ('image').
+   * @param {() => string} callbacks.getCurrentBucket Active format bucket.
    */
-  constructor(dataSource, preview, callbacks) {
+  constructor(dataSource, preview, selection, callbacks) {
     this.dataSource = dataSource;
     this.preview = preview;
+    this.selection = selection;
     this.getTemplate = callbacks.getTemplate;
     this.getBucketCss = callbacks.getBucketCss;
     this.getMediaType = callbacks.getMediaType;
     this.getCurrentBucket = callbacks.getCurrentBucket;
-    this.onSelectionChange = callbacks.onSelectionChange ?? (() => {});
 
-    this.checkedRowIndices = new Set();
     this.gridEl = document.getElementById('export-ratio-grid');
   }
 
   /**
-   * @param {object} template
-   * @param {string} bucket
-   * @param {string} mediaType
+   * @description Checks whether a bucket layout is available for export.
+   * @param {object} template Template definition object.
+   * @param {string} bucket Format bucket id.
    * @returns {boolean}
+   * @private
    */
   _isBucketAvailable(template, bucket) {
     const layout = template.layouts[bucket];
@@ -55,24 +62,13 @@ export class ExportGrid {
     return getPlatformLabelsForBucket(bucket, 'image').length > 0;
   }
 
-  resetRowSelection() {
-    this.checkedRowIndices.clear();
-  }
-
-  _syncCheckedRows(rowCount) {
-    for (const index of [...this.checkedRowIndices]) {
-      if (index >= rowCount) {
-        this.checkedRowIndices.delete(index);
-      }
-    }
-
-    for (let i = 0; i < rowCount; i++) {
-      if (!this.checkedRowIndices.has(i)) {
-        this.checkedRowIndices.add(i);
-      }
-    }
-  }
-
+  /**
+   * @description Resolves pixel dimensions for a bucket layout.
+   * @param {object} template Template definition object.
+   * @param {string} bucket Format bucket id.
+   * @returns {{ width: number, height: number }}
+   * @private
+   */
   _getLayoutDimensions(template, bucket) {
     const layout = template.layouts[bucket];
     if (layout?.width && layout?.height) {
@@ -81,43 +77,22 @@ export class ExportGrid {
     return getDefaultDimensionsForBucket(bucket);
   }
 
-  _buildPostSelect(rowData, rowIndex) {
-    const isChecked = this.checkedRowIndices.has(rowIndex);
-    const input = document.createElement('input');
-    input.type = 'checkbox';
-    input.className = 'export-post-checkbox';
-    input.checked = isChecked;
-    input.setAttribute('aria-label', `Select ${getRowLabel(rowData, rowIndex)}`);
-    input.addEventListener('click', (e) => e.stopPropagation());
-    input.addEventListener('change', () => {
-      if (input.checked) {
-        this.checkedRowIndices.add(rowIndex);
-      } else {
-        this.checkedRowIndices.delete(rowIndex);
-      }
-      this.onSelectionChange();
-    });
-
-    const label = document.createElement('p');
-    label.className = 'export-post-label';
-    label.textContent = getRowLabel(rowData, rowIndex);
-
-    return { input, label };
-  }
-
-  _buildPostTile(bucket, template, rowData, rowIndex, mediaType) {
+  /**
+   * @description Builds the preview box inner content for one export tile.
+   * @param {object} template Template definition.
+   * @param {string} bucket Format bucket id.
+   * @param {Record<string, string>} rowData Row values for placeholder substitution.
+   * @returns {HTMLElement} Preview box element.
+   * @private
+   */
+  _buildPreviewBox(template, bucket, rowData) {
     const bucketMeta = FORMAT_BUCKETS[bucket];
     const label = bucketMeta?.label ?? bucket;
     const layout = template.layouts[bucket];
     const { width: realW, height: realH } = this._getLayoutDimensions(template, bucket);
 
-    const tile = document.createElement('div');
-    tile.className = 'export-post-tile';
-    tile.dataset.bucket = bucket;
-    tile.dataset.rowIndex = String(rowIndex);
-
     const box = document.createElement('div');
-    box.className = 'ratio-tile-box active export-post-preview-box';
+    box.className = 'ratio-tile-box active export-post-preview-box post-card__preview-box';
 
     if (!layout) {
       const empty = document.createElement('div');
@@ -135,33 +110,29 @@ export class ExportGrid {
       });
     }
 
-    tile.appendChild(box);
-
-    const { input, label: nameLabel } = this._buildPostSelect(rowData, rowIndex);
-    tile.appendChild(input);
-    tile.appendChild(nameLabel);
-
-    return tile;
+    return box;
   }
 
+  /**
+   * @description Re-renders all export tiles for the current bucket and row set.
+   * @returns {void}
+   */
   render() {
     if (!this.gridEl) return;
 
     const rows = this.dataSource.getRows();
     const bucket = this.getCurrentBucket();
     const template = this.getTemplate();
-    const mediaType = this.getMediaType();
 
     this.gridEl.dataset.exportBucket = bucket;
 
     if (rows.length === 0) {
       this.gridEl.innerHTML = '';
-      this.checkedRowIndices.clear();
-      this.onSelectionChange();
+      this.selection.reset();
       return;
     }
 
-    this._syncCheckedRows(rows.length);
+    this.selection.syncWithRowCount(rows.length);
     this.gridEl.innerHTML = '';
 
     if (!this._isBucketAvailable(template, bucket)) {
@@ -170,17 +141,35 @@ export class ExportGrid {
       const bucketLabel = FORMAT_BUCKETS[bucket]?.label ?? bucket;
       empty.textContent = `This template has no ${bucketLabel.toLowerCase()} layout for export.`;
       this.gridEl.appendChild(empty);
-      this.onSelectionChange();
+      this.selection.notify();
       return;
     }
 
     for (let i = 0; i < rows.length; i++) {
-      this.gridEl.appendChild(this._buildPostTile(bucket, template, rows[i], i, mediaType));
+      const rowLabel = getRowLabel(rows[i], i);
+      const previewBox = this._buildPreviewBox(template, bucket, rows[i]);
+
+      const tile = createExportCard({
+        rowIndex: i,
+        rowLabel,
+        bucket,
+        checked: this.selection.isRowChecked(i),
+        previewBox,
+        onCheckChange: (rowIndex, checked) => {
+          this.selection.setRowChecked(rowIndex, checked);
+        },
+      });
+
+      this.gridEl.appendChild(tile);
     }
 
-    this.onSelectionChange();
+    this.selection.notify();
   }
 
+  /**
+   * @description Returns bucket ids available for export.
+   * @returns {string[]}
+   */
   getSelectedBucketIds() {
     const template = this.getTemplate();
     const bucket = this.getCurrentBucket();
@@ -190,23 +179,28 @@ export class ExportGrid {
     return [];
   }
 
+  /**
+   * @description Whether export can proceed (selection + bucket availability).
+   * @returns {boolean}
+   */
   hasSelection() {
-    return this.checkedRowIndices.size > 0 && this.getSelectedBucketIds().length > 0;
-  }
-
-  getSelectedCount() {
-    if (this.getSelectedBucketIds().length === 0) return 0;
-    return this.checkedRowIndices.size;
+    return this.selection.hasSelection() && this.getSelectedBucketIds().length > 0;
   }
 
   /**
+   * @description Count of selected rows when bucket is available.
+   * @returns {number}
+   */
+  getSelectedCount() {
+    if (this.getSelectedBucketIds().length === 0) return 0;
+    return this.selection.getSelectedCount();
+  }
+
+  /**
+   * @description Returns selected row payloads for the exporter.
    * @returns {{ rowData: Record<string, string>, rowIndex: number }[]}
    */
   getSelectedRows() {
-    const rows = this.dataSource.getRows();
-    return [...this.checkedRowIndices]
-      .sort((a, b) => a - b)
-      .filter((index) => index < rows.length)
-      .map((rowIndex) => ({ rowData: rows[rowIndex], rowIndex }));
+    return this.selection.getSelectedRows(this.dataSource.getRows());
   }
 }

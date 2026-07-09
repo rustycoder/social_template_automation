@@ -10,7 +10,7 @@ export const BUCKET_RATIO_LABELS = {
   square: '1:1',
   portrait: '4:5',
   story: '9:16',
-  landscape: '1.91:1',
+  landscape: '16:9',
 };
 
 /** @type {string[]} Ordered bucket ids for gallery and export format tabs. */
