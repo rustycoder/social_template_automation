@@ -1,27 +1,18 @@
-import { Router } from 'express';
-import { authenticate } from '../middleware/auth.js';
-import {
-  createSubscription,
-  getActivePlans,
-  getActiveSubscription,
-  getBillingHistory,
-  syncExpiredSubscriptions,
-} from '../services/subscriptionService.js';
-import {
-  createSubscriptionCheckout,
-  verifySubscriptionCheckout,
-} from '../services/paymentService.js';
+import { Router } from "express";
+import { authenticate } from "../middleware/auth.js";
+import { createSubscriptionCheckout, verifySubscriptionCheckout } from "../services/paymentService.js";
+import { getActivePlans, getActiveSubscription, getBillingHistory, syncExpiredSubscriptions } from "../services/subscriptionService.js";
 
 const router = Router();
 
 function resolveHistoryStatus(item) {
-  if (item.status === 'active' && new Date(item.expiresAt) <= new Date()) {
-    return 'expired';
+  if (item.status === "active" && new Date(item.expiresAt) <= new Date()) {
+    return "expired";
   }
   return item.status;
 }
 
-router.get('/plans', async (_req, res) => {
+router.get("/plans", async (_req, res) => {
   try {
     const plans = await getActivePlans();
     res.json({
@@ -32,12 +23,12 @@ router.get('/plans', async (_req, res) => {
       })),
     });
   } catch (error) {
-    console.error('Plans error:', error);
-    res.status(500).json({ error: 'Failed to load plans' });
+    console.error("Plans error:", error);
+    res.status(500).json({ error: "Failed to load plans" });
   }
 });
 
-router.get('/status', authenticate, async (req, res) => {
+router.get("/status", authenticate, async (req, res) => {
   try {
     await syncExpiredSubscriptions();
     const subscription = await getActiveSubscription(req.user.id);
@@ -56,18 +47,15 @@ router.get('/status', authenticate, async (req, res) => {
         : null,
     });
   } catch (error) {
-    console.error('Status error:', error);
-    res.status(500).json({ error: 'Failed to load subscription status' });
+    console.error("Status error:", error);
+    res.status(500).json({ error: "Failed to load subscription status" });
   }
 });
 
-router.get('/billing', authenticate, async (req, res) => {
+router.get("/billing", authenticate, async (req, res) => {
   try {
     await syncExpiredSubscriptions();
-    const [subscription, history] = await Promise.all([
-      getActiveSubscription(req.user.id),
-      getBillingHistory(req.user.id),
-    ]);
+    const [subscription, history] = await Promise.all([getActiveSubscription(req.user.id), getBillingHistory(req.user.id)]);
 
     res.json({
       currentSubscription: subscription
@@ -108,16 +96,16 @@ router.get('/billing', authenticate, async (req, res) => {
       })),
     });
   } catch (error) {
-    console.error('Billing error:', error);
-    res.status(500).json({ error: 'Failed to load billing history' });
+    console.error("Billing error:", error);
+    res.status(500).json({ error: "Failed to load billing history" });
   }
 });
 
-router.post('/checkout', authenticate, async (req, res) => {
+router.post("/checkout", authenticate, async (req, res) => {
   try {
     const { planId } = req.body;
     if (!planId) {
-      return res.status(400).json({ error: 'planId is required' });
+      return res.status(400).json({ error: "planId is required" });
     }
 
     const checkout = await createSubscriptionCheckout(req.user.id, planId);
@@ -126,12 +114,12 @@ router.post('/checkout', authenticate, async (req, res) => {
     if (error.status) {
       return res.status(error.status).json({ error: error.message });
     }
-    console.error('Checkout error:', error);
-    res.status(500).json({ error: 'Failed to create checkout session' });
+    console.error("Checkout error:", error);
+    res.status(500).json({ error: "Failed to create checkout session" });
   }
 });
 
-router.post('/checkout/verify', authenticate, async (req, res) => {
+router.post("/checkout/verify", authenticate, async (req, res) => {
   try {
     const { orderId, resultIndicator } = req.body;
     const result = await verifySubscriptionCheckout(req.user.id, orderId, resultIndicator);
@@ -140,32 +128,32 @@ router.post('/checkout/verify', authenticate, async (req, res) => {
     if (error.status) {
       return res.status(error.status).json({ error: error.message });
     }
-    console.error('Checkout verify error:', error);
-    res.status(500).json({ error: 'Failed to verify payment' });
+    console.error("Checkout verify error:", error);
+    res.status(500).json({ error: "Failed to verify payment" });
   }
 });
 
-router.post('/subscribe', authenticate, async (req, res) => {
-  try {
-    const { planId } = req.body;
-    if (!planId) {
-      return res.status(400).json({ error: 'planId is required' });
-    }
+// router.post('/subscribe', authenticate, async (req, res) => {
+//   try {
+//     const { planId } = req.body;
+//     if (!planId) {
+//       return res.status(400).json({ error: 'planId is required' });
+//     }
 
-    const subscription = await createSubscription(req.user.id, planId);
+//     const subscription = await createSubscription(req.user.id, planId);
 
-    res.status(201).json({
-      message: 'Subscription activated successfully',
-      hasActiveSubscription: true,
-      subscription,
-    });
-  } catch (error) {
-    if (error.status) {
-      return res.status(error.status).json({ error: error.message });
-    }
-    console.error('Subscribe error:', error);
-    res.status(500).json({ error: 'Failed to create subscription' });
-  }
-});
+//     res.status(201).json({
+//       message: 'Subscription activated successfully',
+//       hasActiveSubscription: true,
+//       subscription,
+//     });
+//   } catch (error) {
+//     if (error.status) {
+//       return res.status(error.status).json({ error: error.message });
+//     }
+//     console.error('Subscribe error:', error);
+//     res.status(500).json({ error: 'Failed to create subscription' });
+//   }
+// });
 
 export default router;
