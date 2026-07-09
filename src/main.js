@@ -7,10 +7,9 @@ import { TemplateEditor } from './modules/templateEditor.js';
 import { DataSource } from './modules/dataSource.js';
 import { UploadStep } from './modules/uploadStep.js';
 import { PostPreview, getDefaultDimensionsForBucket } from './modules/preview.js';
-import { getTemplateFields } from './modules/templateFields.js';
 import { renderGalleryPreview } from './modules/templateGalleryPreview.js';
 import { getSampleRowForTemplate } from './modules/templateSampleData.js';
-import { FORMAT_BUCKETS, PLATFORM_PRESETS, getPresetsSupportingMedia } from './modules/social/socialFormats.js';
+import { FORMAT_BUCKETS, PLATFORM_PRESETS, getPresetsSupportingMedia, getPlatformLabelsForBucket } from './modules/social/socialFormats.js';
 import {
   exportBulkPosts,
   exportSinglePostPresets,
@@ -35,6 +34,7 @@ class App {
     this.dataSource = new DataSource();
     this.currentTemplateKey = this.templateStore.getDefaultTemplateId();
     this.currentBucket = 'square';
+    this.galleryBucket = 'square';
     this.exportMediaType = 'image';
     this._progressRaf = null;
 
@@ -159,6 +159,23 @@ class App {
 
   _bindTemplateStep() {
     this.templateGrid = document.getElementById('template-grid');
+    this.galleryFormatTabBtns = document.querySelectorAll('#template-format-tabs [data-gallery-bucket]');
+
+    this.galleryFormatTabBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const bucket = btn.dataset.galleryBucket;
+        if (!bucket || bucket === this.galleryBucket) return;
+        this.galleryBucket = bucket;
+        this._syncGalleryFormatTabs();
+        this._renderTemplateGallery();
+      });
+    });
+  }
+
+  _syncGalleryFormatTabs() {
+    this.galleryFormatTabBtns?.forEach((btn) => {
+      btn.classList.toggle('active', btn.dataset.galleryBucket === this.galleryBucket);
+    });
   }
 
   _goToDataStep() {
@@ -177,18 +194,18 @@ class App {
 
     const keys = this.templateStore.getVisibleTemplateKeys();
     this.templateGrid.innerHTML = '';
+    this.templateGrid.dataset.galleryBucket = this.galleryBucket;
+    this._syncGalleryFormatTabs();
 
     for (const key of keys) {
       const template = this.templateStore.getTemplate(key);
+      const hasLayout = template.layouts?.[this.galleryBucket] != null;
       const card = document.createElement('div');
-      card.className = 'template-card';
+      card.className = `template-card${hasLayout ? '' : ' template-card--unavailable'}`;
       card.dataset.template = key;
-      if (key === this.currentTemplateKey) {
+      if (key === this.currentTemplateKey && hasLayout) {
         card.classList.add('selected');
       }
-
-      const fields = getTemplateFields(template);
-      const fieldSummary = fields.map((f) => f.key).join(', ');
 
       card.innerHTML = `
         <div class="template-preview-container">
@@ -196,18 +213,25 @@ class App {
         </div>
         <div class="template-card-body">
           <h4>${template.name}</h4>
-          <p class="template-card-fields">${fieldSummary}</p>
         </div>
       `;
 
-      card.addEventListener('click', () => {
-        this._selectTemplate(key);
-        this._goToDataStep();
-      });
+      if (hasLayout) {
+        card.addEventListener('click', () => {
+          this._selectTemplate(key);
+          this._goToDataStep();
+        });
+      }
+
       this.templateGrid.appendChild(card);
 
       const previewMount = card.querySelector('.template-preview-mount');
-      renderGalleryPreview(template, previewMount);
+      if (hasLayout) {
+        renderGalleryPreview(template, previewMount, { bucket: this.galleryBucket });
+      } else {
+        previewMount.innerHTML =
+          '<span class="gallery-preview-unavailable">Not available in this format</span>';
+      }
     }
   }
 
@@ -217,7 +241,7 @@ class App {
   _selectTemplate(key) {
     this.currentTemplateKey = key;
     this.templateEditor.currentTemplateKey = key;
-    this._selectInitialBucket(key);
+    this.currentBucket = this.galleryBucket;
     this.templateEditor.selectTemplate(key);
 
     this.templateGrid?.querySelectorAll('.template-card').forEach((card) => {
@@ -249,6 +273,7 @@ class App {
     this.progressFill = document.getElementById('progress-fill');
     this.progressText = document.getElementById('progress-text');
     this.exportBtn = document.getElementById('btn-export');
+    this.exportCustomizeSection = document.getElementById('export-customize-section');
     this.exportMediaToggle = document.getElementById('export-media-toggle');
     this.exportMediaBtns = document.querySelectorAll('#export-media-toggle [data-export-media]');
 
@@ -295,9 +320,10 @@ class App {
       }, 50);
     } else if (step === 3) {
       this.templateEditor.setHeaders(this.dataSource.getHeaders());
+      this.exportGrid.resetRowSelection();
       this._syncBucketTabs();
-      this._syncAnimationPanel();
       this._syncExportMediaType();
+      this._syncExportFormatTag();
       setTimeout(() => {
         this.exportGrid.render();
       }, 50);
@@ -325,6 +351,7 @@ class App {
 
   _enterExportStep() {
     this.templateEditor.setHeaders(this.dataSource.getHeaders());
+    this.exportGrid.resetRowSelection();
     this._syncBucketTabs();
     this._syncAnimationPanel();
     this._syncExportMediaType();
@@ -352,9 +379,31 @@ class App {
 
   _updateExportCount() {
     if (!this.exportBtn) return;
-    const count = this.exportGrid.getSelectedCount();
-    const label = count === 1 ? 'Download 1 format' : `Download ${count} formats`;
-    this.exportBtn.textContent = label;
+
+    const selectedCount = this.exportGrid.getSelectedCount();
+    const buckets = this._getSelectedBuckets();
+
+    if (buckets.length === 0 || selectedCount === 0) {
+      this.exportBtn.textContent = 'Export posts';
+      this.exportBtn.disabled = buckets.length === 0 || selectedCount === 0;
+      return;
+    }
+
+    this.exportBtn.textContent =
+      selectedCount === 1 ? 'Export 1 post' : `Export ${selectedCount} posts`;
+    this.exportBtn.disabled = false;
+
+    this._syncExportFormatTag();
+  }
+
+  _syncExportFormatTag() {
+    const tag = document.getElementById('export-format-tag');
+    if (!tag) return;
+
+    const bucketLabel = FORMAT_BUCKETS[this.currentBucket]?.label ?? this.currentBucket;
+    const ratioLabels = { square: '1:1', portrait: '4:5', story: '9:16', landscape: '1.91:1' };
+    const ratio = ratioLabels[this.currentBucket] ?? '';
+    tag.textContent = ratio ? `${bucketLabel} · ${ratio}` : bucketLabel;
   }
 
   _getCurrentLayoutDimensions() {
@@ -435,19 +484,7 @@ class App {
 
   _syncAnimationPanel() {
     if (!this.animationPanel) return;
-    const supportsVideo = this._bucketSupportsVideo(this.currentBucket);
-    this.animationPanel.classList.toggle('hidden', !supportsVideo);
-    if (!supportsVideo) return;
-
-    const template = this.templateStore.getTemplate(this.currentTemplateKey);
-    const layout = template.layouts[this.currentBucket];
-    const hasAnimation = !!layout?.animation;
-
-    if (this.animateToggle) this.animateToggle.checked = hasAnimation;
-    this.animationPresetGroup?.classList.toggle('hidden', !hasAnimation);
-    if (this.animationPresetSelect) {
-      this.animationPresetSelect.value = this._getDefaultAnimationPresetKey();
-    }
+    this.animationPanel.classList.add('hidden');
   }
 
   _saveAnimationToTemplate() {
@@ -493,14 +530,16 @@ class App {
     return template;
   }
 
-  _getAvailablePresets(template, mediaType = 'image') {
-    return PLATFORM_PRESETS.filter((preset) => {
-      const layout = template.layouts[preset.bucket];
-      if (!layout) return false;
-      if (!preset.media.includes(mediaType)) return false;
-      if (mediaType === 'video') return !!layout.animation;
-      return true;
-    });
+  _isBucketAvailable(template, bucket, mediaType = 'image') {
+    const layout = template.layouts[bucket];
+    if (!layout) return false;
+    if (getPlatformLabelsForBucket(bucket, mediaType).length === 0) return false;
+    if (mediaType === 'video') return !!layout.animation;
+    return true;
+  }
+
+  _getAvailableBuckets(template, mediaType = 'image') {
+    return BUCKET_IDS.filter((bucket) => this._isBucketAvailable(template, bucket, mediaType));
   }
 
   _syncExportMediaType() {
@@ -508,6 +547,7 @@ class App {
     const canVideo = this._canExportVideo(template);
 
     this.exportMediaToggle?.classList.toggle('hidden', !canVideo);
+    this.exportCustomizeSection?.classList.toggle('hidden', !canVideo);
     if (!canVideo && this.exportMediaType === 'video') {
       this.exportMediaType = 'image';
     }
@@ -520,16 +560,12 @@ class App {
     });
   }
 
-  _getSelectedPresets() {
+  _getSelectedBuckets() {
     const template = this.templateStore.getTemplate(this.currentTemplateKey);
-    const availableIds = new Set(
-      this._getAvailablePresets(template, this.exportMediaType).map((preset) => preset.id)
-    );
-
-    return this.exportGrid
-      .getSelectedPresetIds()
-      .map((id) => PLATFORM_PRESETS.find((preset) => preset.id === id))
-      .filter((preset) => preset && availableIds.has(preset.id));
+    if (this._isBucketAvailable(template, this.currentBucket, this.exportMediaType)) {
+      return [this.currentBucket];
+    }
+    return [];
   }
 
   _setExportProgress(current, total, message) {
@@ -552,24 +588,26 @@ class App {
 
     const selectedPresets = this._getSelectedPresets();
     if (selectedPresets.length === 0) {
+
       window.dispatchEvent(
-        new CustomEvent('toast', { detail: { message: 'Select at least one export format', type: 'error' } })
+        new CustomEvent('toast', { detail: { message: 'Selected format is not available for this template', type: 'error' } })
       );
       return;
     }
 
-    const rows = this.dataSource.getRows();
-    if (rows.length === 0) {
+    const selectedRows = this.exportGrid.getSelectedRows();
+    if (selectedRows.length === 0) {
       window.dispatchEvent(
-        new CustomEvent('toast', { detail: { message: 'No post data loaded', type: 'error' } })
+        new CustomEvent('toast', { detail: { message: 'Select at least one post to export', type: 'error' } })
       );
       return;
     }
 
     const template = this._getExportTemplate();
+    const getBucketCss = (bucket) => this._getBucketCss(bucket);
 
     if (this.exportMediaType === 'video' && this.dataSource.mode === 'bulk') {
-      const { videoCount, estimatedMinutes } = estimateBulkVideoJob(template, rows, selectedPresets);
+      const { videoCount, estimatedMinutes } = estimateBulkVideoJob(template, selectedRows, selectedBuckets);
       const confirmed = window.confirm(
         `This will render approximately ${videoCount} video(s), estimated ${estimatedMinutes} minute(s). Continue?`
       );
@@ -584,20 +622,22 @@ class App {
 
     try {
       if (this.exportMediaType === 'video' && this.dataSource.mode === 'single') {
-        await exportSingleVideo(template, rows[0], selectedPresets[0], (c, t, m) =>
-          this._setExportProgress(c, t, m)
+        const { rowData } = selectedRows[0];
+        await exportSingleVideo(template, rowData, selectedBuckets[0], (c, t, m) =>
+          this._setExportProgress(c, t, m), getBucketCss
         );
       } else if (this.exportMediaType === 'video') {
-        await exportBulkVideos(template, rows, selectedPresets, (c, t, m) =>
-          this._setExportProgress(c, t, m)
+        await exportBulkVideos(template, selectedRows, selectedBuckets, (c, t, m) =>
+          this._setExportProgress(c, t, m), getBucketCss
         );
       } else if (this.dataSource.mode === 'single') {
-        await exportSinglePostPresets(template, rows[0], selectedPresets, (c, t, m) =>
-          this._setExportProgress(c, t, m)
+        const { rowData } = selectedRows[0];
+        await exportSinglePostPresets(template, rowData, selectedBuckets, (c, t, m) =>
+          this._setExportProgress(c, t, m), getBucketCss
         );
       } else {
-        await exportBulkPosts(template, rows, selectedPresets, (c, t, m) =>
-          this._setExportProgress(c, t, m)
+        await exportBulkPosts(template, selectedRows, selectedBuckets, (c, t, m) =>
+          this._setExportProgress(c, t, m), getBucketCss
         );
       }
 
@@ -618,6 +658,7 @@ class App {
         this._progressRaf = null;
       }
       this.exportBtn.disabled = false;
+      this._updateExportCount();
       setTimeout(() => {
         document.body.classList.remove('social-exporting');
         this.progressSection?.classList.add('hidden');

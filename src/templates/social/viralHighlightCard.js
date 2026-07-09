@@ -26,8 +26,8 @@ const SHARED_BASE = `* {
 }
 
 .header-bar {
-  background: #ffff00;
-  color: #ff0000;
+  background: #f5a623;
+  color: #cc2233;
   font-weight: 800;
   text-transform: uppercase;
   text-align: center;
@@ -64,7 +64,7 @@ const SHARED_BASE = `* {
 
 .inset-left {
   border-style: solid;
-  border-color: #ffff00;
+  border-color: #f5a623;
 }
 
 .inset-right {
@@ -99,7 +99,7 @@ const SHARED_BASE = `* {
 }
 
 .footer-text .hl-yellow {
-  color: #ffff00;
+  color: #f5a623;
 }
 
 .bg-image[src=""],

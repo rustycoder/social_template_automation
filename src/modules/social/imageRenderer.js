@@ -7,6 +7,7 @@ import {
   waitForImages,
   waitForFonts,
   captureRenderRootToCanvas,
+  normalizeImagesForCapture,
 } from './socialRenderHost.js';
 export { renderPostToPng } from './puppeteerExporter.js';
 
@@ -20,16 +21,23 @@ export { replacePlaceholders } from './socialRenderHost.js';
  * @param {number} height
  */
 export async function renderPostToCanvas(templateHtml, layoutCss, rowData, width, height) {
-  const { renderRoot, cleanup } = setupRenderHost(templateHtml, layoutCss, rowData, width, height);
+  const { renderRoot, captureEl, cleanup } = setupRenderHost(
+    templateHtml,
+    layoutCss,
+    rowData,
+    width,
+    height
+  );
 
   try {
+    await normalizeImagesForCapture(renderRoot);
     await waitForImages(renderRoot);
     await waitForFonts();
     await new Promise((resolve) => {
       requestAnimationFrame(() => requestAnimationFrame(resolve));
     });
 
-    const canvas = await captureRenderRootToCanvas(renderRoot, width, height);
+    const canvas = await captureRenderRootToCanvas(captureEl, width, height);
     if (!canvas.width || !canvas.height) {
       throw new Error('Image render failed (empty canvas). Check template images and try again.');
     }

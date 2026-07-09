@@ -2,6 +2,7 @@
  * Social Preview — bucket-aware Shadow DOM live preview at platform pixel dimensions.
  */
 import { FORMAT_BUCKETS, PLATFORM_PRESETS } from './socialFormats.js';
+import { replacePlaceholders } from './socialRenderHost.js';
 
 const SOCIAL_PREVIEW_SHADOW_CSS = `
 :host {
@@ -295,10 +296,11 @@ export class SocialPreview {
     });
   }
 
+
   _buildPreviewContent(rowData, cssTemplate = this.templateEditor.getCSS()) {
     const htmlTemplate = this.templateEditor.getHTML();
-    const htmlContent = this._replacePlaceholders(htmlTemplate, rowData);
-    const cssContent = this._replacePlaceholders(cssTemplate, rowData);
+    const htmlContent = replacePlaceholders(htmlTemplate, rowData);
+    const cssContent = replacePlaceholders(cssTemplate, rowData);
     return { htmlContent, cssContent };
   }
 

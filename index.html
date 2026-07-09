@@ -4,11 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Create social media posts from templates — fill fields or upload Excel, preview, and export for Instagram, TikTok, Facebook, and LinkedIn." />
-  <meta name="theme-color" content="#0a0a0f" />
+  <meta name="theme-color" content="#1a1817" />
   <title>Social Media Template Automation</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/src/style.css" />
   <script>
     window.global = window;
@@ -24,14 +24,14 @@
             <path d="M8 10h16M8 16h12M8 22h14" stroke="#fff" stroke-width="2" stroke-linecap="round" />
             <defs>
               <linearGradient id="logo-grad" x1="0" y1="0" x2="32" y2="32">
-                <stop stop-color="#6366f1" />
-                <stop offset="1" stop-color="#a855f7" />
+                <stop stop-color="#2b6de5" />
+                <stop offset="1" stop-color="#4a85f0" />
               </linearGradient>
             </defs>
           </svg>
           <h1>Social Media Template Automation</h1>
         </div>
-        <p class="tagline">Template → Data → Export</p>
+        <p class="tagline">Layout → Content → Export</p>
       </div>
       <div class="header-right">
         <nav class="header-nav" aria-label="Workflow steps">
@@ -101,8 +101,15 @@
       <section class="step-panel active" id="step-1">
         <div class="panel-card">
           <div class="panel-header">
-            <h2>Choose a Template</h2>
-            <p class="panel-desc">Click a template to start adding your content.</p>
+            <h2>Pick a post style</h2>
+            <p class="panel-desc">Choose a layout, then fill in your content.</p>
+          </div>
+
+          <div class="template-format-tabs editor-tabs" id="template-format-tabs">
+            <button type="button" class="source-tab-btn active" data-gallery-bucket="square">Square</button>
+            <button type="button" class="source-tab-btn" data-gallery-bucket="portrait">Portrait</button>
+            <button type="button" class="source-tab-btn" data-gallery-bucket="story">Story/Reel</button>
+            <button type="button" class="source-tab-btn" data-gallery-bucket="landscape">Landscape</button>
           </div>
 
           <div class="template-grid" id="template-grid"></div>
@@ -115,13 +122,13 @@
           <div class="data-form-pane">
             <div class="panel-card">
               <div class="panel-header">
-                <h2>Enter Post Data</h2>
-                <p class="panel-desc" id="data-step-desc">Fill in the fields for your selected template or upload an Excel file.</p>
+                <h2>Add your content</h2>
+                <p class="panel-desc" id="data-step-desc">Type in your copy or upload a spreadsheet.</p>
               </div>
 
               <div class="editor-tabs" id="upload-tabs">
-                <button type="button" class="source-tab-btn active" data-source="single">Single Post</button>
-                <button type="button" class="source-tab-btn" data-source="bulk">Bulk (Excel)</button>
+                <button type="button" class="source-tab-btn active" data-source="single">Single post</button>
+                <button type="button" class="source-tab-btn" data-source="bulk">Multiple posts (Excel)</button>
               </div>
 
               <div class="upload-panel" id="single-panel">
@@ -130,9 +137,9 @@
 
               <div class="upload-panel hidden" id="bulk-panel">
                 <div class="bulk-sample-download">
-                  <p class="bulk-sample-hint">Download a template Excel file with the correct columns, fill in your rows, then upload below.</p>
+                  <p class="bulk-sample-hint">Download a spreadsheet with the right columns, fill in your rows, then upload below.</p>
                   <button type="button" class="btn btn-ghost bulk-sample-btn" id="btn-download-sample-excel">
-                    Download sample Excel
+                    Download sample spreadsheet
                   </button>
                 </div>
                 <div class="dropzone" id="dropzone">
@@ -175,7 +182,7 @@
                   Back
                 </button>
                 <button type="button" class="btn btn-primary" id="btn-to-preview" disabled>
-                  Continue to Export
+                  Review &amp; export
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                     <path d="M3 8H13M9 4L13 8L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                   </svg>
@@ -187,7 +194,7 @@
           <div class="preview-pane">
             <div class="panel-card preview-card">
               <div class="panel-header">
-                <h3>Live Preview</h3>
+                <h3>Preview</h3>
                 <div class="preview-nav hidden" id="data-preview-nav" aria-label="Row navigation">
                   <button type="button" class="preview-nav-btn" id="data-btn-prev-row" aria-label="Previous row" disabled>‹</button>
                   <span id="data-preview-row-indicator">1 / 1</span>
@@ -198,29 +205,23 @@
               <div class="preview-frame-wrapper" id="data-preview-frame-wrapper">
                 <div class="preview-mount" id="data-preview-mount"></div>
               </div>
-              <p class="preview-hint" id="data-preview-hint">Sample preview — fill fields to see your post</p>
+              <p class="preview-hint" id="data-preview-hint">Preview updates as you type</p>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- Step 3: Preview & Export -->
+      <!-- Step 3: Preview & Export — Monitor Wall -->
       <section class="step-panel" id="step-3">
         <div class="export-page">
-          <header class="export-page-header">
-            <h2>Export</h2>
-            <p class="panel-desc">Preview each format at true size. Uncheck any platform you don't want, then download.</p>
-          </header>
-
-          <div class="preview-nav export-row-nav hidden" id="export-row-nav">
-            <button type="button" class="preview-nav-btn" id="export-row-prev" aria-label="Previous row" disabled>‹</button>
-            <span id="export-row-indicator">Row 1 of 1</span>
-            <button type="button" class="preview-nav-btn" id="export-row-next" aria-label="Next row">›</button>
+          <div class="export-bar">
+            <h2 class="export-bar-title">Export</h2>
+            <span class="export-format-tag" id="export-format-tag"></span>
           </div>
 
           <div class="export-ratio-grid" id="export-ratio-grid"></div>
 
-          <section class="export-customize-section">
+          <section class="export-customize-section hidden" id="export-customize-section">
             <div class="animation-panel hidden" id="animation-panel">
               <label class="animation-toggle">
                 <input type="checkbox" id="animate-toggle" />
@@ -240,8 +241,8 @@
               <button type="button" class="source-tab-btn" data-export-media="video">Video</button>
             </div>
 
-            <details class="customize-panel" id="customize-panel">
-              <summary>Customize template (HTML / CSS)</summary>
+            <details class="customize-panel hidden" id="customize-panel">
+              <summary>Edit template (HTML / CSS)</summary>
               <div class="template-actions">
                 <button type="button" class="btn btn-ghost" id="btn-save-template" title="Save template">Save template</button>
               </div>
@@ -275,7 +276,7 @@
               Back
             </button>
             <button type="button" class="btn btn-primary btn-export" id="btn-export">
-              Download 0 formats
+              Export posts
             </button>
           </div>
         </div>

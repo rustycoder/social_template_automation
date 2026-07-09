@@ -18,7 +18,7 @@ const SQUARE_CSS = `* {
   width: 1080px;
   height: 1080px;
   overflow: hidden;
-  background: #0f172a;
+  background: #1a1817;
   font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
   color: #ffffff;
   -webkit-font-smoothing: antialiased;
@@ -29,7 +29,7 @@ const SQUARE_CSS = `* {
   inset: 0;
   background-size: cover;
   background-position: center;
-  background-color: #1e293b;
+  background-color: #2b2928;
 }
 
 .gradient-overlay {
@@ -37,9 +37,9 @@ const SQUARE_CSS = `* {
   inset: 0;
   background: linear-gradient(
     to top,
-    rgba(15, 23, 42, 0.92) 0%,
-    rgba(15, 23, 42, 0.55) 32%,
-    rgba(15, 23, 42, 0.15) 55%,
+    rgba(26, 24, 23, 0.92) 0%,
+    rgba(26, 24, 23, 0.55) 32%,
+    rgba(26, 24, 23, 0.15) 55%,
     transparent 72%
   );
 }
@@ -80,7 +80,7 @@ const STORY_CSS = `* {
   width: 1080px;
   height: 1920px;
   overflow: hidden;
-  background: #0f172a;
+  background: #1a1817;
   font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
   color: #ffffff;
   -webkit-font-smoothing: antialiased;
@@ -91,7 +91,7 @@ const STORY_CSS = `* {
   inset: 0;
   background-size: cover;
   background-position: center;
-  background-color: #1e293b;
+  background-color: #2b2928;
 }
 
 .gradient-overlay {
@@ -99,9 +99,9 @@ const STORY_CSS = `* {
   inset: 0;
   background: linear-gradient(
     to top,
-    rgba(15, 23, 42, 0.94) 0%,
-    rgba(15, 23, 42, 0.5) 28%,
-    rgba(15, 23, 42, 0.12) 48%,
+    rgba(26, 24, 23, 0.94) 0%,
+    rgba(26, 24, 23, 0.5) 28%,
+    rgba(26, 24, 23, 0.12) 48%,
     transparent 62%
   );
 }

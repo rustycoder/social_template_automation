@@ -1,5 +1,5 @@
 const PLAY_ICON_SVG = `<svg class="play-icon" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-  <circle cx="14" cy="14" r="13" fill="#d81f27"/>
+  <circle cx="14" cy="14" r="13" fill="#cc2233"/>
   <polygon points="11,9 20,14 11,19" fill="#ffffff"/>
 </svg>`;
 
@@ -30,10 +30,10 @@ const BREAKING_NEWS_HTML = `<div class="card breaking-news-card">
 </div>`;
 
 export const DEFAULT_STAMP_IMAGE = `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
-  <circle cx="100" cy="100" r="92" fill="#ffffff" stroke="#d81f27" stroke-width="6"/>
-  <circle cx="100" cy="100" r="72" fill="none" stroke="#d81f27" stroke-width="3" stroke-dasharray="4 6"/>
-  <text x="100" y="108" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-size="28" font-weight="900" fill="#d81f27" transform="rotate(-12 100 100)">SEALED</text>
-  <text x="100" y="100" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#d81f27" letter-spacing="2">
+  <circle cx="100" cy="100" r="92" fill="#ffffff" stroke="#cc2233" stroke-width="6"/>
+  <circle cx="100" cy="100" r="72" fill="none" stroke="#cc2233" stroke-width="3" stroke-dasharray="4 6"/>
+  <text x="100" y="108" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-size="28" font-weight="900" fill="#cc2233" transform="rotate(-12 100 100)">SEALED</text>
+  <text x="100" y="100" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#cc2233" letter-spacing="2">
     <textPath href="#stamp-ring" startOffset="25%">SEALED • SEALED • SEALED •</textPath>
   </text>
   <defs>
@@ -141,7 +141,7 @@ const SHARED_BASE = `* {
 
 .news-tag {
   display: inline-block;
-  background: #d81f27;
+  background: #cc2233;
   color: #ffffff;
   font-weight: 800;
   text-transform: uppercase;
@@ -165,7 +165,7 @@ const SHARED_BASE = `* {
 }
 
 .headline-badge {
-  background: #d81f27;
+  background: #cc2233;
   color: #ffffff;
   font-weight: 800;
   font-style: italic;
@@ -182,7 +182,7 @@ const SHARED_BASE = `* {
 }
 
 .body-text .hl-red {
-  background: #d81f27;
+  background: #cc2233;
   color: #ffffff;
   font-style: italic;
   box-decoration-break: clone;
@@ -192,7 +192,7 @@ const SHARED_BASE = `* {
 
 .footer-cta {
   display: inline-block;
-  border: 2px solid #8b1a1a;
+  border: 2px solid #991a1a;
   color: #ffffff;
   font-weight: 600;
   text-align: center;
