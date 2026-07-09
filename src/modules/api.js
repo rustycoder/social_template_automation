@@ -1,0 +1,75 @@
+const API_BASE = '/api';
+
+class ApiError extends Error {
+  constructor(message, status) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+  }
+}
+
+async function request(path, options = {}) {
+  const headers = {
+    'Content-Type': 'application/json',
+    ...options.headers,
+  };
+
+  const token = localStorage.getItem('auth_token');
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${API_BASE}${path}`, {
+    ...options,
+    headers,
+  });
+
+  let data = null;
+  const contentType = response.headers.get('content-type');
+  if (contentType?.includes('application/json')) {
+    data = await response.json();
+  }
+
+  if (!response.ok) {
+    throw new ApiError(data?.error || 'Request failed', response.status);
+  }
+
+  return data;
+}
+
+export const api = {
+  register(email, password, name) {
+    return request('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({ email, password, name }),
+    });
+  },
+
+  login(email, password) {
+    return request('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    });
+  },
+
+  getMe() {
+    return request('/auth/me');
+  },
+
+  getPlans() {
+    return request('/subscriptions/plans');
+  },
+
+  getSubscriptionStatus() {
+    return request('/subscriptions/status');
+  },
+
+  subscribe(planId) {
+    return request('/subscriptions/subscribe', {
+      method: 'POST',
+      body: JSON.stringify({ planId }),
+    });
+  },
+};
+
+export { ApiError };

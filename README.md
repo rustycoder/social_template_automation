@@ -35,15 +35,51 @@ A web app for creating social media posts from templates — pick a design, fill
    npm install
    ```
 
-3. **Start the development server:**
+3. **Set up MySQL:**
+
+   Copy `.env.example` to `.env` and set your database credentials:
 
    ```bash
-   npm run dev
+   cp .env.example .env
    ```
 
-4. **Open in browser:**
+   Create the database and tables:
 
-   The app will open at the URL shown in the terminal (typically [http://localhost:5173](http://localhost:5173)).
+   ```bash
+   npm run db:setup
+   ```
+
+   Or run migrations after the initial setup:
+
+   ```bash
+   npm run db:migrate
+   ```
+
+4. **Start the app (frontend + API):**
+
+   ```bash
+   npm run dev:all
+   ```
+
+   Or run separately in two terminals:
+
+   ```bash
+   npm run dev:server   # API on http://localhost:3001
+   npm run dev          # Frontend on http://localhost:3000
+   ```
+
+5. **Open in browser:**
+
+   The app opens at [http://localhost:3000](http://localhost:3000).
+
+### Subscriptions
+
+- **Monthly Pro** — $50/month
+- **Yearly Pro** — $499/year
+
+Users can browse all templates for free. **Downloading exports requires an active subscription.** If a user clicks download without a subscription, a subscribe popup appears. Sign in (or create an account), then choose a plan to unlock downloads.
+
+> Payment integration (Stripe, etc.) can be added to `POST /api/subscriptions/subscribe`. Currently subscriptions activate immediately for development.
 
 ### Production Build
 
@@ -51,6 +87,19 @@ A web app for creating social media posts from templates — pick a design, fill
 npm run build
 npm run preview
 ```
+
+### Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start the Vite frontend dev server |
+| `npm run dev:server` | Start the API server (`http://localhost:3001`) |
+| `npm run dev:all` | Start frontend and API together |
+| `npm run build` | Build the frontend for production |
+| `npm run preview` | Preview the production build locally |
+| `npm run db:setup` | Create the database and tables from `server/schema.sql` |
+| `npm run db:migrate` | Run pending database migrations |
+| `npm run db:reset` | Drop and recreate the database, then run all migrations |
 
 ## How to Use
 

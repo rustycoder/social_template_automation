@@ -20,6 +20,9 @@ import {
 } from './modules/exporter.js';
 import { ANIMATION_PRESETS, syncTemplateAnimatedFlag } from './modules/social/socialAnimations.js';
 import { ExportGrid } from './modules/social/exportGrid.js';
+import { authService } from './modules/auth.js';
+import { AuthUI } from './modules/authUI.js';
+import { SubscriptionUI } from './modules/subscriptionUI.js';
 
 const BUCKET_IDS = ['square', 'portrait', 'story', 'landscape'];
 
@@ -89,6 +92,9 @@ class App {
 
     this.uploadStep.onContinue = () => this._enterExportStep();
     this.uploadStep.onDataChange = () => this._updateDataStepPreview();
+
+    this.authUI = new AuthUI();
+    this.subscriptionUI = new SubscriptionUI(this.authUI);
 
     this._bindNavigation();
     this._bindTemplateStep();
@@ -537,6 +543,9 @@ class App {
   }
 
   async _handleExport() {
+    const hasSubscription = await this.subscriptionUI.requireSubscription();
+    if (!hasSubscription) return;
+
     const selectedPresets = this._getSelectedPresets();
     if (selectedPresets.length === 0) {
       window.dispatchEvent(
@@ -629,6 +638,7 @@ class App {
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  await authService.ready();
   new App();
 });

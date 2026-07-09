@@ -33,24 +33,60 @@
         </div>
         <p class="tagline">Template → Data → Export</p>
       </div>
-      <nav class="header-nav">
-        <div class="step-indicators" id="step-indicators">
-          <button class="step-btn active" data-step="1">
-            <span class="step-num">1</span>
-            <span class="step-label">Template</span>
-          </button>
-          <div class="step-connector"></div>
-          <button class="step-btn" data-step="2">
-            <span class="step-num">2</span>
-            <span class="step-label">Data</span>
-          </button>
-          <div class="step-connector"></div>
-          <button class="step-btn" data-step="3">
-            <span class="step-num">3</span>
-            <span class="step-label">Export</span>
-          </button>
+      <div class="header-right">
+        <nav class="header-nav" aria-label="Workflow steps">
+          <div class="step-indicators" id="step-indicators">
+            <button class="step-btn active" data-step="1">
+              <span class="step-num">1</span>
+              <span class="step-label">Template</span>
+            </button>
+            <div class="step-connector"></div>
+            <button class="step-btn" data-step="2">
+              <span class="step-num">2</span>
+              <span class="step-label">Data</span>
+            </button>
+            <div class="step-connector"></div>
+            <button class="step-btn" data-step="3">
+              <span class="step-num">3</span>
+              <span class="step-label">Export</span>
+            </button>
+          </div>
+        </nav>
+        <div class="header-auth" id="header-auth">
+          <button type="button" class="btn btn-ghost btn-sm" id="btn-login">Sign in</button>
+          <div class="user-menu hidden" id="user-menu">
+            <button
+              type="button"
+              class="profile-trigger"
+              id="profile-trigger"
+              aria-haspopup="menu"
+              aria-expanded="false"
+              aria-controls="profile-dropdown"
+            >
+              <span class="profile-avatar" id="profile-avatar" aria-hidden="true"></span>
+              <span class="user-name" id="user-name"></span>
+              <svg class="profile-chevron" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                <path d="M3.5 5.25L7 8.75L10.5 5.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <div class="profile-dropdown hidden" id="profile-dropdown" role="menu">
+              <div class="profile-dropdown-header">
+                <span class="profile-dropdown-name" id="dropdown-user-name"></span>
+                <span class="profile-dropdown-email" id="dropdown-user-email"></span>
+              </div>
+              <div class="profile-dropdown-sub" id="dropdown-sub-section">
+                <span class="user-sub-badge inactive" id="dropdown-sub-badge">No subscription</span>
+              </div>
+              <button type="button" class="profile-dropdown-item" id="btn-logout" role="menuitem">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M6 14H3.667A1.667 1.667 0 0 1 2 12.333V3.667A1.667 1.667 0 0 1 3.667 2H6M10.667 11.333L14 8M14 8L10.667 4.667M14 8H6" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Sign out
+              </button>
+            </div>
+          </div>
         </div>
-      </nav>
+      </div>
     </header>
 
     <main id="main-content">
@@ -240,6 +276,45 @@
     </main>
 
     <div class="toast-container" id="toast-container"></div>
+
+    <!-- Auth modal -->
+    <div class="modal-overlay hidden" id="auth-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
+      <div class="modal-card auth-modal" id="auth-modal">
+        <button type="button" class="modal-close" id="auth-modal-close" aria-label="Close">✕</button>
+        <h2 id="auth-modal-title">Sign in</h2>
+        <p class="modal-desc">Sign in to subscribe and download your posts.</p>
+        <form id="auth-form" class="auth-form">
+          <div class="form-group hidden" id="auth-name-group">
+            <label for="auth-name">Name</label>
+            <input type="text" id="auth-name" class="text-input" autocomplete="name" />
+          </div>
+          <div class="form-group">
+            <label for="auth-email">Email</label>
+            <input type="email" id="auth-email" class="text-input" required autocomplete="email" />
+          </div>
+          <div class="form-group">
+            <label for="auth-password">Password</label>
+            <input type="password" id="auth-password" class="text-input" required minlength="8" autocomplete="current-password" />
+          </div>
+          <p class="form-error hidden" id="auth-error"></p>
+          <button type="submit" class="btn btn-primary btn-block" id="auth-submit-btn">Sign in</button>
+        </form>
+        <p class="modal-footer-text">
+          <button type="button" class="link-btn" id="auth-toggle-mode">Create an account</button>
+        </p>
+      </div>
+    </div>
+
+    <!-- Subscribe modal -->
+    <div class="modal-overlay hidden" id="subscribe-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="subscribe-modal-title">
+      <div class="modal-card subscribe-modal">
+        <button type="button" class="modal-close" id="subscribe-modal-close" aria-label="Close">✕</button>
+        <h2 id="subscribe-modal-title">Subscribe to download</h2>
+        <p class="modal-desc">Get unlimited access to the full template library and all export downloads.</p>
+        <div class="subscribe-plans" id="subscribe-plans"></div>
+        <p class="form-error hidden" id="subscribe-error"></p>
+      </div>
+    </div>
   </div>
 
   <script type="module" src="/src/main.js"></script>
