@@ -111,9 +111,17 @@ html {
   box-sizing: border-box;
 }
 
-/* Step 2 split layout: pin main content between fixed header and footer. */
+/* Step 2 split layout: full viewport between header and footer; only form column scrolls. */
 #app[data-active-step="2"] #main-content,
 #main-content[data-layout-mode="split"] {
+  position: fixed;
+  top: var(--header-height);
+  bottom: var(--footer-height);
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: calc(100dvh - var(--header-height) - var(--footer-height));
+  max-height: calc(100dvh - var(--header-height) - var(--footer-height));
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -125,10 +133,15 @@ html {
 #main-content[data-layout-mode="split"] .step-panel.active {
   display: flex;
   flex-direction: column;
-  flex: 1;
+  flex: 1 1 auto;
   height: 100%;
   min-height: 0;
   overflow: hidden;
+}
+
+#app[data-active-step="2"] #step-2.step-panel.active .data-split {
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 #app[data-active-step="2"] #step-2.step-panel.active {

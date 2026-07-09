@@ -868,10 +868,7 @@ body {
 }
 
 /* ---------- Main Content ---------- */
-/* Shell layout (margin-top, overflow) lives in shell.css — only add non-conflicting extras here */
-#main-content {
-  position: relative;
-}
+/* Shell layout (fixed viewport, overflow) lives in shell.css */
 
 /* Step Panels */
 .step-panel {
@@ -881,6 +878,12 @@ body {
 
 .step-panel.active {
   display: block;
+}
+
+#main-content[data-layout-mode="split"] .step-panel.active,
+#app[data-active-step="2"] #main-content .step-panel.active {
+  display: flex;
+  flex-direction: column;
 }
 
 @keyframes fadeSlideIn {
