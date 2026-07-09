@@ -23,6 +23,7 @@ import { ExportGrid } from './modules/social/exportGrid.js';
 import { authService } from './modules/auth.js';
 import { AuthUI } from './modules/authUI.js';
 import { SubscriptionUI } from './modules/subscriptionUI.js';
+import { BillingUI } from './modules/billingUI.js';
 
 const BUCKET_IDS = ['square', 'portrait', 'story', 'landscape'];
 
@@ -95,6 +96,8 @@ class App {
 
     this.authUI = new AuthUI();
     this.subscriptionUI = new SubscriptionUI(this.authUI);
+    this.billingUI = new BillingUI(this.authUI);
+    this.authUI.onBillingClick = () => this.billingUI.show();
 
     this._bindNavigation();
     this._bindTemplateStep();

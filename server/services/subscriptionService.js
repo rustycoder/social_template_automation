@@ -45,11 +45,6 @@ export async function getActiveSubscription(userId) {
   return rows[0] || null;
 }
 
-export async function userHasActiveSubscription(userId) {
-  const sub = await getActiveSubscription(userId);
-  return !!sub;
-}
-
 export async function createSubscription(userId, planId) {
   const plan = await getPlanById(planId);
   if (!plan) {
@@ -91,4 +86,49 @@ export async function createSubscription(userId, planId) {
     startsAt: now.toISOString(),
     expiresAt: expiresAt.toISOString(),
   };
+}
+
+export async function getBillingHistory(userId) {
+  return query(
+    `SELECT s.id, s.plan_id AS planId, s.status, s.starts_at AS startsAt, s.expires_at AS expiresAt,
+            s.created_at AS createdAt,
+            p.name AS planName, p.price_cents AS priceCents, p.billing_interval AS billingInterval
+     FROM subscriptions s
+     JOIN subscription_plans p ON p.id = s.plan_id
+     WHERE s.user_id = ?
+     ORDER BY s.created_at DESC`,
+    [userId]
+  );
+}
+
+/**
+ * Mark subscriptions as expired when past their end date.
+ * @returns {Promise<number>} Number of subscriptions updated
+ */
+export async function expireSubscriptions() {
+  const result = await query(
+    `UPDATE subscriptions
+     SET status = 'expired', updated_at = NOW()
+     WHERE status = 'active' AND expires_at <= NOW()`
+  );
+  return result.affectedRows ?? 0;
+}
+
+/** Run expiry sync before subscription reads so status is always current. */
+export async function syncExpiredSubscriptions() {
+  return expireSubscriptions();
+}
+
+export async function getLatestSubscription(userId) {
+  const rows = await query(
+    `SELECT s.id, s.plan_id AS planId, s.status, s.starts_at AS startsAt, s.expires_at AS expiresAt,
+            p.name AS planName, p.price_cents AS priceCents, p.billing_interval AS billingInterval
+     FROM subscriptions s
+     JOIN subscription_plans p ON p.id = s.plan_id
+     WHERE s.user_id = ?
+     ORDER BY s.created_at DESC
+     LIMIT 1`,
+    [userId]
+  );
+  return rows[0] || null;
 }

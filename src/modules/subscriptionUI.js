@@ -9,6 +9,8 @@ export class SubscriptionUI {
     this.closeBtn = document.getElementById('subscribe-modal-close');
     this.plansContainer = document.getElementById('subscribe-plans');
     this.errorEl = document.getElementById('subscribe-error');
+    this.titleEl = document.getElementById('subscribe-modal-title');
+    this.descEl = document.getElementById('subscribe-modal-desc');
     this.plans = [];
     this._resolveOpen = null;
 
@@ -71,8 +73,18 @@ export class SubscriptionUI {
     });
   }
 
-  open() {
+  open({ expired = false } = {}) {
     this.errorEl?.classList.add('hidden');
+
+    if (this.titleEl) {
+      this.titleEl.textContent = expired ? 'Subscription expired' : 'Subscribe to download';
+    }
+    if (this.descEl) {
+      this.descEl.textContent = expired
+        ? 'Your plan has expired. Renew to continue downloading templates.'
+        : 'Get unlimited access to the full template library and all export downloads.';
+    }
+
     this.overlay?.classList.remove('hidden');
 
     return new Promise((resolve) => {
@@ -89,15 +101,17 @@ export class SubscriptionUI {
   }
 
   async requireSubscription() {
-    if (authService.hasActiveSubscription()) return true;
-
     if (!authService.isLoggedIn()) {
       const loggedIn = await this.authUI.requireLogin();
       if (!loggedIn) return false;
-      if (authService.hasActiveSubscription()) return true;
     }
 
-    return this.open();
+    await authService.refreshSubscription();
+
+    if (authService.hasActiveSubscription()) return true;
+
+    const expired = authService.isSubscriptionExpired();
+    return this.open({ expired });
   }
 
   async _handleSubscribe(planId, button) {

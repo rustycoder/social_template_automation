@@ -14,4 +14,8 @@ export const config = {
     database: process.env.DB_NAME || 'social_template_automation',
   },
   corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  cron: {
+    // Default: every hour at minute 0
+    expireSubscriptions: process.env.CRON_EXPIRE_SCHEDULE || '0 * * * *',
+  },
 };

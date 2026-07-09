@@ -45,6 +45,10 @@ class AuthService {
     return !!this.user?.hasActiveSubscription;
   }
 
+  isSubscriptionExpired() {
+    return !!this.user?.subscriptionExpired;
+  }
+
   getUser() {
     return this.user;
   }
@@ -82,6 +86,10 @@ class AuthService {
     this.user = user;
     this._notify();
     return user;
+  }
+
+  async refreshSubscription() {
+    return this.refreshUser();
   }
 
   async subscribe(planId) {

@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import { query } from '../db.js';
 import { config } from '../config.js';
 import { authenticate } from '../middleware/auth.js';
-import { getActiveSubscription } from '../services/subscriptionService.js';
+import { getActiveSubscription, syncExpiredSubscriptions, getLatestSubscription } from '../services/subscriptionService.js';
 
 const router = Router();
 
@@ -27,13 +27,27 @@ async function buildUserResponse(userId) {
   const user = users[0];
   if (!user) return null;
 
+  await syncExpiredSubscriptions();
+
   const subscription = await getActiveSubscription(userId);
+  let subscriptionExpired = false;
+
+  if (!subscription) {
+    const latest = await getLatestSubscription(userId);
+    subscriptionExpired =
+      !!latest &&
+      (latest.status === 'expired' ||
+        latest.status === 'cancelled' ||
+        new Date(latest.expiresAt) <= new Date());
+  }
+
   return {
     id: user.id,
     email: user.email,
     name: user.name,
     createdAt: user.createdAt,
     hasActiveSubscription: !!subscription,
+    subscriptionExpired,
     subscription: subscription
       ? {
           planId: subscription.planId,

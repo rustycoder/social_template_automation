@@ -70,6 +70,10 @@ export const api = {
       body: JSON.stringify({ planId }),
     });
   },
+
+  getBilling() {
+    return request('/subscriptions/billing');
+  },
 };
 
 export { ApiError };
