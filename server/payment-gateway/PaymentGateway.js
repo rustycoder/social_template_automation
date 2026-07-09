@@ -46,7 +46,7 @@ export default class PaymentGateway {
     if (!payloadData || typeof payloadData !== "object") {
       throw new Error("createCheckoutSession requires a payloadData object.");
     }
-
+    console.log("payloadData", payloadData);
     try {
       const response = await this.httpClient.post("/session", payloadData);
       return response.data;

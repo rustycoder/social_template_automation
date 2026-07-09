@@ -13,17 +13,12 @@ function getPaymentGateway() {
       error.status = 503;
       throw error;
     }
-    try {
-      paymentGateway = new PaymentGateway({
-        merchantId: config.mpgs.merchantId,
-        apiPassword: config.mpgs.apiPassword,
-        apiVersion: config.mpgs.apiVersion,
-        region: config.mpgs.region,
-      });
-    } catch (error) {
-      console.error("Error creating payment gateway", error);
-      throw error;
-    }
+    paymentGateway = new PaymentGateway({
+      merchantId: config.mpgs.merchantId,
+      apiPassword: config.mpgs.apiPassword,
+      apiVersion: config.mpgs.apiVersion,
+      region: config.mpgs.region,
+    });
   }
 
   return paymentGateway;
