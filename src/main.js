@@ -3,7 +3,6 @@
  */
 import './style.css';
 import { TemplateStore } from './modules/templateStore.js';
-import { TemplateEditor } from './modules/templateEditor.js';
 import { DataSource } from './modules/dataSource.js';
 import { UploadStep } from './modules/uploadStep.js';
 import { PostPreview, getDefaultDimensionsForBucket } from './modules/preview.js';
@@ -21,8 +20,6 @@ import { AuthUI } from './modules/authUI.js';
 import { SubscriptionUI } from './modules/subscriptionUI.js';
 import { BillingUI } from './modules/billingUI.js';
 
-const BUCKET_IDS = ['square', 'portrait', 'story', 'landscape'];
-
 class App {
   constructor() {
     this.currentStep = 1;
@@ -35,24 +32,19 @@ class App {
     this.templateGalleryLimit = 12;
     this._progressRaf = null;
 
-    this.editorStore = this._createEditorStoreAdapter();
-    this.templateEditor = new TemplateEditor(this.editorStore, {
-      htmlContainerId: 'html-editor-container',
-      cssContainerId: 'css-editor-container',
-      tagsListId: 'tags-list',
-      templateSelectId: 'template-select-hidden',
-      saveTemplateBtnId: 'btn-save-template',
-      tabBtnsSelector: '#customize-panel .tab-switcher .tab-btn',
-      codeEditorsSelector: '#customize-panel .code-editor-wrapper .code-editor',
-      defaultTemplateKey: this.currentTemplateKey,
-    });
+    const previewContent = this._createPreviewContentAccessors();
 
-    this.preview = new PostPreview(
-      this.dataSource,
-      this.templateEditor,
-      () => this.currentBucket,
-      () => this._getCurrentLayoutDimensions()
-    );
+    this.preview = new PostPreview(this.dataSource, previewContent);
+    this.dataPreview = new PostPreview(this.dataSource, previewContent, {
+      mountId: 'data-preview-mount',
+      frameWrapperId: 'data-preview-frame-wrapper',
+      navId: 'data-preview-nav',
+      prevRowBtnId: 'data-btn-prev-row',
+      nextRowBtnId: 'data-btn-next-row',
+      rowIndicatorId: 'data-preview-row-indicator',
+      formatTagId: 'data-preview-format-tag',
+      skipWrapperAspectRatio: true,
+    });
 
     this.exportGrid = new ExportGrid(this.dataSource, this.preview, {
       getTemplate: () => this._getExportTemplate(),
@@ -62,33 +54,7 @@ class App {
       onSelectionChange: () => this._updateExportCount(),
     });
 
-    this.dataPreview = new PostPreview(
-      this.dataSource,
-      this.templateEditor,
-      () => this.currentBucket,
-      () => this._getCurrentLayoutDimensions(),
-      {
-        mountId: 'data-preview-mount',
-        frameWrapperId: 'data-preview-frame-wrapper',
-        navId: 'data-preview-nav',
-        prevRowBtnId: 'data-btn-prev-row',
-        nextRowBtnId: 'data-btn-next-row',
-        rowIndicatorId: 'data-preview-row-indicator',
-        formatTagId: 'data-preview-format-tag',
-        skipWrapperAspectRatio: true,
-      }
-    );
-
     this.uploadStep = new UploadStep(this.dataSource, () => this.templateStore.getTemplate(this.currentTemplateKey));
-
-    this.templateEditor.onContentChange = () => {
-      if (this.currentStep === 3) {
-        this.exportGrid.render();
-      }
-      if (this.currentStep === 2) {
-        this._updateDataStepPreview();
-      }
-    };
 
     this.uploadStep.onContinue = () => this._enterExportStep();
     this.uploadStep.onDataChange = () => this._updateDataStepPreview();
@@ -101,43 +67,26 @@ class App {
     this._bindNavigation();
     this._bindTemplateStep();
     this._bindExportUI();
-    this._bindBucketTabs();
     this._bindToast();
     this._renderTemplateGallery();
     this._selectInitialBucket(this.currentTemplateKey);
-    this.templateEditor.selectTemplate(this.currentTemplateKey);
     this._selectTemplate(this.currentTemplateKey);
     this._syncFooter(1);
   }
 
-  _createEditorStoreAdapter() {
-    const self = this;
+  _createPreviewContentAccessors() {
     return {
-      getTemplate(key) {
-        const template = self.templateStore.getTemplate(key || self.currentTemplateKey);
-        const layout = template.layouts[self.currentBucket];
-        return {
-          name: template.name,
-          html: template.content?.html ?? '',
-          css: layout?.css ?? '',
-        };
+      getHtml: () => {
+        const template = this.templateStore.getTemplate(this.currentTemplateKey);
+        return template.content?.html ?? '';
       },
-      saveTemplate(key, html, css) {
-        const template = self.templateStore.getTemplate(key);
-        template.content = template.content || { html: '' };
-        template.content.html = html;
-        const bucket = self.currentBucket;
-        if (!template.layouts[bucket]) {
-          const dims = getDefaultDimensionsForBucket(bucket);
-          template.layouts[bucket] = { css, width: dims.width, height: dims.height };
-        } else {
-          template.layouts[bucket].css = css;
-        }
-        self.templateStore.saveTemplate(key, { ...template, id: key });
-        self.currentTemplateKey = key;
-        self.templateEditor.currentTemplateKey = key;
-        self._renderTemplateGallery();
+      getCss: (bucket) => {
+        const layoutBucket = bucket ?? this.currentBucket;
+        const template = this.templateStore.getTemplate(this.currentTemplateKey);
+        return template.layouts[layoutBucket]?.css ?? '';
       },
+      getBucket: () => this.currentBucket,
+      getLayoutDimensions: () => this._getCurrentLayoutDimensions(),
     };
   }
 
@@ -192,7 +141,6 @@ class App {
 
   _goToDataStep() {
     this.uploadStep.rebuildFormForTemplate();
-    this.templateEditor.selectTemplate(this.currentTemplateKey);
     const desc = document.getElementById('data-step-desc');
     if (desc) {
       const template = this.templateStore.getTemplate(this.currentTemplateKey);
@@ -280,19 +228,10 @@ class App {
    */
   _selectTemplate(key) {
     this.currentTemplateKey = key;
-    this.templateEditor.currentTemplateKey = key;
     this.currentBucket = this.galleryBucket;
-    this.templateEditor.selectTemplate(key);
 
     this.templateGrid?.querySelectorAll('.template-card').forEach((card) => {
       card.classList.toggle('selected', card.dataset.template === key);
-    });
-  }
-
-  _bindBucketTabs() {
-    this.bucketTabBtns = document.querySelectorAll('#bucket-tabs .bucket-tab-btn');
-    this.bucketTabBtns.forEach((btn) => {
-      btn.addEventListener('click', () => this._onBucketTabClick(btn.dataset.bucket));
     });
   }
 
@@ -337,7 +276,6 @@ class App {
     this._syncFooter(step);
 
     if (step === 2) {
-      this.templateEditor.selectTemplate(this.currentTemplateKey);
       setTimeout(() => {
         this._updateDataStepPreview();
         requestAnimationFrame(() => {
@@ -346,9 +284,7 @@ class App {
         });
       }, 50);
     } else if (step === 3) {
-      this.templateEditor.setHeaders(this.dataSource.getHeaders());
       this.exportGrid.resetRowSelection();
-      this._syncBucketTabs();
       this._syncExportFormatTag();
       setTimeout(() => {
         this.exportGrid.render();
@@ -376,9 +312,7 @@ class App {
   }
 
   _enterExportStep() {
-    this.templateEditor.setHeaders(this.dataSource.getHeaders());
     this.exportGrid.resetRowSelection();
-    this._syncBucketTabs();
     this._goToStep(3);
   }
 
@@ -389,14 +323,12 @@ class App {
       this.currentBucket = preferred;
       return;
     }
-    const firstBucket = BUCKET_IDS.find((bucket) => template.layouts[bucket]);
+    const buckets = ['square', 'portrait', 'story', 'landscape'];
+    const firstBucket = buckets.find((bucket) => template.layouts[bucket]);
     this.currentBucket = firstBucket || 'square';
   }
 
   _getBucketCss(bucket) {
-    if (bucket === this.currentBucket) {
-      return this.templateEditor.getCSS();
-    }
     const template = this.templateStore.getTemplate(this.currentTemplateKey);
     return template.layouts[bucket]?.css ?? '';
   }
@@ -436,57 +368,6 @@ class App {
     return getDefaultDimensionsForBucket(this.currentBucket);
   }
 
-  _saveCurrentEditorToTemplate() {
-    const template = this.templateStore.getTemplate(this.currentTemplateKey);
-    template.content = template.content || { html: '' };
-    template.content.html = this.templateEditor.getHTML();
-    const layout = template.layouts[this.currentBucket];
-    if (layout) {
-      layout.css = this.templateEditor.getCSS();
-      this.templateStore.saveTemplate(this.currentTemplateKey, { ...template, id: this.currentTemplateKey });
-    }
-  }
-
-  _onBucketTabClick(bucket) {
-    if (!bucket) return;
-    const template = this.templateStore.getTemplate(this.currentTemplateKey);
-
-    if (!template.layouts[bucket]) {
-      const bucketLabel = FORMAT_BUCKETS[bucket]?.label ?? bucket;
-      const create = window.confirm(
-        `This template has no ${bucketLabel} layout yet. Create one by copying CSS from an existing layout?`
-      );
-      if (!create) return;
-
-      const sourceBucket = BUCKET_IDS.find((id) => template.layouts[id]);
-      if (!sourceBucket) return;
-
-      const dims = getDefaultDimensionsForBucket(bucket);
-      template.layouts[bucket] = {
-        css: template.layouts[sourceBucket].css,
-        width: dims.width,
-        height: dims.height,
-      };
-      this.templateStore.saveTemplate(this.currentTemplateKey, { ...template, id: this.currentTemplateKey });
-    }
-
-    this._saveCurrentEditorToTemplate();
-    this.currentBucket = bucket;
-    this.templateEditor.selectTemplate(this.currentTemplateKey);
-    this._syncBucketTabs();
-    this.exportGrid.render();
-  }
-
-  _syncBucketTabs() {
-    const template = this.templateStore.getTemplate(this.currentTemplateKey);
-    this.bucketTabBtns?.forEach((btn) => {
-      const bucket = btn.dataset.bucket;
-      const hasLayout = template.layouts[bucket] != null;
-      btn.classList.toggle('active', bucket === this.currentBucket);
-      btn.classList.toggle('bucket-missing', !hasLayout);
-    });
-  }
-
   _isBucketAvailable(template, bucket) {
     const layout = template.layouts[bucket];
     if (!layout) return false;
@@ -502,10 +383,7 @@ class App {
   }
 
   _getExportTemplate() {
-    this._saveCurrentEditorToTemplate();
-    const template = this.templateStore.getTemplate(this.currentTemplateKey);
-    template.content.html = this.templateEditor.getHTML();
-    return template;
+    return this.templateStore.getTemplate(this.currentTemplateKey);
   }
 
   _setExportProgress(current, total, message) {
@@ -528,7 +406,6 @@ class App {
 
     const selectedBuckets = this._getSelectedBuckets();
     if (selectedBuckets.length === 0) {
-
       window.dispatchEvent(
         new CustomEvent('toast', { detail: { message: 'Selected format is not available for this template', type: 'error' } })
       );

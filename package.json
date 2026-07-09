@@ -21,17 +21,12 @@
     "vite": "^6.0.0"
   },
   "dependencies": {
-    "@codemirror/lang-css": "^6.3.1",
-    "@codemirror/lang-html": "^6.4.9",
-    "@codemirror/theme-one-dark": "^6.1.2",
     "axios": "^1.18.1",
     "bcryptjs": "^3.0.2",
-    "codemirror": "^6.0.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "exceljs": "^3.4.0",
     "express": "^4.21.2",
-    "html2pdf.js": "^0.14.0",
     "jsonwebtoken": "^9.0.2",
     "jszip": "^3.10.1",
     "mysql2": "^3.12.0",

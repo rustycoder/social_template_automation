@@ -46,16 +46,15 @@ export function getDefaultDimensionsForBucket(bucket) {
 export class SocialPreview {
   /**
    * @param {import('../dataSource.js').DataSource} dataSource
-   * @param {import('../templateEditor.js').TemplateEditor} templateEditor
-   * @param {() => string} getBucket
-   * @param {() => { width: number, height: number }} getLayoutDimensions
+   * @param {{ getHtml: () => string, getCss: (bucket?: string) => string, getBucket: () => string, getLayoutDimensions: () => { width: number, height: number } }} contentAccessors
    * @param {object} [options]
    */
-  constructor(dataSource, templateEditor, getBucket, getLayoutDimensions, options = {}) {
+  constructor(dataSource, contentAccessors, options = {}) {
     this.dataSource = dataSource;
-    this.templateEditor = templateEditor;
-    this.getBucket = getBucket;
-    this.getLayoutDimensions = getLayoutDimensions;
+    this.getHtml = contentAccessors.getHtml;
+    this.getCss = contentAccessors.getCss;
+    this.getBucket = contentAccessors.getBucket;
+    this.getLayoutDimensions = contentAccessors.getLayoutDimensions;
     this.currentPreviewRow = 0;
     this.options = {
       mountId: 'preview-mount',
@@ -301,8 +300,8 @@ export class SocialPreview {
   }
 
 
-  _buildPreviewContent(rowData, cssTemplate = this.templateEditor.getCSS()) {
-    const htmlTemplate = this.templateEditor.getHTML();
+  _buildPreviewContent(rowData, cssTemplate = this.getCss()) {
+    const htmlTemplate = this.getHtml();
     const htmlContent = replacePlaceholders(htmlTemplate, rowData);
     const cssContent = replacePlaceholders(cssTemplate, rowData);
     return { htmlContent, cssContent };
@@ -337,7 +336,7 @@ export class SocialPreview {
   }
 
   _renderPreview(mount, rowData, frameWidthPx, frameHeightPx) {
-    this.renderInto(mount, rowData, this.templateEditor.getCSS(), frameWidthPx, frameHeightPx);
+    this.renderInto(mount, rowData, this.getCss(), frameWidthPx, frameHeightPx);
   }
 
   _waitForImages(root) {
