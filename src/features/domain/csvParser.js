@@ -1,4 +1,11 @@
 /**
+ * @file features/domain/csvParser.js
+ * @description Excel workbook parser for bulk upload — extracts headers, rows, and embedded images.
+ * @dependencies exceljs
+ * @state None — DOM-independent pure parsing.
+ */
+
+/**
  * Excel parsing for bulk upload — DOM-independent.
  */
 import ExcelJS from 'exceljs';

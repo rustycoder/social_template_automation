@@ -1,3 +1,10 @@
+/**
+ * @file features/auth/api.js
+ * @description HTTP client for backend auth, subscription, and billing endpoints.
+ * @dependencies features/auth/tokenStorage.js
+ * @state None — attaches JWT from tokenStorage on each request.
+ */
+
 import { tokenStorage } from './tokenStorage.js';
 
 const API_BASE = '/api';

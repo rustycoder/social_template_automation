@@ -1,12 +1,12 @@
 /**
- * @file modules/social/exportGrid.js
+ * @file features/rendering/exportGrid.js
  * @description Export grid renderer — builds post tiles using PostCard primitives and delegates
  *              selection state to SelectionModule.
  * @dependencies features/components/PostCard.js, features/modules/SelectionModule.js
  * @state Stateless renderer; SelectionModule owns checkedRowIndices.
  */
 
-import { createExportCard } from '../../features/components/PostCard.js';
+import { createExportCard } from '../components/PostCard.js';
 import { FORMAT_BUCKETS, getPlatformLabelsForBucket } from './socialFormats.js';
 import { getDefaultDimensionsForBucket } from './socialPreview.js';
 
@@ -28,9 +28,9 @@ function getRowLabel(rowData, index) {
 export class ExportGrid {
   /**
    * @description Creates the export grid renderer.
-   * @param {import('../dataSource.js').DataSource} dataSource Shared row store.
+   * @param {import('../domain/dataSource.js').DataSource} dataSource Shared row store.
    * @param {import('./socialPreview.js').SocialPreview} preview Live preview renderer.
-   * @param {import('../../features/modules/SelectionModule.js').SelectionModule} selection Selection state module.
+   * @param {import('../modules/SelectionModule.js').SelectionModule} selection Selection state module.
    * @param {object} callbacks
    * @param {() => object} callbacks.getTemplate Active template resolver.
    * @param {(bucket: string) => string} callbacks.getBucketCss CSS per bucket.

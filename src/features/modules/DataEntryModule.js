@@ -2,17 +2,17 @@
  * @file features/modules/DataEntryModule.js
  * @description Data Page state machine — manages Single Form vs Multiple Excel tabs, field validation,
  *              bulk upload parsing, and the Continue button gate before export.
- * @dependencies modules/templateFields.js, modules/sampleExcelExport.js, modules/dataSource.js
+ * @dependencies features/domain/templateFields.js, features/domain/sampleExcelExport.js, features/domain/dataSource.js
  * @state activeSource ('single' | 'bulk'), lastValidation, onContinue / onDataChange callbacks.
  */
 
-import { getTemplateFields, validateExcelHeaders, validateManualFields } from '../../modules/templateFields.js';
-import { downloadSampleExcel } from '../../modules/sampleExcelExport.js';
+import { getTemplateFields, validateExcelHeaders, validateManualFields } from '../domain/templateFields.js';
+import { downloadSampleExcel } from '../domain/sampleExcelExport.js';
 
 export class DataEntryModule {
   /**
    * @description Initializes Data Page form controls and tab state machine.
-   * @param {import('../../modules/dataSource.js').DataSource} dataSource Shared row store.
+   * @param {import('../domain/dataSource.js').DataSource} dataSource Shared row store.
    * @param {() => object} getTemplate Resolver for the currently selected template.
    */
   constructor(dataSource, getTemplate) {

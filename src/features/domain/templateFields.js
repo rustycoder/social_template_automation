@@ -1,4 +1,11 @@
 /**
+ * @file features/domain/templateFields.js
+ * @description Template field schema — extraction from HTML placeholders, validation, and row building.
+ * @dependencies None
+ * @state None — pure functions.
+ */
+
+/**
  * Template field helpers — extraction, validation, and form building.
  */
 

@@ -1,11 +1,18 @@
 /**
+ * @file features/domain/templateStore.js
+ * @description Read-only template catalog — loads HTML templates with fields and per-bucket layouts.
+ * @dependencies templates/htmlTemplateLoader.js
+ * @state None — clones templates on read to prevent mutation.
+ */
+
+/**
  * Read-only template store — HTML file templates with fields and layouts.
  */
 
 import {
   HTML_TEMPLATES,
   DEFAULT_TEMPLATE_ID,
-} from '../templates/htmlTemplateLoader.js';
+} from '../../templates/htmlTemplateLoader.js';
 
 function cloneTemplate(template) {
   return structuredClone(template);

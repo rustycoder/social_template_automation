@@ -1,21 +1,21 @@
 /**
  * @file features/App.js
- * @description Top-level application orchestrator — wires LayoutModule, page controllers,
- *              DataEntryModule, SelectionModule, auth/billing, and shared preview instances.
- * @dependencies All feature modules/pages, legacy modules (templateStore, dataSource, auth).
- * @state currentTemplateKey, currentBucket, template/data/export page instances.
+ * @description Top-level application orchestrator — wires shell modules, page controllers,
+ *              domain services, rendering pipeline, and auth/billing subsystems.
+ * @dependencies features/domain, features/rendering, features/auth, features/modules, features/pages
+ * @state currentTemplateKey, currentBucket, page controller instances.
  */
 
-import { TemplateStore } from '../modules/templateStore.js';
-import { DataSource } from '../modules/dataSource.js';
-import { PostPreview, getDefaultDimensionsForBucket } from '../modules/preview.js';
-import { ExportGrid } from '../modules/social/exportGrid.js';
-import { getPlatformLabelsForBucket } from '../modules/social/socialFormats.js';
-import { authService } from '../modules/auth.js';
-import { handleCheckoutReturn } from '../modules/checkout.js';
-import { AuthUI } from '../modules/authUI.js';
-import { SubscriptionUI } from '../modules/subscriptionUI.js';
-import { BillingUI } from '../modules/billingUI.js';
+import { TemplateStore } from './domain/templateStore.js';
+import { DataSource } from './domain/dataSource.js';
+import { PostPreview, getDefaultDimensionsForBucket } from './rendering/preview.js';
+import { ExportGrid } from './rendering/exportGrid.js';
+import { getPlatformLabelsForBucket } from './rendering/socialFormats.js';
+import { authService } from './auth/auth.js';
+import { handleCheckoutReturn } from './auth/checkout.js';
+import { AuthUI } from './auth/authUI.js';
+import { SubscriptionUI } from './auth/subscriptionUI.js';
+import { BillingUI } from './auth/billingUI.js';
 
 import { LayoutModule } from './modules/LayoutModule.js';
 import { DataEntryModule } from './modules/DataEntryModule.js';

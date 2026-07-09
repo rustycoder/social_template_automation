@@ -1,4 +1,11 @@
 /**
+ * @file features/domain/dataSource.js
+ * @description Unified in-memory row store — accepts bulk Excel uploads or single manual form entry.
+ * @dependencies features/domain/csvParser.js, features/domain/templateFields.js
+ * @state headers, rows, mode ('bulk' | 'single' | null), fileName, imageColumns.
+ */
+
+/**
  * Unified data source — headers/rows from bulk Excel or single manual entry.
  */
 import { parseExcelFile } from './csvParser.js';

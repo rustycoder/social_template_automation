@@ -1,8 +1,15 @@
 /**
+ * @file features/rendering/templateGalleryPreview.js
+ * @description Live-rendered thumbnail previews for the Template Page gallery grid.
+ * @dependencies features/rendering/socialRenderHost.js, features/domain/templateSampleData.js
+ * @state None — renders into caller-provided mount elements.
+ */
+
+/**
  * Live-rendered thumbnail previews for the Step 1 template gallery.
  */
-import { replacePlaceholders, hideUnresolvedImages, waitForImages } from './social/socialRenderHost.js';
-import { getSampleRowForTemplate } from './templateSampleData.js';
+import { replacePlaceholders, hideUnresolvedImages, waitForImages } from './socialRenderHost.js';
+import { getSampleRowForTemplate } from '../domain/templateSampleData.js';
 
 const GALLERY_SHADOW_CSS = `
 :host {

@@ -2,18 +2,18 @@
  * @file features/pages/DataPage.js
  * @description Page 2 — coordinates live preview updates when data entry changes and prepares
  *              the step description when entering from Template Page.
- * @dependencies modules/preview.js, modules/templateSampleData.js
+ * @dependencies features/rendering/preview.js, features/domain/templateSampleData.js
  * @state Stateless view coordinator; DataEntryModule owns form/upload state.
  */
 
-import { getSampleRowForTemplate } from '../../modules/templateSampleData.js';
+import { getSampleRowForTemplate } from '../domain/templateSampleData.js';
 
 export class DataPage {
   /**
    * @description Creates the Data Page preview coordinator.
-   * @param {import('../../modules/preview.js').PostPreview} dataPreview Right-column live preview.
+   * @param {import('../rendering/preview.js').PostPreview} dataPreview Right-column live preview.
    * @param {() => object} getTemplate Resolver for the active template.
-   * @param {import('../../modules/dataSource.js').DataSource} dataSource Shared row store.
+   * @param {import('../domain/dataSource.js').DataSource} dataSource Shared row store.
    * @param {() => { width: number, height: number }} getLayoutDimensions Layout size for preview fitting.
    */
   constructor(dataPreview, getTemplate, dataSource, getLayoutDimensions) {

@@ -1,4 +1,11 @@
 /**
+ * @file features/domain/templateSampleData.js
+ * @description Sample row values for gallery thumbnails and empty-state previews.
+ * @dependencies features/domain/templateFields.js
+ * @state None — static sample generators.
+ */
+
+/**
  * Sample row data for template gallery thumbnails and demos.
  */
 import { getTemplateFields } from './templateFields.js';

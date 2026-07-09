@@ -1,7 +1,7 @@
 /**
  * @file features/pages/TemplatePage.js
  * @description Page 1 — template discovery grid with search, aspect-ratio filtering, and gallery previews.
- * @dependencies features/components/PostCard.js, features/shared/constants.js, modules/templateGalleryPreview.js
+ * @dependencies features/components/PostCard.js, features/shared/constants.js, features/rendering/templateGalleryPreview.js
  * @state galleryBucket, templateSearchQuery, templateGalleryLimit, currentTemplateKey (owned by page controller).
  */
 
@@ -11,12 +11,12 @@ import {
   DEFAULT_GALLERY_LIMIT,
   GALLERY_LIMIT_STEP,
 } from '../shared/constants.js';
-import { renderGalleryPreview } from '../../modules/templateGalleryPreview.js';
+import { renderGalleryPreview } from '../rendering/templateGalleryPreview.js';
 
 export class TemplatePage {
   /**
    * @description Creates the Template Page controller.
-   * @param {import('../../modules/templateStore.js').TemplateStore} templateStore Template catalog.
+   * @param {import('../domain/templateStore.js').TemplateStore} templateStore Template catalog.
    * @param {object} callbacks
    * @param {(templateKey: string) => void} callbacks.onTemplateSelect Fired when user picks a template.
    * @param {(bucket: string) => void} [callbacks.onBucketChange] Fired when gallery aspect bucket changes.

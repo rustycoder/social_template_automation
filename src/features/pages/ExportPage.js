@@ -1,23 +1,23 @@
 /**
  * @file features/pages/ExportPage.js
  * @description Page 3 — export grid rendering, format tag, progress UI, and export button state.
- * @dependencies features/modules/SelectionModule.js, modules/social/exportGrid.js, modules/exporter.js
+ * @dependencies features/modules/SelectionModule.js, features/rendering/exportGrid.js, features/rendering/exporter.js
  * @state Export progress RAF handle; delegates selection to SelectionModule.
  */
 
-import { FORMAT_BUCKETS } from '../../modules/social/socialFormats.js';
+import { FORMAT_BUCKETS } from '../rendering/socialFormats.js';
 import { BUCKET_RATIO_LABELS } from '../shared/constants.js';
 import {
   exportBulkPosts,
   exportSinglePostPresets,
-} from '../../modules/exporter.js';
+} from '../rendering/exporter.js';
 
 export class ExportPage {
   /**
    * @description Creates the Export Page controller.
    * @param {import('../modules/SelectionModule.js').SelectionModule} selection Selection state module.
-   * @param {import('../../modules/social/exportGrid.js').ExportGrid} exportGrid Tile renderer.
-   * @param {import('../../modules/dataSource.js').DataSource} dataSource Shared row store.
+   * @param {import('../rendering/exportGrid.js').ExportGrid} exportGrid Tile renderer.
+   * @param {import('../domain/dataSource.js').DataSource} dataSource Shared row store.
    * @param {object} deps
    * @param {() => object} deps.getTemplate Active template resolver.
    * @param {() => string} deps.getCurrentBucket Active format bucket.

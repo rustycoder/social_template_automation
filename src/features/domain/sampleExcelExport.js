@@ -1,4 +1,11 @@
 /**
+ * @file features/domain/sampleExcelExport.js
+ * @description Generates downloadable sample .xlsx files with correct column headers per template.
+ * @dependencies exceljs, features/domain/templateFields.js, features/domain/templateSampleData.js
+ * @state None.
+ */
+
+/**
  * Generate per-template sample Excel files for bulk data entry.
  */
 import ExcelJS from 'exceljs';
