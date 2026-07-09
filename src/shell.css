@@ -106,6 +106,7 @@
   left: 0;
   right: 0;
   height: var(--footer-height);
+  min-height: var(--footer-height);
   background: var(--color-bg-raised);
   border-top: 1px solid var(--color-border);
   z-index: 100;
@@ -113,6 +114,7 @@
   align-items: center;
   justify-content: center;
   padding: 0 var(--shell-padding);
+  box-sizing: border-box;
 }
 
 #app-footer.hidden,
@@ -131,7 +133,7 @@
   display: flex;
 }
 
-.footer-panel--aspect {
+.footer-panel--aspect.active {
   justify-content: center;
 }
 
@@ -140,11 +142,12 @@
   gap: 16px;
 }
 
-/* Three-slot footer layout — leftActions / centerActions / rightActions */
-.footer-panel--nav:has(.footer-slot) {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
+/* Nav footer with slot wrappers — flex space-between (not 3-col grid; only left + right slots exist) */
+.footer-panel--nav.active:has(.footer-slot) {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
+  width: 100%;
   gap: 16px;
 }
 
@@ -152,18 +155,28 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
 }
 
 .footer-slot--left {
   justify-content: flex-start;
+  flex-shrink: 0;
 }
 
 .footer-slot--center {
   justify-content: center;
+  flex: 1;
 }
 
 .footer-slot--right {
   justify-content: flex-end;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+/* Direct children (no slots) — same space-between layout */
+.footer-panel--nav.active:not(:has(.footer-slot)) {
+  justify-content: space-between;
 }
 
 /* ---------- Step track ---------- */
@@ -283,8 +296,14 @@
   transform: scale(0.98);
 }
 
+#app-footer .btn-outline,
 #app-footer .btn-primary {
   height: 40px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+#app-footer .btn-primary {
   padding: 0 24px;
   font-size: 0.875rem;
 }
@@ -296,6 +315,7 @@
   align-items: center;
   justify-content: center;
   gap: 12px;
+  max-width: 100%;
 }
 
 .aspect-segment__btn {
@@ -758,5 +778,14 @@
 
   .footer-panel--nav {
     padding: 0 4px;
+    gap: 8px;
+  }
+
+  #app-footer .btn-outline {
+    padding: 0 12px;
+  }
+
+  #app-footer .btn-primary {
+    padding: 0 16px;
   }
 }

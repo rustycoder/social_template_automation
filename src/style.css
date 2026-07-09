@@ -50,9 +50,7 @@
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 
-  /* Layout */
-  --header-height: 64px;
-  --footer-height: 60px;
+  /* Layout — shell.css owns header/footer dimensions for the fixed chrome */
   --content-max-width: 1280px;
   --round-eight: 8px;
 
