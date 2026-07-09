@@ -45,7 +45,7 @@ export async function getActiveSubscription(userId) {
   return rows[0] || null;
 }
 
-export async function createSubscription(userId, planId) {
+export async function createSubscription(userId, planId, { paymentTransactionId } = {}) {
   const plan = await getPlanById(planId);
   if (!plan) {
     const error = new Error('Invalid subscription plan');
@@ -71,18 +71,28 @@ export async function createSubscription(userId, planId) {
   );
 
   const result = await query(
-    `INSERT INTO subscriptions (user_id, plan_id, status, starts_at, expires_at)
-     VALUES (?, ?, 'active', ?, ?)`,
-    [userId, planId, now, expiresAt]
+    `INSERT INTO subscriptions (user_id, plan_id, payment_transaction_id, status, starts_at, expires_at)
+     VALUES (?, ?, ?, 'active', ?, ?)`,
+    [userId, planId, paymentTransactionId ?? null, now, expiresAt]
   );
 
+  const subscriptionId = result.insertId;
+
+  if (paymentTransactionId) {
+    await query(
+      `UPDATE payment_transactions SET subscription_id = ? WHERE id = ?`,
+      [subscriptionId, paymentTransactionId]
+    );
+  }
+
   return {
-    id: result.insertId,
+    id: subscriptionId,
     planId: plan.id,
     planName: plan.name,
     priceCents: plan.priceCents,
     billingInterval: plan.billingInterval,
     status: 'active',
+    paymentTransactionId: paymentTransactionId ?? null,
     startsAt: now.toISOString(),
     expiresAt: expiresAt.toISOString(),
   };
@@ -91,10 +101,14 @@ export async function createSubscription(userId, planId) {
 export async function getBillingHistory(userId) {
   return query(
     `SELECT s.id, s.plan_id AS planId, s.status, s.starts_at AS startsAt, s.expires_at AS expiresAt,
-            s.created_at AS createdAt,
-            p.name AS planName, p.price_cents AS priceCents, p.billing_interval AS billingInterval
+            s.created_at AS createdAt, s.payment_transaction_id AS paymentTransactionId,
+            p.name AS planName, p.price_cents AS priceCents, p.billing_interval AS billingInterval,
+            pt.id AS paymentId, pt.order_id AS paymentOrderId, pt.amount_cents AS paymentAmountCents,
+            pt.currency AS paymentCurrency, pt.status AS paymentStatus,
+            pt.mpgs_transaction_id AS mpgsTransactionId, pt.completed_at AS paymentCompletedAt
      FROM subscriptions s
      JOIN subscription_plans p ON p.id = s.plan_id
+     LEFT JOIN payment_transactions pt ON pt.id = s.payment_transaction_id
      WHERE s.user_id = ?
      ORDER BY s.created_at DESC`,
     [userId]

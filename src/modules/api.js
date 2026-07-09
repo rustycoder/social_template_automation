@@ -1,3 +1,5 @@
+import { tokenStorage } from './tokenStorage.js';
+
 const API_BASE = '/api';
 
 class ApiError extends Error {
@@ -14,7 +16,7 @@ async function request(path, options = {}) {
     ...options.headers,
   };
 
-  const token = localStorage.getItem('auth_token');
+  const token = tokenStorage.get();
   if (token) {
     headers.Authorization = `Bearer ${token}`;
   }
@@ -31,6 +33,10 @@ async function request(path, options = {}) {
   }
 
   if (!response.ok) {
+    if (response.status === 401) {
+      tokenStorage.clear();
+      window.dispatchEvent(new CustomEvent('auth:expired'));
+    }
     throw new ApiError(data?.error || 'Request failed', response.status);
   }
 
@@ -68,6 +74,20 @@ export const api = {
     return request('/subscriptions/subscribe', {
       method: 'POST',
       body: JSON.stringify({ planId }),
+    });
+  },
+
+  createCheckout(planId) {
+    return request('/subscriptions/checkout', {
+      method: 'POST',
+      body: JSON.stringify({ planId }),
+    });
+  },
+
+  verifyCheckout({ orderId, resultIndicator }) {
+    return request('/subscriptions/checkout/verify', {
+      method: 'POST',
+      body: JSON.stringify({ orderId, resultIndicator }),
     });
   },
 

@@ -7,6 +7,10 @@ import {
   getBillingHistory,
   syncExpiredSubscriptions,
 } from '../services/subscriptionService.js';
+import {
+  createSubscriptionCheckout,
+  verifySubscriptionCheckout,
+} from '../services/paymentService.js';
 
 const router = Router();
 
@@ -90,11 +94,54 @@ router.get('/billing', authenticate, async (req, res) => {
         startsAt: item.startsAt,
         expiresAt: item.expiresAt,
         createdAt: item.createdAt,
+        payment: item.paymentId
+          ? {
+              id: item.paymentId,
+              orderId: item.paymentOrderId,
+              amountCents: item.paymentAmountCents,
+              currency: item.paymentCurrency,
+              status: item.paymentStatus,
+              transactionId: item.mpgsTransactionId,
+              completedAt: item.paymentCompletedAt,
+            }
+          : null,
       })),
     });
   } catch (error) {
     console.error('Billing error:', error);
     res.status(500).json({ error: 'Failed to load billing history' });
+  }
+});
+
+router.post('/checkout', authenticate, async (req, res) => {
+  try {
+    const { planId } = req.body;
+    if (!planId) {
+      return res.status(400).json({ error: 'planId is required' });
+    }
+
+    const checkout = await createSubscriptionCheckout(req.user.id, planId);
+    res.status(200).json(checkout);
+  } catch (error) {
+    if (error.status) {
+      return res.status(error.status).json({ error: error.message });
+    }
+    console.error('Checkout error:', error);
+    res.status(500).json({ error: 'Failed to create checkout session' });
+  }
+});
+
+router.post('/checkout/verify', authenticate, async (req, res) => {
+  try {
+    const { orderId, resultIndicator } = req.body;
+    const result = await verifySubscriptionCheckout(req.user.id, orderId, resultIndicator);
+    res.status(200).json(result);
+  } catch (error) {
+    if (error.status) {
+      return res.status(error.status).json({ error: error.message });
+    }
+    console.error('Checkout verify error:', error);
+    res.status(500).json({ error: 'Failed to verify payment' });
   }
 });
 

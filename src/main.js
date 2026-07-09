@@ -21,6 +21,7 @@ import {
 import { ANIMATION_PRESETS, syncTemplateAnimatedFlag } from './modules/social/socialAnimations.js';
 import { ExportGrid } from './modules/social/exportGrid.js';
 import { authService } from './modules/auth.js';
+import { handleCheckoutReturn } from './modules/checkout.js';
 import { AuthUI } from './modules/authUI.js';
 import { SubscriptionUI } from './modules/subscriptionUI.js';
 import { BillingUI } from './modules/billingUI.js';
@@ -643,5 +644,6 @@ class App {
 
 document.addEventListener('DOMContentLoaded', async () => {
   await authService.ready();
+  await handleCheckoutReturn();
   new App();
 });

@@ -164,6 +164,7 @@ export class BillingUI {
             <td>${formatDate(item.createdAt)}</td>
             <td>${item.planName}</td>
             <td>${item.priceLabel}/${interval}</td>
+            <td>${item.payment?.orderId || '—'}</td>
             <td>${formatDate(item.startsAt)}</td>
             <td>${formatDate(item.expiresAt)}</td>
             <td><span class="billing-status-badge ${statusClass}">${formatStatus(item.status)}</span></td>

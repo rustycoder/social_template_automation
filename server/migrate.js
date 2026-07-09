@@ -99,7 +99,7 @@ async function runMigration(connection, filename) {
 }
 
 async function printSummary(connection) {
-  const tables = ['users', 'subscription_plans', 'subscriptions', 'schema_migrations'];
+  const tables = ['users', 'subscription_plans', 'payment_transactions', 'subscriptions', 'schema_migrations'];
 
   console.log('\nTable row counts:');
   for (const table of tables) {

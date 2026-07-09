@@ -1,6 +1,7 @@
 import { api } from './api.js';
 import { authService } from './auth.js';
 import { ApiError } from './api.js';
+import { launchMpgsCheckout } from './checkout.js';
 
 export class SubscriptionUI {
   constructor(authUI) {
@@ -15,7 +16,8 @@ export class SubscriptionUI {
     this._resolveOpen = null;
 
     this._bindEvents();
-    this._loadPlans();
+
+    window.addEventListener('subscription-activated', () => this.close(true));
   }
 
   _bindEvents() {
@@ -25,13 +27,39 @@ export class SubscriptionUI {
     });
   }
 
+  _showPlansLoading() {
+    if (!this.plansContainer) return;
+    this.plansContainer.innerHTML = '<p class="modal-desc plans-loading">Loading plans…</p>';
+  }
+
   async _loadPlans() {
+    this._showPlansLoading();
+    this.errorEl?.classList.add('hidden');
+
     try {
       const { plans } = await api.getPlans();
       this.plans = plans;
+
+      if (!plans?.length) {
+        if (this.plansContainer) {
+          this.plansContainer.innerHTML =
+            '<p class="modal-desc plans-loading">No subscription plans are available right now.</p>';
+        }
+        return;
+      }
+
       this._renderPlans();
     } catch (error) {
       console.error('Failed to load plans:', error);
+      if (this.plansContainer) {
+        this.plansContainer.innerHTML =
+          '<p class="modal-desc plans-loading">Could not load plans. Make sure the API server is running.</p>';
+      }
+      if (this.errorEl) {
+        this.errorEl.textContent =
+          'Failed to load subscription plans. Run npm run dev:all or start the API on port 3001.';
+        this.errorEl.classList.remove('hidden');
+      }
     }
   }
 
@@ -73,9 +101,7 @@ export class SubscriptionUI {
     });
   }
 
-  open({ expired = false } = {}) {
-    this.errorEl?.classList.add('hidden');
-
+  async open({ expired = false } = {}) {
     if (this.titleEl) {
       this.titleEl.textContent = expired ? 'Subscription expired' : 'Subscribe to download';
     }
@@ -86,6 +112,7 @@ export class SubscriptionUI {
     }
 
     this.overlay?.classList.remove('hidden');
+    await this._loadPlans();
 
     return new Promise((resolve) => {
       this._resolveOpen = resolve;
@@ -101,12 +128,19 @@ export class SubscriptionUI {
   }
 
   async requireSubscription() {
-    if (!authService.isLoggedIn()) {
+    const hasSession = await authService.ensureSession();
+    if (!hasSession) {
       const loggedIn = await this.authUI.requireLogin();
       if (!loggedIn) return false;
     }
 
-    await authService.refreshSubscription();
+    try {
+      await authService.refreshSubscription();
+    } catch {
+      const loggedIn = await this.authUI.requireLogin();
+      if (!loggedIn) return false;
+      await authService.refreshSubscription();
+    }
 
     if (authService.hasActiveSubscription()) return true;
 
@@ -115,7 +149,8 @@ export class SubscriptionUI {
   }
 
   async _handleSubscribe(planId, button) {
-    if (!authService.isLoggedIn()) {
+    const hasSession = await authService.ensureSession();
+    if (!hasSession) {
       const loggedIn = await this.authUI.requireLogin();
       if (!loggedIn) return;
     }
@@ -123,17 +158,26 @@ export class SubscriptionUI {
     this.errorEl?.classList.add('hidden');
     button.disabled = true;
     const originalText = button.textContent;
-    button.textContent = 'Processing…';
+    button.textContent = 'Redirecting to payment…';
 
     try {
-      await authService.subscribe(planId);
-      window.dispatchEvent(
-        new CustomEvent('toast', {
-          detail: { message: 'Subscription activated! You can now download.', type: 'success' },
-        })
-      );
-      this.close(true);
+      await this._startCheckout(planId);
     } catch (error) {
+      if (error instanceof ApiError && error.status === 401) {
+        authService.logout();
+        const loggedIn = await this.authUI.requireLogin();
+        if (loggedIn) {
+          try {
+            await this._startCheckout(planId);
+            return;
+          } catch (retryError) {
+            error = retryError;
+          }
+        } else {
+          return;
+        }
+      }
+
       const message =
         error instanceof ApiError ? error.message : 'Subscription failed. Please try again.';
       if (this.errorEl) {
@@ -144,5 +188,9 @@ export class SubscriptionUI {
       button.disabled = false;
       button.textContent = originalText;
     }
+  }
+
+  async _startCheckout(planId) {
+    await launchMpgsCheckout(planId);
   }
 }

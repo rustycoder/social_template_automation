@@ -1,23 +1,27 @@
 import { api } from './api.js';
-
-const TOKEN_KEY = 'auth_token';
+import { tokenStorage } from './tokenStorage.js';
 
 class AuthService {
   constructor() {
     this.user = null;
     this.listeners = new Set();
     this._ready = this._init();
+
+    window.addEventListener('auth:expired', () => {
+      this.user = null;
+      this._notify();
+    });
   }
 
   async _init() {
-    const token = localStorage.getItem(TOKEN_KEY);
+    const token = tokenStorage.get();
     if (!token) return;
 
     try {
       const { user } = await api.getMe();
       this.user = user;
     } catch {
-      localStorage.removeItem(TOKEN_KEY);
+      tokenStorage.clear();
       this.user = null;
     }
   }
@@ -38,7 +42,24 @@ class AuthService {
   }
 
   isLoggedIn() {
-    return !!this.user;
+    return !!this.user && !!tokenStorage.get();
+  }
+
+  async ensureSession() {
+    const token = tokenStorage.get();
+    if (!token) {
+      this.user = null;
+      this._notify();
+      return false;
+    }
+
+    try {
+      await this.refreshUser();
+      return this.isLoggedIn();
+    } catch {
+      this.logout();
+      return false;
+    }
   }
 
   hasActiveSubscription() {
@@ -55,7 +76,7 @@ class AuthService {
 
   async register(email, password, name) {
     const { token, user } = await api.register(email, password, name);
-    localStorage.setItem(TOKEN_KEY, token);
+    tokenStorage.save(token);
     this.user = user;
     this._notify();
     return user;
@@ -63,29 +84,36 @@ class AuthService {
 
   async login(email, password) {
     const { token, user } = await api.login(email, password);
-    localStorage.setItem(TOKEN_KEY, token);
+    tokenStorage.save(token);
     this.user = user;
     this._notify();
     return user;
   }
 
   logout() {
-    localStorage.removeItem(TOKEN_KEY);
+    tokenStorage.clear();
     this.user = null;
     this._notify();
   }
 
   async refreshUser() {
-    if (!localStorage.getItem(TOKEN_KEY)) {
+    if (!tokenStorage.get()) {
       this.user = null;
       this._notify();
       return null;
     }
 
-    const { user } = await api.getMe();
-    this.user = user;
-    this._notify();
-    return user;
+    try {
+      const { user } = await api.getMe();
+      this.user = user;
+      this._notify();
+      return user;
+    } catch (error) {
+      if (error?.status === 401) {
+        this.logout();
+      }
+      throw error;
+    }
   }
 
   async refreshSubscription() {

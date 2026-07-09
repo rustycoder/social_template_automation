@@ -60,6 +60,13 @@ A web app for creating social media posts from templates — pick a design, fill
    | `JWT_EXPIRES_IN` | Token lifetime (default `7d`) |
    | `CORS_ORIGIN` | Frontend origin (default `http://localhost:3000`) |
    | `CRON_EXPIRE_SCHEDULE` | Cron expression for subscription expiry (default `0 * * * *`) |
+| `APP_URL` | Public app URL for MPGS payment return redirect |
+| `MPGS_MERCHANT_ID` | MPGS merchant ID |
+| `MPGS_API_PASSWORD` | MPGS API password |
+| `MPGS_API_VERSION` | MPGS REST API version (default `74`) |
+| `MPGS_REGION` | Gateway region: `TEST`, `NA`, `AP`, `EU` |
+| `MPGS_CURRENCY` | Payment currency (default `USD`) |
+| `MPGS_MERCHANT_NAME` | Merchant name shown on checkout |
 
 4. **Set up the database:**
 
@@ -110,9 +117,44 @@ A web app for creating social media posts from templates — pick a design, fill
 2. Click **Download** on the export step
 3. If not signed in → sign-in modal
 4. If signed in without a subscription → subscribe modal
-5. After subscribing → downloads are unlocked
+5. After successful MPGS payment → subscription is activated and downloads are unlocked
 
-> Payment integration (Stripe, etc.) can be added to `POST /api/subscriptions/subscribe`. Currently subscriptions activate immediately for development.
+Payments are processed via **MPGS Hosted Checkout** (Mastercard Payment Gateway). Configure credentials in `.env` — see [Payment Gateway](#payment-gateway-mpgs).
+
+## Payment Gateway (MPGS)
+
+Subscription purchases use [MPGS Hosted Checkout](https://developer.mastercard.com/) via `server/payment-gateway/` and `server/services/paymentService.js`.
+
+### Configure `.env`
+
+```
+APP_URL=http://localhost:3000
+MPGS_MERCHANT_ID=your_merchant_id
+MPGS_API_PASSWORD=your_api_password
+MPGS_API_VERSION=74
+MPGS_REGION=TEST
+MPGS_CURRENCY=USD
+MPGS_MERCHANT_NAME=Social Media Template Automation
+```
+
+### Payment flow
+
+1. User clicks **Subscribe** on a plan
+2. API creates an MPGS checkout session (`POST /api/subscriptions/checkout`)
+3. User is redirected to the MPGS hosted payment page
+4. After payment, MPGS redirects back to `APP_URL/?checkout_return=1&orderId=...&resultIndicator=...`
+5. Frontend verifies payment (`POST /api/subscriptions/checkout/verify`)
+6. On success, subscription is activated in the database
+
+### Run migration for payments table
+
+```bash
+npm run db:migrate
+```
+
+This applies `003_payment_transactions.sql` which stores pending/completed payment records.
+
+> The legacy `POST /api/subscriptions/subscribe` endpoint remains for development only. Production subscribe buttons use the MPGS checkout flow.
 
 ## Subscription Expiry Cron
 
@@ -204,7 +246,9 @@ The app always fetches fresh subscription status from the API (not cached) in th
 | `GET` | `/api/subscriptions/plans` | — | List available plans |
 | `GET` | `/api/subscriptions/status` | ✓ | Active subscription status |
 | `GET` | `/api/subscriptions/billing` | ✓ | Current plan + billing history |
-| `POST` | `/api/subscriptions/subscribe` | ✓ | Activate a subscription |
+| `POST` | `/api/subscriptions/checkout` | ✓ | Create MPGS checkout session |
+| `POST` | `/api/subscriptions/checkout/verify` | ✓ | Verify payment and activate subscription |
+| `POST` | `/api/subscriptions/subscribe` | ✓ | Direct activate (dev only) |
 
 ## How to Use
 
@@ -265,11 +309,13 @@ social-media-template-automation/
 │   ├── jobs/
 │   │   └── expireSubscriptions.js
 │   ├── migrations/
+│   ├── payment-gateway/        # MPGS payment gateway client
 │   ├── middleware/
 │   ├── routes/
 │   │   ├── auth.js
 │   │   └── subscriptions.js
 │   └── services/
+│       ├── paymentService.js
 │       └── subscriptionService.js
 └── src/
     ├── main.js
@@ -279,6 +325,7 @@ social-media-template-automation/
     │   ├── auth.js
     │   ├── authUI.js
     │   ├── billingUI.js
+    │   ├── checkout.js
     │   ├── subscriptionUI.js
     │   └── ...
     └── templates/social/
