@@ -9,9 +9,19 @@ import {
   captureRenderRootToCanvas,
   normalizeImagesForCapture,
 } from './socialRenderHost.js';
-export { renderPostToPng } from './puppeteerExporter.js';
-
 export { replacePlaceholders } from './socialRenderHost.js';
+
+/**
+ * @param {string} templateHtml
+ * @param {string} layoutCss
+ * @param {Record<string, string>} rowData
+ * @param {number} width
+ * @param {number} height
+ */
+export async function renderPostToPng(templateHtml, layoutCss, rowData, width, height) {
+  const canvas = await renderPostToCanvas(templateHtml, layoutCss, rowData, width, height);
+  return canvasToBlob(canvas);
+}
 
 /**
  * @param {string} templateHtml

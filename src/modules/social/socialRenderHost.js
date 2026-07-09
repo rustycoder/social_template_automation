@@ -347,21 +347,6 @@ export function setupRenderHost(templateHtml, layoutCss, rowData, width, height)
     background: 'transparent',
   });
 
-  const shadow = captureHost.attachShadow({ mode: 'open' });
-  shadow.innerHTML = `<style>${cssContent}</style>${htmlContent}`;
-
-  const renderRoot = document.createElement('div');
-  renderRoot.className = 'social-export-render-root';
-  Object.assign(renderRoot.style, {
-    width: `${width}px`,
-    height: `${height}px`,
-    minWidth: `${width}px`,
-    minHeight: `${height}px`,
-    overflow: 'hidden',
-    position: 'relative',
-
-  });
-
   const styleEl = document.createElement('style');
   styleEl.textContent = `${EXPORT_FRAME_CSS}\n${cssContent}`;
   host.appendChild(styleEl);

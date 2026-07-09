@@ -586,8 +586,8 @@ class App {
     const hasSubscription = await this.subscriptionUI.requireSubscription();
     if (!hasSubscription) return;
 
-    const selectedPresets = this._getSelectedPresets();
-    if (selectedPresets.length === 0) {
+    const selectedBuckets = this._getSelectedBuckets();
+    if (selectedBuckets.length === 0) {
 
       window.dispatchEvent(
         new CustomEvent('toast', { detail: { message: 'Selected format is not available for this template', type: 'error' } })
