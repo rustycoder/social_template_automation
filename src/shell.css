@@ -631,21 +631,63 @@
 }
 
 .export-grid,
-.export-ratio-grid {
+.export-ratio-grid,
+#export-ratio-grid {
   display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  align-content: start;
+}
+
+/* Match Template Page masonry column widths per aspect bucket */
+#export-ratio-grid[data-export-bucket="square"],
+#export-ratio-grid[data-gallery-bucket="square"] {
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+#export-ratio-grid[data-export-bucket="portrait"],
+#export-ratio-grid[data-gallery-bucket="portrait"] {
+  grid-template-columns: repeat(auto-fill, minmax(176px, 1fr));
+}
+
+#export-ratio-grid[data-export-bucket="story"],
+#export-ratio-grid[data-gallery-bucket="story"] {
+  grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+}
+
+#export-ratio-grid[data-export-bucket="landscape"],
+#export-ratio-grid[data-gallery-bucket="landscape"] {
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 24px;
+}
+
+/* Export cards share Template Page preview aspect ratios */
+#export-ratio-grid[data-export-bucket="portrait"] .template-preview-container,
+#export-ratio-grid[data-gallery-bucket="portrait"] .template-preview-container {
+  aspect-ratio: 4 / 5;
+}
+
+#export-ratio-grid[data-export-bucket="story"] .template-preview-container,
+#export-ratio-grid[data-gallery-bucket="story"] .template-preview-container {
+  aspect-ratio: 9 / 16;
+}
+
+#export-ratio-grid[data-export-bucket="landscape"] .template-preview-container,
+#export-ratio-grid[data-gallery-bucket="landscape"] .template-preview-container {
+  aspect-ratio: 1200 / 628;
 }
 
 .export-post-tile,
 .post-card--has-checkbox {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }
 
-.export-post-tile .ratio-tile-box,
-.post-card--has-checkbox .post-card__preview-box {
-  border-radius: var(--radius-card);
-  box-shadow: var(--shadow-elevated);
+.export-post-tile .template-preview-container,
+.post-card--has-checkbox .template-preview-container {
+  border-radius: var(--radius-card) var(--radius-card) 0 0;
+  box-shadow: none;
 }
 
 .export-post-checkbox {

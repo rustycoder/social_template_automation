@@ -9,6 +9,8 @@
     "dev:all": "concurrently \"npm run dev:server\" \"npm run dev\"",
     "build": "vite build",
     "preview": "vite preview",
+    "browsers:install": "puppeteer browsers install chrome",
+    "postinstall": "puppeteer browsers install chrome",
     "db:setup": "mysql -u root -p < server/schema.sql",
     "db:migrate": "node server/migrate.js",
     "db:reset": "node server/migrate.js --fresh",

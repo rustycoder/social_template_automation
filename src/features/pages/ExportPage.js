@@ -2,7 +2,7 @@
  * @file features/pages/ExportPage.js
  * @description Page 3 — export grid rendering, format tag, progress UI, and export button state.
  * @dependencies features/modules/SelectionModule.js, features/rendering/exportGrid.js, features/rendering/exporter.js
- * @state Export progress RAF handle; delegates selection to SelectionModule.
+ * @state Export progress UI; delegates selection to SelectionModule.
  */
 
 import { FORMAT_BUCKETS } from '../rendering/socialFormats.js';
@@ -40,12 +40,6 @@ export class ExportPage {
     this.progressText = document.getElementById('progress-text');
     this.exportBtn = document.getElementById('btn-export');
     this.formatTag = document.getElementById('export-format-tag');
-
-    /** @type {number | null} */
-    this._progressRaf = null;
-
-    /** @type {{ current: number, total: number, message: string } | null} */
-    this._pendingProgress = null;
 
     this.exportBtn?.addEventListener('click', () => this.handleExport());
   }
@@ -97,25 +91,38 @@ export class ExportPage {
   }
 
   /**
-   * @description Throttled progress bar update via requestAnimationFrame.
+   * @description Shows the export progress overlay immediately (synchronous DOM update).
    * @param {number} current Completed units.
-   * @param {number} total Total units.
+   * @param {number} total Total units (0 when unknown).
    * @param {string} message Status message.
    * @returns {void}
    * @private
    */
-  _setExportProgress(current, total, message) {
-    this._pendingProgress = { current, total, message };
-    if (this._progressRaf) return;
-    this._progressRaf = requestAnimationFrame(() => {
-      this._progressRaf = null;
-      const progress = this._pendingProgress;
-      if (!progress) return;
-      if (progress.message) this.progressText.textContent = progress.message;
-      if (progress.total > 0) {
-        this.progressFill.style.width = `${(progress.current / progress.total) * 90}%`;
-      }
-    });
+  _showExportProgress(current, total, message) {
+    document.body.classList.add('social-exporting');
+    this.progressSection?.classList.remove('hidden');
+    if (message && this.progressText) {
+      this.progressText.textContent = message;
+    }
+    if (!this.progressFill) return;
+
+    if (total > 0) {
+      const pct = Math.min(100, Math.max(2, (current / total) * 100));
+      this.progressFill.style.width = `${pct}%`;
+    } else {
+      this.progressFill.style.width = current > 0 ? '8%' : '4%';
+    }
+  }
+
+  /**
+   * @description Hides the export progress overlay.
+   * @returns {void}
+   * @private
+   */
+  _hideExportProgress() {
+    document.body.classList.remove('social-exporting');
+    this.progressSection?.classList.add('hidden');
+    if (this.progressFill) this.progressFill.style.width = '0%';
   }
 
   /**
@@ -123,11 +130,21 @@ export class ExportPage {
    * @returns {Promise<void>}
    */
   async handleExport() {
+    // Instant feedback on click — before any async subscription/render work.
+    this._showExportProgress(0, 0, 'Preparing export…');
+    if (this.exportBtn) this.exportBtn.disabled = true;
+
     const hasSubscription = await this.requireSubscription();
-    if (!hasSubscription) return;
+    if (!hasSubscription) {
+      this._hideExportProgress();
+      this.updateExportButton();
+      return;
+    }
 
     const selectedBuckets = this.getSelectedBuckets();
     if (selectedBuckets.length === 0) {
+      this._hideExportProgress();
+      this.updateExportButton();
       window.dispatchEvent(
         new CustomEvent('toast', {
           detail: { message: 'Selected format is not available for this template', type: 'error' },
@@ -138,6 +155,8 @@ export class ExportPage {
 
     const selectedRows = this.exportGrid.getSelectedRows();
     if (selectedRows.length === 0) {
+      this._hideExportProgress();
+      this.updateExportButton();
       window.dispatchEvent(
         new CustomEvent('toast', { detail: { message: 'Select at least one post to export', type: 'error' } })
       );
@@ -146,55 +165,37 @@ export class ExportPage {
 
     const template = this.getTemplate();
     const getBucketCss = (bucket) => this.getBucketCss(bucket);
+    const totalRenders = selectedRows.length * selectedBuckets.length;
 
-    document.body.classList.add('social-exporting');
-    this.progressSection?.classList.remove('hidden');
-    this.progressFill.style.width = '0%';
-    this.progressText.textContent = 'Preparing export…';
-    this.exportBtn.disabled = true;
+    this._showExportProgress(0, totalRenders, `Exporting 0 of ${totalRenders}…`);
 
     try {
+      const onProgress = (current, total, message) => {
+        const label =
+          message ?? `Exporting ${current} of ${total}…`;
+        this._showExportProgress(current, total, label);
+      };
+
       if (this.dataSource.mode === 'single') {
         const { rowData } = selectedRows[0];
-        await exportSinglePostPresets(
-          template,
-          rowData,
-          selectedBuckets,
-          (c, t, m) => this._setExportProgress(c, t, m),
-          getBucketCss
-        );
+        await exportSinglePostPresets(template, rowData, selectedBuckets, onProgress, getBucketCss);
       } else {
-        await exportBulkPosts(
-          template,
-          selectedRows,
-          selectedBuckets,
-          (c, t, m) => this._setExportProgress(c, t, m),
-          getBucketCss
-        );
+        await exportBulkPosts(template, selectedRows, selectedBuckets, onProgress, getBucketCss);
       }
 
-      this.progressFill.style.width = '100%';
-      this.progressText.textContent = 'Export complete!';
+      this._showExportProgress(totalRenders, totalRenders, 'Export complete!');
       window.dispatchEvent(
         new CustomEvent('toast', { detail: { message: 'Export successful', type: 'success' } })
       );
     } catch (error) {
       console.error('Export error:', error);
-      this.progressText.textContent = `Error: ${error.message}`;
+      this._showExportProgress(0, totalRenders, `Error: ${error.message}`);
       window.dispatchEvent(
         new CustomEvent('toast', { detail: { message: `Export failed: ${error.message}`, type: 'error' } })
       );
     } finally {
-      if (this._progressRaf) {
-        cancelAnimationFrame(this._progressRaf);
-        this._progressRaf = null;
-      }
-      this.exportBtn.disabled = false;
       this.updateExportButton();
-      setTimeout(() => {
-        document.body.classList.remove('social-exporting');
-        this.progressSection?.classList.add('hidden');
-      }, 1200);
+      setTimeout(() => this._hideExportProgress(), 1200);
     }
   }
 }

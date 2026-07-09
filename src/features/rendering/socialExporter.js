@@ -100,7 +100,6 @@ export async function exportBulkPosts(template, rowEntries, selectedBuckets, onP
     const rowBase = getRowBaseName(rowData, rowIndex);
 
     for (const bucket of selectedBuckets) {
-      current += 1;
       onProgress?.(current, total, `Rendering ${rowBase} · ${bucket}...`);
 
       const layout = getLayoutForBucket(template, bucket);
@@ -113,6 +112,8 @@ export async function exportBulkPosts(template, rowEntries, selectedBuckets, onP
       const filename = `${rowBase}_${bucket}.png`;
 
       zip.file(filename, blob);
+      current += 1;
+      onProgress?.(current, total, `Rendered ${rowBase} · ${bucket}`);
     }
   }
 
@@ -142,7 +143,6 @@ export async function exportSinglePostPresets(template, rowData, selectedBuckets
   let current = 0;
 
   for (const bucket of selectedBuckets) {
-    current += 1;
     onProgress?.(current, total, `Rendering ${bucket}...`);
 
     const layout = getLayoutForBucket(template, bucket);
@@ -153,6 +153,8 @@ export async function exportSinglePostPresets(template, rowData, selectedBuckets
 
     const blob = await renderPostToPng(templateHtml, layoutCss, rowData, width, height);
     zip.file(`post_${bucket}.png`, blob);
+    current += 1;
+    onProgress?.(current, total, `Rendered ${bucket}`);
   }
 
   onProgress?.(total, total, 'Packaging zip...');

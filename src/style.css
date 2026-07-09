@@ -1491,6 +1491,26 @@ body {
 /* ---------- Progress ---------- */
 .progress-section {
   margin-top: 20px;
+  transition: opacity 0.15s ease;
+}
+
+body.social-exporting .progress-section {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--footer-height) + 20px);
+  transform: translateX(-50%);
+  z-index: 250;
+  width: min(520px, calc(100vw - 32px));
+  margin-top: 0;
+  padding: 16px 20px;
+  background: var(--color-bg-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+}
+
+body.social-exporting .progress-fill {
+  transition: width 0.2s ease;
 }
 
 .progress-bar {
@@ -2245,31 +2265,38 @@ body.social-exporting * {
 .export-ratio-grid {
   flex: 1;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 16px;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   overflow-y: auto;
   min-height: 0;
   align-content: start;
 }
 
-.export-ratio-grid[data-export-bucket="square"] .export-post-preview-box {
-  aspect-ratio: 1;
+/* Bucket-specific columns — mirror Template Page (#template-grid) */
+.export-ratio-grid[data-export-bucket="square"],
+.export-ratio-grid[data-gallery-bucket="square"] {
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
 }
 
-.export-ratio-grid[data-export-bucket="portrait"] .export-post-preview-box {
-  aspect-ratio: 4 / 5;
+.export-ratio-grid[data-export-bucket="portrait"],
+.export-ratio-grid[data-gallery-bucket="portrait"] {
+  grid-template-columns: repeat(auto-fill, minmax(176px, 1fr));
 }
 
-.export-ratio-grid[data-export-bucket="story"] .export-post-preview-box {
-  aspect-ratio: 9 / 16;
+.export-ratio-grid[data-export-bucket="story"],
+.export-ratio-grid[data-gallery-bucket="story"] {
+  grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
 }
 
-.export-ratio-grid[data-export-bucket="landscape"] .export-post-preview-box {
-  aspect-ratio: 1.91;
+.export-ratio-grid[data-export-bucket="landscape"],
+.export-ratio-grid[data-gallery-bucket="landscape"] {
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
 }
 
 .export-post-tile {
   min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .export-post-select {

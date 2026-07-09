@@ -4,37 +4,77 @@
  * screenshot via a Puppeteer-managed headless Chromium instance.
  */
 
-let browserInstance = null;
-
 import { existsSync } from 'fs';
 
+let browserInstance = null;
+
+/**
+ * @description Resolves a locally installed Chrome/Chromium binary (macOS, Windows, Linux).
+ * @returns {string | null}
+ */
 function findSystemChrome() {
   const candidates = [
+    process.env.PUPPETEER_EXECUTABLE_PATH,
     process.env.CHROME_PATH,
+    // macOS
+    '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+    '/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary',
+    '/Applications/Chromium.app/Contents/MacOS/Chromium',
+    // Linux
+    '/usr/bin/google-chrome',
+    '/usr/bin/google-chrome-stable',
+    '/usr/bin/chromium',
+    '/usr/bin/chromium-browser',
+    // Windows
     'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
     'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
     `${process.env.LOCALAPPDATA}\\Google\\Chrome\\Application\\chrome.exe`,
   ].filter(Boolean);
-  for (const p of candidates) {
-    if (existsSync(p)) return p;
+
+  for (const candidate of candidates) {
+    if (existsSync(candidate)) return candidate;
   }
   return null;
+}
+
+/**
+ * @description Resolves Chrome for Puppeteer: env → system install → Puppeteer cache.
+ * @param {typeof import('puppeteer')} puppeteerModule
+ * @returns {Promise<string>}
+ */
+async function resolveExecutablePath(puppeteerModule) {
+  const systemChrome = findSystemChrome();
+  if (systemChrome) {
+    console.log(`[renderApi] Using system Chrome: ${systemChrome}`);
+    return systemChrome;
+  }
+
+  try {
+    const cached = puppeteerModule.default.executablePath();
+    if (cached && existsSync(cached)) {
+      console.log(`[renderApi] Using Puppeteer Chrome cache: ${cached}`);
+      return cached;
+    }
+  } catch {
+    // Cache miss — fall through to install hint
+  }
+
+  throw new Error(
+    'Chrome not found. Install it with: npm run browsers:install — or set CHROME_PATH to your Chrome binary.'
+  );
 }
 
 async function getBrowser() {
   if (browserInstance) return browserInstance;
 
   const puppeteer = await import('puppeteer');
-  const systemChrome = findSystemChrome();
-  const launchOptions = {
+  const executablePath = await resolveExecutablePath(puppeteer);
+
+  browserInstance = await puppeteer.default.launch({
     headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-  };
-  if (systemChrome) {
-    launchOptions.executablePath = systemChrome;
-    console.log(`[renderApi] Using system Chrome: ${systemChrome}`);
-  }
-  browserInstance = await puppeteer.default.launch(launchOptions);
+    executablePath,
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+  });
 
   browserInstance.on('disconnected', () => {
     browserInstance = null;

@@ -1,12 +1,11 @@
 /**
  * @file features/rendering/exportGrid.js
- * @description Export grid renderer — builds post tiles using PostCard primitives and delegates
- *              selection state to SelectionModule.
+ * @description Export grid renderer — builds post tiles matching Template Page card dimensions.
  * @dependencies features/components/PostCard.js, features/modules/SelectionModule.js
  * @state Stateless renderer; SelectionModule owns checkedRowIndices.
  */
 
-import { createExportCard } from '../components/PostCard.js';
+import { createExportCard, createPostCardPreview } from '../components/PostCard.js';
 import { FORMAT_BUCKETS, getPlatformLabelsForBucket } from './socialFormats.js';
 import { getDefaultDimensionsForBucket } from './socialPreview.js';
 
@@ -78,39 +77,46 @@ export class ExportGrid {
   }
 
   /**
-   * @description Builds the preview box inner content for one export tile.
+   * @description Builds a template-page-style preview container with live render mount.
    * @param {object} template Template definition.
    * @param {string} bucket Format bucket id.
    * @param {Record<string, string>} rowData Row values for placeholder substitution.
-   * @returns {HTMLElement} Preview box element.
+   * @returns {HTMLElement} .template-preview-container element.
    * @private
    */
-  _buildPreviewBox(template, bucket, rowData) {
+  _buildPreviewContainer(template, bucket, rowData) {
     const bucketMeta = FORMAT_BUCKETS[bucket];
     const label = bucketMeta?.label ?? bucket;
     const layout = template.layouts[bucket];
     const { width: realW, height: realH } = this._getLayoutDimensions(template, bucket);
 
-    const box = document.createElement('div');
-    box.className = 'ratio-tile-box active export-post-preview-box post-card__preview-box';
+    const preview = createPostCardPreview({ bucket, showAspectBadge: false });
+    const mount = preview.querySelector('.template-preview-mount');
 
-    if (!layout) {
-      const empty = document.createElement('div');
-      empty.className = 'ratio-tile-empty';
-      empty.textContent = `No ${label.toLowerCase()} layout for this template`;
-      box.appendChild(empty);
-    } else {
-      const mount = document.createElement('div');
-      mount.className = 'preview-mount ratio-tile-mount';
-      box.appendChild(mount);
-
-      const css = this.getBucketCss(bucket);
-      requestAnimationFrame(() => {
-        this.preview.renderInto(mount, rowData, css, realW, realH);
-      });
+    if (!layout || !mount) {
+      mount.innerHTML = `<span class="gallery-preview-unavailable">No ${label.toLowerCase()} layout</span>`;
+      return preview;
     }
 
-    return box;
+    const css = this.getBucketCss(bucket);
+    requestAnimationFrame(() => {
+      this.preview.renderInto(mount, rowData, css, realW, realH);
+    });
+
+    return preview;
+  }
+
+  /**
+   * @description Applies grid classes and bucket data attrs shared with Template Page masonry.
+   * @param {string} bucket Active format bucket.
+   * @returns {void}
+   * @private
+   */
+  _syncGridLayout(bucket) {
+    if (!this.gridEl) return;
+    this.gridEl.classList.add('template-masonry', 'export-grid');
+    this.gridEl.dataset.exportBucket = bucket;
+    this.gridEl.dataset.galleryBucket = bucket;
   }
 
   /**
@@ -124,7 +130,7 @@ export class ExportGrid {
     const bucket = this.getCurrentBucket();
     const template = this.getTemplate();
 
-    this.gridEl.dataset.exportBucket = bucket;
+    this._syncGridLayout(bucket);
 
     if (rows.length === 0) {
       this.gridEl.innerHTML = '';
@@ -147,14 +153,14 @@ export class ExportGrid {
 
     for (let i = 0; i < rows.length; i++) {
       const rowLabel = getRowLabel(rows[i], i);
-      const previewBox = this._buildPreviewBox(template, bucket, rows[i]);
+      const previewContainer = this._buildPreviewContainer(template, bucket, rows[i]);
 
       const tile = createExportCard({
         rowIndex: i,
         rowLabel,
         bucket,
         checked: this.selection.isRowChecked(i),
-        previewBox,
+        previewContainer,
         onCheckChange: (rowIndex, checked) => {
           this.selection.setRowChecked(rowIndex, checked);
         },

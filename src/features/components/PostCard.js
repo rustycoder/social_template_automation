@@ -111,13 +111,13 @@ export function createTemplateCard({
 }
 
 /**
- * @description Creates an export-page tile with preview box, checkbox, and row label.
+ * @description Creates an export-page card matching Template Page card structure (preview + label).
  * @param {object} options
  * @param {number} options.rowIndex Zero-based data row index.
  * @param {string} options.rowLabel Human-readable label for the post.
  * @param {string} options.bucket Export format bucket id.
  * @param {boolean} options.checked Whether the row is selected for export.
- * @param {HTMLElement} [options.previewBox] Pre-built preview box; empty box created when omitted.
+ * @param {HTMLElement} [options.previewContainer] Pre-built preview container from createPostCardPreview.
  * @param {(rowIndex: number, checked: boolean) => void} [options.onCheckChange] Checkbox change handler.
  * @returns {HTMLElement} Export tile root element.
  */
@@ -126,7 +126,7 @@ export function createExportCard({
   rowLabel,
   bucket,
   checked,
-  previewBox = null,
+  previewContainer = null,
   onCheckChange = null,
 }) {
   const tile = document.createElement('div');
@@ -134,11 +134,9 @@ export function createExportCard({
   tile.dataset.bucket = bucket;
   tile.dataset.rowIndex = String(rowIndex);
 
-  const box = previewBox ?? document.createElement('div');
-  if (!previewBox) {
-    box.className = 'ratio-tile-box active export-post-preview-box post-card__preview-box';
-  }
-  tile.appendChild(box);
+  const preview =
+    previewContainer ?? createPostCardPreview({ bucket, showAspectBadge: false });
+  tile.appendChild(preview);
 
   const checkbox = document.createElement('input');
   checkbox.type = 'checkbox';
@@ -154,10 +152,10 @@ export function createExportCard({
   });
   tile.appendChild(checkbox);
 
-  const label = document.createElement('p');
-  label.className = 'export-post-label post-card__label';
-  label.textContent = rowLabel;
-  tile.appendChild(label);
+  const body = document.createElement('div');
+  body.className = 'template-card-body post-card__body';
+  body.innerHTML = `<h4>${rowLabel}</h4>`;
+  tile.appendChild(body);
 
   return tile;
 }
