@@ -7,9 +7,14 @@ class AuthService {
     this.listeners = new Set();
     this._ready = this._init();
 
-    window.addEventListener('auth:expired', () => {
+    window.addEventListener('auth:expired', (event) => {
       this.user = null;
       this._notify();
+      const message =
+        event.detail?.message || 'Session expired. Please log in again.';
+      window.dispatchEvent(
+        new CustomEvent('toast', { detail: { message, type: 'error' } })
+      );
     });
   }
 
@@ -90,7 +95,14 @@ class AuthService {
     return user;
   }
 
-  logout() {
+  async logout() {
+    try {
+      if (tokenStorage.get()) {
+        await api.logout();
+      }
+    } catch {
+      /* still clear local session if server logout fails */
+    }
     tokenStorage.clear();
     this.user = null;
     this._notify();

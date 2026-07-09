@@ -217,6 +217,7 @@ export class DataEntryModule {
     });
     this.bulkPanel?.classList.toggle('hidden', source !== 'bulk');
     this.singlePanel?.classList.toggle('hidden', source !== 'single');
+    this.btnDownloadSample?.classList.toggle('hidden', source !== 'bulk');
     this._updateContinueButton();
     this._notifyDataChange();
   }

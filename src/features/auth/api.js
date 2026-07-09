@@ -40,9 +40,13 @@ async function request(path, options = {}) {
   }
 
   if (!response.ok) {
-    if (response.status === 401) {
+    if (response.status === 401 && token) {
       tokenStorage.clear();
-      window.dispatchEvent(new CustomEvent('auth:expired'));
+      window.dispatchEvent(
+        new CustomEvent('auth:expired', {
+          detail: { message: data?.error || 'Session expired. Please log in again.' },
+        })
+      );
     }
     throw new ApiError(data?.error || 'Request failed', response.status);
   }
@@ -63,6 +67,10 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     });
+  },
+
+  logout() {
+    return request('/auth/logout', { method: 'POST' });
   },
 
   getMe() {

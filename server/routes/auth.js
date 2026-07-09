@@ -5,13 +5,21 @@ import { query } from '../db.js';
 import { config } from '../config.js';
 import { authenticate } from '../middleware/auth.js';
 import { getActiveSubscription, syncExpiredSubscriptions, getLatestSubscription } from '../services/subscriptionService.js';
+import { bumpSessionVersion } from '../services/sessionService.js';
 
 const router = Router();
 
-function signToken(user) {
-  return jwt.sign({ email: user.email }, config.jwtSecret, {
+/**
+ * @description Issues a new JWT after bumping session version (invalidates other devices).
+ * @param {number | string} userId
+ * @param {string} email
+ * @returns {Promise<string>}
+ */
+async function issueSessionToken(userId, email) {
+  const sessionVersion = await bumpSessionVersion(userId);
+  return jwt.sign({ email, sessionVersion }, config.jwtSecret, {
     expiresIn: config.jwtExpiresIn,
-    subject: String(user.id),
+    subject: String(userId),
   });
 }
 
@@ -90,7 +98,7 @@ router.post('/register', async (req, res) => {
       [normalizedEmail, passwordHash, name.trim()]
     );
 
-    const token = signToken({ id: result.insertId, email: normalizedEmail });
+    const token = await issueSessionToken(result.insertId, normalizedEmail);
     const user = await buildUserResponse(result.insertId);
 
     res.status(201).json({ token, user });
@@ -123,13 +131,23 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
-    const token = signToken(user);
+    const token = await issueSessionToken(user.id, user.email);
     const userResponse = await buildUserResponse(user.id);
 
     res.json({ token, user: userResponse });
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ error: 'Login failed' });
+  }
+});
+
+router.post('/logout', authenticate, async (req, res) => {
+  try {
+    await bumpSessionVersion(req.user.id);
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('Logout error:', error);
+    res.status(500).json({ error: 'Logout failed' });
   }
 });
 

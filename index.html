@@ -131,7 +131,10 @@
         <div class="data-split">
           <div class="data-split__form">
             <h2 class="page-title">Add your content</h2>
-            <p class="page-desc" id="data-step-desc">Upload a spreadsheet or fill in fields manually.</p>
+            <div class="data-page__subtitle-row">
+              <p class="page-desc" id="data-step-desc">Upload a spreadsheet or fill in fields manually.</p>
+              <button type="button" class="text-link" id="btn-download-sample-excel">Download sample</button>
+            </div>
 
             <div class="tab-switcher tab-switcher--underline" id="upload-tabs" role="tablist">
               <button type="button" class="tab-switcher__btn active" role="tab" data-source="bulk" aria-selected="true">Multiple Data</button>
@@ -143,26 +146,15 @@
             </div>
 
             <div class="upload-panel" id="bulk-panel">
-              <div class="bulk-upload-row">
-                <div class="bulk-sample-download">
-                  <button type="button" class="btn btn-outline btn-sm bulk-sample-btn" id="btn-download-sample-excel">
-                    <svg class="btn-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                      <path d="M8 2.667v7.333M5.333 8 8 10.667 10.667 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                      <path d="M3.333 13.333h9.334" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                    </svg>
-                    <span>Download sample</span>
-                  </button>
-                </div>
-                <div class="dropzone dropzone--bulk dropzone--compact" id="dropzone">
-                  <div class="dropzone-content">
-                    <svg class="dropzone-icon" width="24" height="24" viewBox="0 0 40 40" fill="none" aria-hidden="true">
-                      <path d="M20 6v20M12 14l8-8 8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                      <path d="M8 28h24" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    </svg>
-                    <div class="dropzone-copy">
-                      <p class="dropzone-text">Drag &amp; Drop Excel file here or <strong>Browse</strong></p>
-                      <p class="dropzone-subtext">.xlsx, .xls</p>
-                    </div>
+              <div class="dropzone dropzone--bulk dropzone--compact" id="dropzone">
+                <div class="dropzone-content">
+                  <svg class="dropzone-icon" width="24" height="24" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+                    <path d="M20 6v20M12 14l8-8 8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M8 28h24" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                  <div class="dropzone-copy">
+                    <p class="dropzone-text">Drag &amp; Drop Excel file here or <strong>Browse</strong></p>
+                    <p class="dropzone-subtext">.xlsx, .xls</p>
                   </div>
                 </div>
               </div>
