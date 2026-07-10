@@ -2211,7 +2211,8 @@ body.social-exporting * {
   padding: 10px 12px;
 }
 
-.template-card-body h4 {
+.template-card-body h4,
+.template-card-heading {
   margin: 0;
   font-size: 0.9rem;
   font-weight: 600;

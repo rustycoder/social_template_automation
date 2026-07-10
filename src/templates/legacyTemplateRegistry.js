@@ -5,7 +5,7 @@ export const LEGACY_TEMPLATE_REGISTRY = [
     file: 'template-c-viral.html',
     id: 'viral-shock-card',
     name: 'Viral / Shock',
-    category: 'pop-culture-media',
+    category: 'pop-culture',
     previewBucket: 'square',
     fields: [
       { key: 'PHOTO', label: 'Photo', type: 'image', required: true },
@@ -46,7 +46,7 @@ export const LEGACY_TEMPLATE_REGISTRY = [
     file: 'template-f-stamp.html',
     id: 'stamp-breaking-card',
     name: 'Stamp / Breaking',
-    category: 'pop-culture-media',
+    category: 'pop-culture',
     previewBucket: 'square',
     fields: [
       { key: 'PHOTO', label: 'Photo', type: 'image', required: true },
@@ -75,7 +75,7 @@ export const LEGACY_TEMPLATE_REGISTRY = [
     file: 'template-h-entertainment-scoop.html',
     id: 'entertainment-scoop-card',
     name: 'Entertainment Scoop',
-    category: 'pop-culture-media',
+    category: 'pop-culture',
     previewBucket: 'square',
     fields: [
       { key: 'PHOTO_LEFT', label: 'Left Photo', type: 'image', required: true },
@@ -89,7 +89,7 @@ export const LEGACY_TEMPLATE_REGISTRY = [
     file: 'template-i-infographic-breakdown.html',
     id: 'infographic-breakdown-card',
     name: 'Infographic Breakdown',
-    category: 'tech-saas',
+    category: 'tech',
     previewBucket: 'square',
     fields: [
       { key: 'PHOTO', label: 'Background Photo', type: 'image', required: true },
@@ -110,7 +110,7 @@ export const LEGACY_TEMPLATE_REGISTRY = [
     file: 'template-j-quote-of-the-day.html',
     id: 'quote-of-the-day-card',
     name: 'Quote of the Day',
-    category: 'productivity-work',
+    category: 'productivity',
     previewBucket: 'square',
     fields: [
       { key: 'PHOTO', label: 'Background Photo', type: 'image', required: true },
@@ -123,7 +123,7 @@ export const LEGACY_TEMPLATE_REGISTRY = [
     file: 'template-k-daily-tips.html',
     id: 'daily-tips-card',
     name: 'Daily Tips',
-    category: 'productivity-work',
+    category: 'productivity',
     previewBucket: 'square',
     fields: [
       { key: 'HEADER', label: 'Header', type: 'text', required: true },
@@ -150,7 +150,7 @@ export const LEGACY_TEMPLATE_REGISTRY = [
     file: 'template-l-fact-of-the-day.html',
     id: 'fact-of-the-day-card',
     name: 'Fact of the Day',
-    category: 'science-space',
+    category: 'science',
     previewBucket: 'square',
     fields: [
       { key: 'PHOTO', label: 'Background Photo', type: 'image', required: true },
@@ -182,7 +182,7 @@ export const LEGACY_TEMPLATE_REGISTRY = [
     file: 'template-n-celebrity-profile.html',
     id: 'celebrity-profile-card',
     name: 'Celebrity Profile',
-    category: 'pop-culture-media',
+    category: 'pop-culture',
     previewBucket: 'square',
     fields: [
       { key: 'PHOTO', label: 'Photo', type: 'image', required: true },
@@ -198,7 +198,7 @@ export const LEGACY_TEMPLATE_REGISTRY = [
     file: 'template-o-movie-rating.html',
     id: 'movie-rating-card',
     name: 'Movie Rating',
-    category: 'pop-culture-media',
+    category: 'pop-culture',
     previewBucket: 'square',
     fields: [
       { key: 'PHOTO', label: 'Scene Photo', type: 'image', required: true },
@@ -232,7 +232,7 @@ export const LEGACY_TEMPLATE_REGISTRY = [
     file: 'template-q-space-fact.html',
     id: 'space-fact-card',
     name: 'Space Fact of the Week',
-    category: 'science-space',
+    category: 'science',
     previewBucket: 'square',
     fields: [
       { key: 'PHOTO', label: 'Space Photo', type: 'image', required: true },

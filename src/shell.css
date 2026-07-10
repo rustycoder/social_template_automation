@@ -584,19 +584,11 @@ html {
 
 .template-card-category,
 .post-card__category {
-  display: inline-block;
-  width: fit-content;
-  max-width: 100%;
-  margin-bottom: 6px;
-  padding: 3px 8px;
-  border-radius: 999px;
-  background: var(--color-bg-hover);
-  border: 1px solid var(--color-border);
-  font-size: 0.62rem;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-  color: var(--color-text-muted);
+  display: block;
+  margin-top: 2px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--color-accent);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1430,8 +1422,14 @@ html {
     padding: 8px 10px;
   }
 
-  .template-card-body h4 {
+  .template-card-body h4,
+  .template-card-heading {
     font-size: 0.8rem;
+  }
+
+  .template-card-category,
+  .post-card__category {
+    font-size: 0.65rem;
   }
 
   .platform-tag--icon {

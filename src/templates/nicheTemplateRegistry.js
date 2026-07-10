@@ -3,7 +3,7 @@ export const NICHE_TEMPLATE_REGISTRY = [
     file: 'template-high-ticket-freelance.html',
     id: 'high-ticket-freelance-card',
     name: "High-Ticket Freelance Blueprint",
-    category: 'productivity-work',
+    category: 'productivity',
     previewBucket: 'square',
     fields: [
       {
@@ -42,7 +42,7 @@ export const NICHE_TEMPLATE_REGISTRY = [
     file: 'template-micro-saas-builder.html',
     id: 'micro-saas-builder-card',
     name: "Micro-SaaS Builder Insights",
-    category: 'productivity-work',
+    category: 'productivity',
     previewBucket: 'square',
     fields: [
       {
@@ -93,7 +93,7 @@ export const NICHE_TEMPLATE_REGISTRY = [
     file: 'template-solopreneur-systems.html',
     id: 'solopreneur-systems-card',
     name: "Solopreneur Systems & Automation",
-    category: 'productivity-work',
+    category: 'productivity',
     previewBucket: 'square',
     fields: [
       {
@@ -138,7 +138,7 @@ export const NICHE_TEMPLATE_REGISTRY = [
     file: 'template-remote-team-culture.html',
     id: 'remote-team-culture-card',
     name: "Remote Team Culture Strategy",
-    category: 'productivity-work',
+    category: 'productivity',
     previewBucket: 'square',
     fields: [
       {
@@ -171,7 +171,7 @@ export const NICHE_TEMPLATE_REGISTRY = [
     file: 'template-ai-prompt-enterprise.html',
     id: 'ai-prompt-enterprise-card',
     name: "AI Prompt Engineering for Enterprise",
-    category: 'productivity-work',
+    category: 'productivity',
     previewBucket: 'square',
     fields: [
       {
@@ -204,7 +204,7 @@ export const NICHE_TEMPLATE_REGISTRY = [
     file: 'template-container-home-design.html',
     id: 'container-home-design-card',
     name: "Architectural Container Home Design",
-    category: 'real-estate-living',
+    category: 'real-estate',
     previewBucket: 'square',
     fields: [
       {
@@ -243,7 +243,7 @@ export const NICHE_TEMPLATE_REGISTRY = [
     file: 'template-heritage-restoration.html',
     id: 'heritage-restoration-card',
     name: "Heritage Home Restorations",
-    category: 'real-estate-living',
+    category: 'real-estate',
     previewBucket: 'square',
     fields: [
       {
@@ -288,7 +288,7 @@ export const NICHE_TEMPLATE_REGISTRY = [
     file: 'template-biophilic-interior.html',
     id: 'biophilic-interior-card',
     name: "Biophilic Interior Design",
-    category: 'real-estate-living',
+    category: 'real-estate',
     previewBucket: 'square',
     fields: [
       {
@@ -321,7 +321,7 @@ export const NICHE_TEMPLATE_REGISTRY = [
     file: 'template-tiny-house-glamping.html',
     id: 'tiny-house-glamping-card',
     name: "High-End Tiny House Glamping",
-    category: 'real-estate-living',
+    category: 'real-estate',
     previewBucket: 'square',
     fields: [
       {
@@ -390,7 +390,7 @@ export const NICHE_TEMPLATE_REGISTRY = [
     file: 'template-commercial-re-syndication.html',
     id: 'commercial-re-syndication-card',
     name: "Commercial Real Estate Syndication",
-    category: 'real-estate-living',
+    category: 'real-estate',
     previewBucket: 'square',
     fields: [
       {
@@ -594,7 +594,7 @@ export const NICHE_TEMPLATE_REGISTRY = [
     file: 'template-longevity-biohacking.html',
     id: 'longevity-biohacking-card',
     name: "Longevity Biohacking Protocols",
-    category: 'health-longevity',
+    category: 'health',
     previewBucket: 'square',
     fields: [
       {
@@ -627,7 +627,7 @@ export const NICHE_TEMPLATE_REGISTRY = [
     file: 'template-pediatric-neurodiversity.html',
     id: 'pediatric-neurodiversity-card',
     name: "Pediatric Neurodiversity Support",
-    category: 'health-longevity',
+    category: 'health',
     previewBucket: 'square',
     fields: [
       {
@@ -660,7 +660,7 @@ export const NICHE_TEMPLATE_REGISTRY = [
     file: 'template-athletic-sleep-optimization.html',
     id: 'athletic-sleep-optimization-card',
     name: "Athletic Sleep Optimization",
-    category: 'health-longevity',
+    category: 'health',
     previewBucket: 'square',
     fields: [
       {
@@ -693,7 +693,7 @@ export const NICHE_TEMPLATE_REGISTRY = [
     file: 'template-executive-ergonomics.html',
     id: 'executive-ergonomics-card',
     name: "Executive Ergonomics Lab",
-    category: 'health-longevity',
+    category: 'health',
     previewBucket: 'square',
     fields: [
       {
@@ -726,7 +726,7 @@ export const NICHE_TEMPLATE_REGISTRY = [
     file: 'template-functional-medicine-nutrition.html',
     id: 'functional-medicine-nutrition-card',
     name: "Functional Medicine Nutrition",
-    category: 'health-longevity',
+    category: 'health',
     previewBucket: 'square',
     fields: [
       {
@@ -759,7 +759,7 @@ export const NICHE_TEMPLATE_REGISTRY = [
     file: 'template-micro-angel-investing.html',
     id: 'micro-angel-investing-card',
     name: "Micro Angel Investing Playbook",
-    category: 'finance-investing',
+    category: 'finance',
     previewBucket: 'square',
     fields: [
       {
@@ -792,7 +792,7 @@ export const NICHE_TEMPLATE_REGISTRY = [
     file: 'template-agriculture-land-investing.html',
     id: 'agriculture-land-investing-card',
     name: "Agriculture Land Investing",
-    category: 'finance-investing',
+    category: 'finance',
     previewBucket: 'square',
     fields: [
       {
@@ -825,7 +825,7 @@ export const NICHE_TEMPLATE_REGISTRY = [
     file: 'template-saas-acquisition-flip.html',
     id: 'saas-acquisition-flip-card',
     name: "SaaS Acquisition Flips",
-    category: 'finance-investing',
+    category: 'finance',
     previewBucket: 'square',
     fields: [
       {
@@ -858,7 +858,7 @@ export const NICHE_TEMPLATE_REGISTRY = [
     file: 'template-web3-micro-grants.html',
     id: 'web3-micro-grants-card',
     name: "Web3 Micro Grants",
-    category: 'finance-investing',
+    category: 'finance',
     previewBucket: 'square',
     fields: [
       {
@@ -891,7 +891,7 @@ export const NICHE_TEMPLATE_REGISTRY = [
     file: 'template-dividend-growth.html',
     id: 'dividend-growth-card',
     name: "Dividend Growth Portfolios",
-    category: 'finance-investing',
+    category: 'finance',
     previewBucket: 'square',
     fields: [
       {
@@ -924,7 +924,7 @@ export const NICHE_TEMPLATE_REGISTRY = [
     file: 'template-nocode-enterprise.html',
     id: 'nocode-enterprise-card',
     name: "No-Code Enterprise Stacks",
-    category: 'tech-saas',
+    category: 'tech',
     previewBucket: 'square',
     fields: [
       {
@@ -957,7 +957,7 @@ export const NICHE_TEMPLATE_REGISTRY = [
     file: 'template-devops-automation.html',
     id: 'devops-automation-card',
     name: "DevOps Automation Patterns",
-    category: 'tech-saas',
+    category: 'tech',
     previewBucket: 'square',
     fields: [
       {
@@ -990,7 +990,7 @@ export const NICHE_TEMPLATE_REGISTRY = [
     file: 'template-privacy-data-engineering.html',
     id: 'privacy-data-engineering-card',
     name: "Privacy-First Data Engineering",
-    category: 'tech-saas',
+    category: 'tech',
     previewBucket: 'square',
     fields: [
       {
@@ -1023,7 +1023,7 @@ export const NICHE_TEMPLATE_REGISTRY = [
     file: 'template-ai-ecommerce-personalization.html',
     id: 'ai-ecommerce-personalization-card',
     name: "AI Ecommerce Personalization",
-    category: 'tech-saas',
+    category: 'tech',
     previewBucket: 'square',
     fields: [
       {
@@ -1056,7 +1056,7 @@ export const NICHE_TEMPLATE_REGISTRY = [
     file: 'template-sustainable-supply-chain.html',
     id: 'sustainable-supply-chain-card',
     name: "Sustainable Supply Chain Design",
-    category: 'tech-saas',
+    category: 'tech',
     previewBucket: 'square',
     fields: [
       {
@@ -1089,7 +1089,7 @@ export const NICHE_TEMPLATE_REGISTRY = [
     file: 'template-deep-space-astrophoto.html',
     id: 'deep-space-astrophoto-card',
     name: "Deep Space Astrophotography",
-    category: 'science-space',
+    category: 'science',
     previewBucket: 'square',
     fields: [
       {
@@ -1122,7 +1122,7 @@ export const NICHE_TEMPLATE_REGISTRY = [
     file: 'template-quantum-computing.html',
     id: 'quantum-computing-card',
     name: "Quantum Computing Frontiers",
-    category: 'science-space',
+    category: 'science',
     previewBucket: 'square',
     fields: [
       {
@@ -1155,7 +1155,7 @@ export const NICHE_TEMPLATE_REGISTRY = [
     file: 'template-deep-ocean-marine.html',
     id: 'deep-ocean-marine-card',
     name: "Deep Ocean Marine Science",
-    category: 'science-space',
+    category: 'science',
     previewBucket: 'square',
     fields: [
       {
@@ -1188,7 +1188,7 @@ export const NICHE_TEMPLATE_REGISTRY = [
     file: 'template-paleontology-dig.html',
     id: 'paleontology-dig-card',
     name: "Paleontology Field Digs",
-    category: 'science-space',
+    category: 'science',
     previewBucket: 'square',
     fields: [
       {
@@ -1221,7 +1221,7 @@ export const NICHE_TEMPLATE_REGISTRY = [
     file: 'template-materials-science.html',
     id: 'materials-science-card',
     name: "Advanced Materials Science",
-    category: 'science-space',
+    category: 'science',
     previewBucket: 'square',
     fields: [
       {
@@ -1254,7 +1254,7 @@ export const NICHE_TEMPLATE_REGISTRY = [
     file: 'template-cyberpunk-cinema.html',
     id: 'cyberpunk-cinema-card',
     name: "Cyberpunk Cinema Studies",
-    category: 'pop-culture-media',
+    category: 'pop-culture',
     previewBucket: 'square',
     fields: [
       {
@@ -1287,7 +1287,7 @@ export const NICHE_TEMPLATE_REGISTRY = [
     file: 'template-indie-game-studio.html',
     id: 'indie-game-studio-card',
     name: "Indie Game Studio Diaries",
-    category: 'pop-culture-media',
+    category: 'pop-culture',
     previewBucket: 'square',
     fields: [
       {
@@ -1320,7 +1320,7 @@ export const NICHE_TEMPLATE_REGISTRY = [
     file: 'template-retro-anime-cells.html',
     id: 'retro-anime-cells-card',
     name: "Retro Anime Cel Collecting",
-    category: 'pop-culture-media',
+    category: 'pop-culture',
     previewBucket: 'square',
     fields: [
       {
@@ -1353,7 +1353,7 @@ export const NICHE_TEMPLATE_REGISTRY = [
     file: 'template-peak-tv-screenplay.html',
     id: 'peak-tv-screenplay-card',
     name: "Peak TV Screenplay Craft",
-    category: 'pop-culture-media',
+    category: 'pop-culture',
     previewBucket: 'square',
     fields: [
       {
@@ -1386,7 +1386,7 @@ export const NICHE_TEMPLATE_REGISTRY = [
     file: 'template-true-crime-forensic.html',
     id: 'true-crime-forensic-card',
     name: "True Crime Forensic Files",
-    category: 'pop-culture-media',
+    category: 'pop-culture',
     previewBucket: 'square',
     fields: [
       {
@@ -1419,7 +1419,7 @@ export const NICHE_TEMPLATE_REGISTRY = [
     file: 'template-bespoke-leather.html',
     id: 'bespoke-leather-card',
     name: "Bespoke Leather Atelier",
-    category: 'creative-artisans',
+    category: 'creative',
     previewBucket: 'square',
     fields: [
       {
@@ -1452,7 +1452,7 @@ export const NICHE_TEMPLATE_REGISTRY = [
     file: 'template-brutalist-graphic-design.html',
     id: 'brutalist-graphic-design-card',
     name: "Brutalist Graphic Design",
-    category: 'creative-artisans',
+    category: 'creative',
     previewBucket: 'square',
     fields: [
       {
@@ -1485,7 +1485,7 @@ export const NICHE_TEMPLATE_REGISTRY = [
     file: 'template-sustainable-haute-couture.html',
     id: 'sustainable-haute-couture-card',
     name: "Sustainable Haute Couture",
-    category: 'creative-artisans',
+    category: 'creative',
     previewBucket: 'square',
     fields: [
       {
@@ -1518,7 +1518,7 @@ export const NICHE_TEMPLATE_REGISTRY = [
     file: 'template-ceramic-arts.html',
     id: 'ceramic-arts-card',
     name: "Ceramic Arts Studio",
-    category: 'creative-artisans',
+    category: 'creative',
     previewBucket: 'square',
     fields: [
       {
@@ -1551,7 +1551,7 @@ export const NICHE_TEMPLATE_REGISTRY = [
     file: 'template-architectural-model-making.html',
     id: 'architectural-model-making-card',
     name: "Architectural Model Making",
-    category: 'creative-artisans',
+    category: 'creative',
     previewBucket: 'square',
     fields: [
       {

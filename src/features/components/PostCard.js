@@ -42,12 +42,17 @@ export function createPlatformTags(bucket, mediaType = 'image') {
  * @description Builds the card body with title and optional platform tags.
  * @param {string} title Card heading text.
  * @param {string} [bucket] When set, renders platform tags for this aspect bucket.
- * @param {string} [categoryId] Template category id for badge display.
+ * @param {string} [categoryId] Template category id shown beside the title.
  * @returns {HTMLElement}
  */
 function createCardBody(title, bucket = '', categoryId = '') {
   const body = document.createElement('div');
   body.className = 'template-card-body post-card__body';
+
+  const heading = document.createElement('h4');
+  heading.className = 'template-card-heading post-card__heading';
+  heading.textContent = title;
+  body.appendChild(heading);
 
   if (categoryId) {
     const category = document.createElement('span');
@@ -55,10 +60,6 @@ function createCardBody(title, bucket = '', categoryId = '') {
     category.textContent = getCategoryLabel(categoryId);
     body.appendChild(category);
   }
-
-  const heading = document.createElement('h4');
-  heading.textContent = title;
-  body.appendChild(heading);
 
   if (bucket) {
     body.appendChild(createPlatformTags(bucket));
