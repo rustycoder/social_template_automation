@@ -4,8 +4,7 @@
  * Loads standalone HTML template files, extracts their CSS/body/fonts,
  * and produces template objects that conform to the existing pipeline interface.
  *
- * Dimension adaptation follows the same regex strategy as render.js:
- * swap width/height on html,body and .card selectors per layout bucket.
+ * Dimension adaptation swaps width/height on html,body and .card selectors per layout bucket.
  */
 
 import viralHtml from './template-c-viral.html?raw';
@@ -57,7 +56,6 @@ function extractBody(rawHtml) {
 
 /**
  * Adapt base CSS to a target layout by swapping container dimensions.
- * Mirrors render.js regex logic exactly.
  */
 function adaptCssToLayout(baseCss, fontImports, width, height) {
   let css = baseCss
