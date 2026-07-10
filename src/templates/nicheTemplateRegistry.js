@@ -138,7 +138,7 @@ export const NICHE_TEMPLATE_REGISTRY = [
     file: 'template-remote-team-culture.html',
     id: 'remote-team-culture-card',
     name: "Remote Team Culture Strategy",
-    category: 'productivity',
+    category: 'work-culture',
     previewBucket: 'square',
     fields: [
       {
@@ -1089,7 +1089,7 @@ export const NICHE_TEMPLATE_REGISTRY = [
     file: 'template-deep-space-astrophoto.html',
     id: 'deep-space-astrophoto-card',
     name: "Deep Space Astrophotography",
-    category: 'science',
+    category: 'space',
     previewBucket: 'square',
     fields: [
       {

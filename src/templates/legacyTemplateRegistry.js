@@ -232,7 +232,7 @@ export const LEGACY_TEMPLATE_REGISTRY = [
     file: 'template-q-space-fact.html',
     id: 'space-fact-card',
     name: 'Space Fact of the Week',
-    category: 'science',
+    category: 'space',
     previewBucket: 'square',
     fields: [
       { key: 'PHOTO', label: 'Space Photo', type: 'image', required: true },
