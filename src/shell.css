@@ -149,8 +149,18 @@ html {
 }
 
 #app[data-active-step="billing"] #main-content,
+#main-content[data-layout-mode="billing"],
 #app[data-billing="true"] #main-content {
-  bottom: 0;
+  bottom: var(--footer-height);
+  display: block;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: var(--shell-padding);
+}
+
+#billing-page.step-panel.active {
+  display: block;
+  width: 100%;
 }
 
 #app-footer {
@@ -170,9 +180,12 @@ html {
   box-sizing: border-box;
 }
 
-#app-footer.hidden,
-#app[data-billing="true"] #app-footer {
+#app-footer.hidden {
   display: none;
+}
+
+#footer-billing.footer-panel--nav.active {
+  justify-content: flex-start;
 }
 
 .footer-panel {

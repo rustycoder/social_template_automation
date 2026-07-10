@@ -30,12 +30,28 @@ export class BillingUI {
     this.tableWrapper = document.getElementById('billing-table-wrapper');
     this._previousStep = 1;
     this._visible = false;
+    this._loadId = 0;
 
     this._bindEvents();
   }
 
   _bindEvents() {
     this.backBtn?.addEventListener('click', () => this.hide());
+  }
+
+  _syncFooterPanel(activeStep) {
+    document.getElementById('app-footer')?.querySelectorAll('.footer-panel').forEach((panel) => {
+      panel.classList.toggle('active', panel.dataset.footerStep === activeStep);
+    });
+  }
+
+  _beginLoad() {
+    if (this.summaryEl) this.summaryEl.innerHTML = '';
+    if (this.tableBody) this.tableBody.innerHTML = '';
+    this.emptyEl?.classList.add('hidden');
+    this.tableWrapper?.classList.add('hidden');
+    this.errorEl?.classList.add('hidden');
+    this._setLoading(true);
   }
 
   async show() {
@@ -47,75 +63,91 @@ export class BillingUI {
     this.authUI._closeDropdown();
     this._previousStep = document.querySelector('.step-panel.active')?.id?.replace('step-', '') || '1';
     this._visible = true;
+    this._beginLoad();
+
+    const main = document.getElementById('main-content');
+    if (main) main.dataset.layoutMode = 'billing';
 
     const app = document.getElementById('app');
     if (app) app.dataset.billing = 'true';
-    document.getElementById('app-footer')?.classList.add('hidden');
 
     document.querySelectorAll('.step-panel').forEach((panel) => panel.classList.remove('active'));
-    document.querySelector('.header-nav')?.classList.add('hidden');
     this.page?.classList.add('active');
+    this._syncFooterPanel('billing');
 
-    await authService.refreshSubscription();
-    await this._load();
+    const loadId = ++this._loadId;
+    try {
+      await this._load(loadId);
+      if (loadId === this._loadId) {
+        await authService.refreshSubscription();
+      }
+    } catch {
+      /* _load handles error UI */
+    }
   }
 
   hide() {
     this._visible = false;
+    this._loadId += 1;
     this.page?.classList.remove('active');
 
     const step = parseInt(this._previousStep, 10) || 1;
     const app = document.getElementById('app');
+    const main = document.getElementById('main-content');
+    if (main) main.dataset.layoutMode = step === 2 ? 'split' : 'default';
     if (app) {
       delete app.dataset.billing;
       app.dataset.activeStep = String(step);
     }
-    document.getElementById('app-footer')?.classList.remove('hidden');
-
-    document.querySelector('.header-nav')?.classList.remove('hidden');
 
     document.getElementById(`step-${step}`)?.classList.add('active');
 
-    document.querySelectorAll('.step-btn, .step-node').forEach((btn) => {
+    document.querySelectorAll('.step-node').forEach((btn) => {
       const btnStep = parseInt(btn.dataset.step, 10);
       btn.classList.remove('active', 'completed');
       if (btnStep === step) btn.classList.add('active');
       else if (btnStep < step) btn.classList.add('completed');
     });
 
-    document.getElementById('app-footer')?.querySelectorAll('.footer-panel').forEach((panel) => {
-      panel.classList.toggle('active', panel.dataset.footerStep === String(step));
-    });
+    this._syncFooterPanel(String(step));
   }
 
-  async _load() {
-    this._setLoading(true);
-    this.errorEl?.classList.add('hidden');
-
+  async _load(loadId) {
     try {
       const data = await api.getBilling();
+      if (loadId !== this._loadId || !this._visible) return;
+
       this._renderSummary(data.currentSubscription);
       this._renderHistory(data.history);
     } catch (error) {
+      if (loadId !== this._loadId || !this._visible) return;
+
       const message =
         error instanceof ApiError ? error.message : 'Failed to load billing history.';
       if (this.errorEl) {
         this.errorEl.textContent = message;
         this.errorEl.classList.remove('hidden');
       }
-      this.summaryEl.innerHTML = '';
-      this.tableBody.innerHTML = '';
+      if (this.summaryEl) this.summaryEl.innerHTML = '';
+      if (this.tableBody) this.tableBody.innerHTML = '';
       this.emptyEl?.classList.add('hidden');
       this.tableWrapper?.classList.add('hidden');
     } finally {
-      this._setLoading(false);
+      if (loadId === this._loadId && this._visible) {
+        this._setLoading(false);
+      }
     }
   }
 
   _setLoading(loading) {
     this.loadingEl?.classList.toggle('hidden', !loading);
-    this.tableWrapper?.classList.toggle('hidden', loading);
-    this.summaryEl?.classList.toggle('hidden', loading);
+    if (loading) {
+      this.tableWrapper?.classList.add('hidden');
+      this.summaryEl?.classList.add('hidden');
+      return;
+    }
+
+    this.summaryEl?.classList.remove('hidden');
   }
 
   _renderSummary(subscription) {
@@ -180,8 +212,8 @@ export class BillingUI {
             <td>${formatDate(item.createdAt)}</td>
             <td>${item.planName}</td>
             <td>${item.priceLabel}/${interval}</td>
-            <td>${item.payment?.orderId || '—'}</td>
-            <td>${formatDate(item.startsAt)}</td>
+            <td class="billing-table__col--hide-sm">${item.payment?.orderId || '—'}</td>
+            <td class="billing-table__col--hide-sm">${formatDate(item.startsAt)}</td>
             <td>${formatDate(item.expiresAt)}</td>
             <td><span class="billing-status-badge ${statusClass}">${formatStatus(item.status)}</span></td>
           </tr>

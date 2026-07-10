@@ -227,28 +227,22 @@
       <!-- Billing -->
       <section class="step-panel" id="billing-page">
         <div class="billing-page">
-          <header class="billing-page-header">
-            <button type="button" class="btn btn-ghost" id="btn-billing-back">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                <path d="M13 8H3M7 4L3 8L7 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              Back
-            </button>
-            <div>
-              <h2>My Billing</h2>
-              <p class="panel-desc">View your subscription and billing history.</p>
+          <header class="billing-page__header">
+            <div class="billing-page__intro">
+              <h2 class="page-title">My Billing</h2>
+              <p class="page-desc">View your subscription and billing history.</p>
             </div>
           </header>
 
-          <p class="form-error hidden" id="billing-error"></p>
+          <p class="billing-error form-error hidden" id="billing-error"></p>
           <div class="billing-loading" id="billing-loading">Loading billing history…</div>
 
           <div id="billing-summary" class="billing-summary"></div>
 
-          <div class="billing-history panel-card">
-            <div class="panel-header">
-              <h3>Billing History</h3>
-            </div>
+          <section class="billing-history-card">
+            <header class="billing-history-card__header">
+              <h3 class="billing-history-card__title">Billing history</h3>
+            </header>
             <p class="billing-empty hidden" id="billing-empty">No billing history yet.</p>
             <div class="billing-table-wrapper" id="billing-table-wrapper">
               <table class="billing-table">
@@ -257,8 +251,8 @@
                     <th>Date</th>
                     <th>Plan</th>
                     <th>Amount</th>
-                    <th>Order ID</th>
-                    <th>Start</th>
+                    <th class="billing-table__col--hide-sm">Order ID</th>
+                    <th class="billing-table__col--hide-sm">Start</th>
                     <th>End</th>
                     <th>Status</th>
                   </tr>
@@ -266,7 +260,7 @@
                 <tbody id="billing-table-body"></tbody>
               </table>
             </div>
-          </div>
+          </section>
         </div>
       </section>
     </main>
@@ -325,6 +319,18 @@
           </svg>
           <span class="btn-text">Export Selected <span class="btn-export-count">(0)</span></span>
         </button>
+      </div>
+
+      <!-- Billing: Back -->
+      <div class="footer-panel footer-panel--nav" id="footer-billing" data-footer-step="billing">
+        <div class="footer-slot footer-slot--left">
+          <button type="button" class="btn btn-outline" id="btn-billing-back" aria-label="Back">
+            <svg class="btn-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M13 8H3M7 4L3 8L7 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span class="btn-text">Back</span>
+          </button>
+        </div>
       </div>
     </footer>
 
