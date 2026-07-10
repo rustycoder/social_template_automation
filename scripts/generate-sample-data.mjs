@@ -8,6 +8,8 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { LEGACY_TEMPLATE_REGISTRY } from '../src/templates/legacyTemplateRegistry.js';
 import { NICHE_TEMPLATE_REGISTRY } from '../src/templates/nicheTemplateRegistry.js';
+import { AUDIENCE_TEMPLATE_REGISTRY } from '../src/templates/audienceTemplateRegistry.js';
+import { AUDIENCE_SAMPLES } from '../src/features/domain/audienceTemplateSamples.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const outPath = join(root, 'src/features/domain/builtinTemplateSamples.js');
@@ -479,10 +481,12 @@ const SAMPLES = {
   },
 };
 
-const REGISTRY = [...LEGACY_TEMPLATE_REGISTRY, ...NICHE_TEMPLATE_REGISTRY];
+const ALL_SAMPLES = { ...SAMPLES, ...AUDIENCE_SAMPLES };
+
+const REGISTRY = [...LEGACY_TEMPLATE_REGISTRY, ...NICHE_TEMPLATE_REGISTRY, ...AUDIENCE_TEMPLATE_REGISTRY];
 
 for (const def of REGISTRY) {
-  const sample = SAMPLES[def.id];
+  const sample = ALL_SAMPLES[def.id];
   if (!sample) {
     console.error(`Missing sample for template: ${def.id}`);
     process.exit(1);
@@ -500,8 +504,8 @@ const file = `/**
  * Regenerate: node scripts/generate-sample-data.mjs
  */
 
-export const BUILTIN_SAMPLES = ${JSON.stringify(SAMPLES, null, 2)};
+export const BUILTIN_SAMPLES = ${JSON.stringify(ALL_SAMPLES, null, 2)};
 `;
 
 writeFileSync(outPath, file, 'utf8');
-console.log(`Wrote ${Object.keys(SAMPLES).length} complete template samples to ${outPath}`);
+console.log(`Wrote ${Object.keys(ALL_SAMPLES).length} complete template samples to ${outPath}`);

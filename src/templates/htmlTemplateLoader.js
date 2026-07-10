@@ -7,6 +7,7 @@
 
 import { LEGACY_TEMPLATE_REGISTRY } from './legacyTemplateRegistry.js';
 import { NICHE_TEMPLATE_REGISTRY } from './nicheTemplateRegistry.js';
+import { AUDIENCE_TEMPLATE_REGISTRY } from './audienceTemplateRegistry.js';
 
 const htmlModules = import.meta.glob('./*.html', {
   query: '?raw',
@@ -14,7 +15,7 @@ const htmlModules = import.meta.glob('./*.html', {
   eager: true,
 });
 
-const TEMPLATE_REGISTRY = [...LEGACY_TEMPLATE_REGISTRY, ...NICHE_TEMPLATE_REGISTRY];
+const TEMPLATE_REGISTRY = [...LEGACY_TEMPLATE_REGISTRY, ...NICHE_TEMPLATE_REGISTRY, ...AUDIENCE_TEMPLATE_REGISTRY];
 
 const LAYOUTS = {
   square: { width: 1080, height: 1080 },
