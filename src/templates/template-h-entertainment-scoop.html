@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Entertainment Scoop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{width:1080px;height:1080px;overflow:hidden;font-family:'Inter',sans-serif;}
+  .card{position:relative;width:1080px;height:1080px;background:linear-gradient(135deg,#ff6b00 0%,#ffb800 50%,#ff3d00 100%);}
+  .logo-slot{position:absolute;top:44px;left:48px;width:72px;height:72px;border:2px dashed rgba(255,255,255,0.5);border-radius:14px;background:rgba(0,0,0,0.15);overflow:hidden;z-index:3;}
+  .logo-slot img{width:100%;height:100%;object-fit:contain;padding:6px;}
+  .top-banner{position:absolute;top:48px;left:140px;right:48px;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:58px;letter-spacing:.04em;color:#fff;text-shadow:0 3px 12px rgba(0,0,0,0.25);z-index:2;}
+  .top-banner mark{background:#fff;color:#ff3d00;padding:2px 12px;border-radius:4px;}
+  .top-banner .highlight-red{background:#1a1a1a;color:#ffb800;padding:2px 12px;border-radius:4px;}
+  .images{display:flex;gap:28px;position:absolute;left:48px;right:48px;top:200px;bottom:200px;z-index:2;}
+  .img-wrap{flex:1;border-radius:20px;overflow:hidden;box-shadow:0 16px 40px rgba(0,0,0,0.28);}
+  .img-wrap img{width:100%;height:100%;object-fit:cover;display:block;}
+  .bottom-bar{position:absolute;left:0;right:0;bottom:0;height:140px;background:rgba(20,10,0,0.82);display:flex;align-items:center;justify-content:center;padding:0 56px;z-index:2;}
+  .bottom-text{font-size:28px;font-weight:700;color:#fff;text-align:center;line-height:1.35;}
+  .bottom-text mark{background:#ffb800;color:#1a1a1a;padding:2px 8px;border-radius:3px;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo-slot"><img class="t-logo" src="{{LOGO}}" alt=""></div>
+    <div class="top-banner">{{TOP_TEXT}}</div>
+    <div class="images">
+      <div class="img-wrap"><img src="{{PHOTO_LEFT}}" alt=""></div>
+      <div class="img-wrap"><img src="{{PHOTO_RIGHT}}" alt=""></div>
+    </div>
+    <div class="bottom-bar"><div class="bottom-text">{{BOTTOM_TEXT}}</div></div>
+  </div>
+</body>
+</html>

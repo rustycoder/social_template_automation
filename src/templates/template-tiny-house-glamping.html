@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>High-End Tiny House Glamping</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Barlow+Condensed:wght@700&family=JetBrains+Mono:wght@500;600&family=Playfair+Display:wght@500;600&family=Oswald:wght@600&family=Cormorant+Garamond:wght@600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}html,body{width:1080px;height:1080px;overflow:hidden;font-family:'Inter',sans-serif;}
+.logo-slot{position:absolute;top:40px;left:44px;right:auto;bottom:auto;width:68px;height:68px;border:2px dashed rgba(255,255,255,0.35);border-radius:12px;background:rgba(255,255,255,0.08);overflow:hidden;z-index:8;}.logo-slot img{width:100%;height:100%;object-fit:contain;padding:6px;}.card{position:relative;width:1080px;height:1080px;background:#0c4a6e;}.grid{position:absolute;inset:32px;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:12px;}.cell{border-radius:16px;overflow:hidden;}.cell img{width:100%;height:100%;object-fit:cover;}.overlay{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:420px;padding:32px 28px;background:rgba(15,23,42,0.88);border-radius:20px;border:1px solid rgba(255,255,255,0.15);z-index:6;text-align:center;}.t-title{font-size:32px;font-weight:800;color:#fff;margin-bottom:20px;line-height:1.2;}.t-title,.t-subtitle,.t-quote mark{background:#FFD600;color:#0a0a0b;padding:2px 6px;border-radius:2px;}.t-title,.t-subtitle,.t-quote .highlight-red{background:#D6293E;color:#fff;padding:2px 6px;border-radius:2px;}.ratings{display:flex;gap:16px;justify-content:center;}.rate{flex:1;background:rgba(255,255,255,0.08);border-radius:12px;padding:14px 10px;}.rate-label{font-size:13px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;}.rate-score{font-size:28px;font-weight:800;color:#38bdf8;margin-top:6px;}
+</style>
+</head>
+<body>
+  <div class="card">
+<div class="grid"><div class="cell"><img src="{{PHOTO_1}}" alt=""></div><div class="cell"><img src="{{PHOTO_2}}" alt=""></div><div class="cell"><img src="{{PHOTO_3}}" alt=""></div><div class="cell"><img src="{{PHOTO_4}}" alt=""></div></div><div class="logo-slot"><img src="{{LOGO}}" alt=""></div><div class="overlay"><div class="t-title">{{TITLE}}</div><div class="ratings"><div class="rate"><div class="rate-label">{{RATING_1_LABEL}}</div><div class="rate-score">{{RATING_1_SCORE}}</div></div><div class="rate"><div class="rate-label">{{RATING_2_LABEL}}</div><div class="rate-score">{{RATING_2_SCORE}}</div></div></div></div>
+  </div>
+</body>
+</html>

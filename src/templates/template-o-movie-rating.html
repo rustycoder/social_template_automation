@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Movie Rating</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{width:1080px;height:1080px;overflow:hidden;font-family:'Inter',sans-serif;}
+  .card{position:relative;width:1080px;height:1080px;background:#0a0a0a;}
+  .t-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  .scrim{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.95) 0%,rgba(0,0,0,0.4) 45%,rgba(0,0,0,0.65) 100%);}
+  .logo-slot{position:absolute;bottom:48px;right:52px;width:72px;height:72px;border:2px dashed rgba(192,192,192,0.4);border-radius:10px;background:rgba(255,255,255,0.06);overflow:hidden;z-index:2;}
+  .logo-slot img{width:100%;height:100%;object-fit:contain;padding:8px;}
+  .content{position:absolute;left:56px;right:56px;bottom:120px;z-index:2;}
+  .genre{display:inline-block;font-size:13px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:#c0c0c0;border:1px solid rgba(192,192,192,0.35);padding:6px 16px;border-radius:4px;margin-bottom:18px;}
+  .t-title{font-family:'Bebas Neue',sans-serif;font-size:72px;line-height:1;color:#fff;letter-spacing:.02em;margin-bottom:20px;}
+  .t-title mark{background:#c0c0c0;color:#0a0a0a;padding:2px 10px;border-radius:3px;}
+  .rating-row{display:flex;align-items:center;gap:16px;margin-bottom:22px;}
+  .stars{font-size:32px;color:#fbbf24;letter-spacing:4px;}
+  .rating-num{font-size:28px;font-weight:700;color:#e5e5e5;}
+  .t-summary{font-size:22px;line-height:1.5;color:rgba(255,255,255,0.82);max-width:900px;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <img class="t-photo" src="{{PHOTO}}" alt="">
+    <div class="scrim"></div>
+    <div class="content">
+      <div class="genre">{{GENRE}}</div>
+      <div class="t-title">{{TITLE}}</div>
+      <div class="rating-row">
+        <div class="stars">★★★★★</div>
+        <div class="rating-num">{{RATING}}/10</div>
+      </div>
+      <div class="t-summary">{{SUMMARY}}</div>
+    </div>
+    <div class="logo-slot"><img class="t-logo" src="{{LOGO}}" alt=""></div>
+  </div>
+</body>
+</html>

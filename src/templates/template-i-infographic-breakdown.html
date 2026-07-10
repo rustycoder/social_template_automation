@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Infographic Breakdown</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{width:1080px;height:1080px;overflow:hidden;font-family:'Inter',sans-serif;}
+  .card{position:relative;width:1080px;height:1080px;background:#0f766e;}
+  .t-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  .scrim{position:absolute;inset:0;background:linear-gradient(160deg,rgba(15,118,110,0.92) 0%,rgba(15,118,110,0.78) 45%,rgba(22,163,74,0.85) 100%);}
+  .logo-slot{position:absolute;bottom:44px;right:48px;width:72px;height:72px;border:2px dashed rgba(255,255,255,0.4);border-radius:12px;background:rgba(255,255,255,0.1);overflow:hidden;z-index:2;}
+  .logo-slot img{width:100%;height:100%;object-fit:contain;padding:6px;}
+  .title{font-family:'Space Grotesk',sans-serif;font-size:44px;font-weight:700;color:#fff;text-align:center;padding:52px 60px 28px;position:relative;z-index:2;}
+  .sections{position:absolute;left:48px;right:48px;top:200px;bottom:140px;display:flex;flex-direction:column;gap:22px;z-index:2;}
+  .section{display:flex;gap:24px;align-items:flex-start;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.18);border-radius:16px;padding:24px 28px;backdrop-filter:blur(4px);}
+  .icon{width:56px;height:56px;border-radius:14px;background:linear-gradient(135deg,#84cc16,#22d3ee);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;}
+  .section-body{flex:1;}
+  .section-heading{font-family:'Space Grotesk',sans-serif;font-size:26px;font-weight:700;color:#fff;margin-bottom:8px;}
+  .section-desc{font-size:18px;line-height:1.45;color:rgba(255,255,255,0.9);}
+</style>
+</head>
+<body>
+  <div class="card">
+    <img class="t-photo" src="{{PHOTO}}" alt="">
+    <div class="scrim"></div>
+    <div class="title">{{TITLE}}</div>
+    <div class="sections">
+      <div class="section">
+        <div class="icon">{{SECTION1_ICON}}</div>
+        <div class="section-body">
+          <div class="section-heading">{{SECTION1_HEADING}}</div>
+          <div class="section-desc">{{SECTION1_DESC}}</div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="icon">{{SECTION2_ICON}}</div>
+        <div class="section-body">
+          <div class="section-heading">{{SECTION2_HEADING}}</div>
+          <div class="section-desc">{{SECTION2_DESC}}</div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="icon">{{SECTION3_ICON}}</div>
+        <div class="section-body">
+          <div class="section-heading">{{SECTION3_HEADING}}</div>
+          <div class="section-desc">{{SECTION3_DESC}}</div>
+        </div>
+      </div>
+    </div>
+    <div class="logo-slot"><img class="t-logo" src="{{LOGO}}" alt=""></div>
+  </div>
+</body>
+</html>

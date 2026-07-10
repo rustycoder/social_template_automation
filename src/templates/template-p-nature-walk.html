@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Nature Walk Findings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Merriweather:wght@700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{width:1080px;height:1080px;overflow:hidden;font-family:'Inter',sans-serif;}
+  .card{position:relative;width:1080px;height:1080px;background:#365314;}
+  .t-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  .scrim{position:absolute;inset:0;background:linear-gradient(160deg,rgba(54,83,20,0.75) 0%,rgba(22,78,50,0.55) 40%,rgba(69,45,22,0.7) 100%);}
+  .logo-slot{position:absolute;top:44px;right:48px;width:72px;height:72px;border:2px dashed rgba(255,255,255,0.35);border-radius:50%;background:rgba(255,255,255,0.1);overflow:hidden;z-index:2;}
+  .logo-slot img{width:100%;height:100%;object-fit:contain;padding:6px;}
+  .header{position:absolute;top:48px;left:52px;right:140px;z-index:2;}
+  .t-title{font-family:'Merriweather',serif;font-size:40px;font-weight:700;color:#fff;margin-bottom:12px;}
+  .t-walk{font-size:18px;line-height:1.5;color:rgba(255,255,255,0.88);max-width:700px;}
+  .findings{position:absolute;left:52px;right:52px;bottom:56px;display:flex;flex-direction:column;gap:16px;z-index:2;}
+  .finding{display:flex;align-items:center;gap:18px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:16px 22px;backdrop-filter:blur(4px);}
+  .finding-icon{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#84cc16,#65a30d);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;}
+  .finding-text{font-size:19px;color:#fff;line-height:1.4;}
+  .finding-text strong{font-weight:600;color:#d9f99d;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <img class="t-photo" src="{{PHOTO}}" alt="">
+    <div class="scrim"></div>
+    <div class="logo-slot"><img class="t-logo" src="{{LOGO}}" alt=""></div>
+    <div class="header">
+      <div class="t-title">{{TITLE}}</div>
+      <div class="t-walk">{{WALK_DESC}}</div>
+    </div>
+    <div class="findings">
+      <div class="finding">
+        <div class="finding-icon">{{FINDING1_ICON}}</div>
+        <div class="finding-text">{{FINDING1}}</div>
+      </div>
+      <div class="finding">
+        <div class="finding-icon">{{FINDING2_ICON}}</div>
+        <div class="finding-text">{{FINDING2}}</div>
+      </div>
+      <div class="finding">
+        <div class="finding-icon">{{FINDING3_ICON}}</div>
+        <div class="finding-text">{{FINDING3}}</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

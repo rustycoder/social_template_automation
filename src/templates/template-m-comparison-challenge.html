@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Comparison Challenge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&family=Oswald:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{width:1080px;height:1080px;overflow:hidden;font-family:'Inter',sans-serif;}
+  .card{position:relative;width:1080px;height:1080px;background:#1e3a8a;}
+  .logo-slot{position:absolute;top:40px;left:44px;width:68px;height:68px;border:2px dashed rgba(255,255,255,0.4);border-radius:12px;background:rgba(255,255,255,0.1);overflow:hidden;z-index:3;}
+  .logo-slot img{width:100%;height:100%;object-fit:contain;padding:6px;}
+  .vs-badge{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:72px;height:72px;border-radius:50%;background:#ef4444;color:#fff;font-family:'Oswald',sans-serif;font-size:28px;font-weight:700;display:flex;align-items:center;justify-content:center;z-index:4;box-shadow:0 4px 20px rgba(0,0,0,0.3);}
+  .title{font-family:'Oswald',sans-serif;font-size:40px;font-weight:700;color:#fff;text-align:center;padding:48px 120px 20px;letter-spacing:.04em;text-transform:uppercase;}
+  .compare{display:flex;position:absolute;left:36px;right:36px;top:130px;bottom:44px;gap:20px;}
+  .side{flex:1;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;background:#fff;box-shadow:0 12px 32px rgba(0,0,0,0.2);}
+  .side.left{border-top:6px solid #2563eb;}
+  .side.right{border-top:6px solid #ef4444;}
+  .side-img{height:38%;overflow:hidden;}
+  .side-img img{width:100%;height:100%;object-fit:cover;}
+  .side-body{padding:20px 22px;flex:1;display:flex;flex-direction:column;gap:10px;}
+  .side-title{font-family:'Oswald',sans-serif;font-size:28px;font-weight:700;color:#1e293b;}
+  .side.left .side-title{color:#1d4ed8;}
+  .side.right .side-title{color:#dc2626;}
+  .side-features{font-size:16px;line-height:1.55;color:#475569;white-space:pre-line;}
+  .rating{margin-top:auto;font-size:18px;font-weight:700;padding:10px 14px;border-radius:10px;text-align:center;}
+  .side.left .rating{background:#dbeafe;color:#1d4ed8;}
+  .side.right .rating{background:#fee2e2;color:#dc2626;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo-slot"><img class="t-logo" src="{{LOGO}}" alt=""></div>
+    <div class="title">{{TITLE}}</div>
+    <div class="compare">
+      <div class="side left">
+        <div class="side-img"><img src="{{PHOTO_LEFT}}" alt=""></div>
+        <div class="side-body">
+          <div class="side-title">{{LEFT_TITLE}}</div>
+          <div class="side-features">{{LEFT_FEATURES}}</div>
+          <div class="rating">★ {{LEFT_RATING}}</div>
+        </div>
+      </div>
+      <div class="side right">
+        <div class="side-img"><img src="{{PHOTO_RIGHT}}" alt=""></div>
+        <div class="side-body">
+          <div class="side-title">{{RIGHT_TITLE}}</div>
+          <div class="side-features">{{RIGHT_FEATURES}}</div>
+          <div class="rating">★ {{RIGHT_RATING}}</div>
+        </div>
+      </div>
+    </div>
+    <div class="vs-badge">VS</div>
+  </div>
+</body>
+</html>

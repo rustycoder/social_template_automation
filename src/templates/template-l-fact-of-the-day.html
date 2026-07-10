@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Fact of the Day</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{width:1080px;height:1080px;overflow:hidden;font-family:'Inter',sans-serif;}
+  .card{position:relative;width:1080px;height:1080px;background:#14532d;}
+  .t-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  .scrim{position:absolute;inset:0;background:linear-gradient(to top,rgba(20,83,45,0.94) 0%,rgba(20,83,45,0.7) 50%,rgba(20,83,45,0.45) 100%);}
+  .logo-slot{position:absolute;bottom:48px;right:52px;width:76px;height:76px;border:2px dashed rgba(212,175,55,0.5);border-radius:12px;background:rgba(0,0,0,0.2);overflow:hidden;z-index:2;}
+  .logo-slot img{width:100%;height:100%;object-fit:contain;padding:8px;}
+  .label{position:absolute;top:56px;left:56px;font-size:14px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#d4af37;z-index:2;}
+  .fact-wrap{position:absolute;left:56px;right:56px;top:50%;transform:translateY(-50%);z-index:2;}
+  .t-fact{font-family:'Playfair Display',serif;font-size:56px;font-weight:800;line-height:1.2;color:#fff;margin-bottom:28px;}
+  .t-fact mark{background:#d4af37;color:#14532d;padding:4px 12px;border-radius:4px;}
+  .t-fact .highlight-red{background:#166534;color:#fef3c7;padding:4px 12px;border-radius:4px;}
+  .t-caption{font-size:22px;line-height:1.5;color:rgba(255,255,255,0.88);max-width:920px;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <img class="t-photo" src="{{PHOTO}}" alt="">
+    <div class="scrim"></div>
+    <div class="label">Fact of the Day</div>
+    <div class="fact-wrap">
+      <div class="t-fact">{{FACT}}</div>
+      <div class="t-caption">{{CAPTION}}</div>
+    </div>
+    <div class="logo-slot"><img class="t-logo" src="{{LOGO}}" alt=""></div>
+  </div>
+</body>
+</html>
