@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Architectural Container Home Design</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}html,body{width:1080px;height:1080px;overflow:hidden;font-family:'Inter',sans-serif;}
+.logo-slot{position:absolute;top:40px;left:44px;right:auto;bottom:auto;width:68px;height:68px;border:2px dashed rgba(255,255,255,0.35);border-radius:12px;background:rgba(255,255,255,0.08);overflow:hidden;z-index:8;}.logo-slot img{width:100%;height:100%;object-fit:contain;padding:6px;}.card{position:relative;width:1080px;height:1080px;background:#111;}.split{display:flex;position:absolute;inset:0;}.half{flex:1;overflow:hidden;}.half img{width:100%;height:100%;object-fit:cover;}.copy{position:absolute;left:0;right:0;bottom:0;padding:64px 72px 80px;background:linear-gradient(to top,rgba(0,0,0,0.9) 0%,rgba(0,0,0,0.4) 70%,transparent 100%);z-index:4;}.t-title{font-family:'Barlow Condensed',sans-serif;font-size:50px;font-weight:800;color:#fff;line-height:1.1;}.t-subtitle{margin-top:14px;font-size:21px;color:#fef3c7;line-height:1.45;}.t-title,.t-subtitle,.t-quote mark{background:#FFD600;color:#0a0a0b;padding:2px 6px;border-radius:2px;}.t-title,.t-subtitle,.t-quote .highlight-red{background:#D6293E;color:#fff;padding:2px 6px;border-radius:2px;}
+</style>
+</head>
+<body>
+  <div class="card">
+<div class="split"><div class="half"><img src="{{PHOTO_LEFT}}" alt=""></div><div class="half"><img src="{{PHOTO_RIGHT}}" alt=""></div></div><div class="logo-slot"><img src="{{LOGO}}" alt=""></div><div class="copy"><div class="t-title">{{TITLE}}</div><div class="t-subtitle">{{SUBTITLE}}</div></div>
+  </div>
+</body>
+</html>

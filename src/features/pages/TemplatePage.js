@@ -12,6 +12,7 @@ import {
   GALLERY_LIMIT_STEP,
 } from '../shared/constants.js';
 import { renderGalleryPreview } from '../rendering/templateGalleryPreview.js';
+import { getCategoryLabel } from '../../templates/templateCategories.js';
 
 export class TemplatePage {
   /**
@@ -35,17 +36,39 @@ export class TemplatePage {
     /** @type {string} */
     this.templateSearchQuery = '';
 
+    /** @type {string} */
+    this.templateCategoryFilter = '';
+
     /** @type {number} */
     this.templateGalleryLimit = DEFAULT_GALLERY_LIMIT;
 
     this.templateGrid = document.getElementById('template-grid');
     this.templateSearchInput = document.getElementById('template-search');
+    this.templateCategorySelect = document.getElementById('template-category-filter');
     this.loadMoreBtn = document.getElementById('btn-load-more-templates');
     this.galleryFormatTabBtns = document.querySelectorAll('#template-format-tabs [data-gallery-bucket]');
 
+    this._populateCategoryFilter();
     this._bindEvents();
     this.render();
     this.selectInitialBucket(this.currentTemplateKey);
+  }
+
+  /**
+   * @description Fills the category dropdown from the template store.
+   * @returns {void}
+   * @private
+   */
+  _populateCategoryFilter() {
+    if (!this.templateCategorySelect) return;
+
+    const options = this.templateStore.getCategoryOptions();
+    for (const { id, label } of options) {
+      const option = document.createElement('option');
+      option.value = id;
+      option.textContent = label;
+      this.templateCategorySelect.appendChild(option);
+    }
   }
 
   /**
@@ -56,6 +79,12 @@ export class TemplatePage {
   _bindEvents() {
     this.templateSearchInput?.addEventListener('input', () => {
       this.templateSearchQuery = this.templateSearchInput.value.trim().toLowerCase();
+      this.templateGalleryLimit = DEFAULT_GALLERY_LIMIT;
+      this.render();
+    });
+
+    this.templateCategorySelect?.addEventListener('change', () => {
+      this.templateCategoryFilter = this.templateCategorySelect.value;
       this.templateGalleryLimit = DEFAULT_GALLERY_LIMIT;
       this.render();
     });
@@ -146,9 +175,19 @@ export class TemplatePage {
 
     const allKeys = this.templateStore.getVisibleTemplateKeys();
     const filteredKeys = allKeys.filter((key) => {
-      if (!this.templateSearchQuery) return true;
       const template = this.templateStore.getTemplate(key);
-      return template.name.toLowerCase().includes(this.templateSearchQuery);
+
+      if (this.templateCategoryFilter && template.category !== this.templateCategoryFilter) {
+        return false;
+      }
+
+      if (!this.templateSearchQuery) return true;
+
+      const categoryLabel = getCategoryLabel(template.category).toLowerCase();
+      return (
+        template.name.toLowerCase().includes(this.templateSearchQuery) ||
+        categoryLabel.includes(this.templateSearchQuery)
+      );
     });
 
     const visibleKeys = filteredKeys.slice(0, this.templateGalleryLimit);
@@ -161,8 +200,8 @@ export class TemplatePage {
     if (filteredKeys.length === 0) {
       const empty = document.createElement('p');
       empty.className = 'template-page__empty';
-      empty.textContent = this.templateSearchQuery
-        ? 'No templates match your search.'
+      empty.textContent = this.templateSearchQuery || this.templateCategoryFilter
+        ? 'No templates match your filters.'
         : 'No templates available.';
       this.templateGrid.appendChild(empty);
       this.loadMoreBtn?.classList.add('hidden');
@@ -179,6 +218,7 @@ export class TemplatePage {
         templateKey: key,
         title: template.name,
         bucket: this.galleryBucket,
+        categoryId: template.category,
         selected: key === this.currentTemplateKey && hasLayout,
         unavailable: !hasLayout,
         onSelect: (templateKey) => {

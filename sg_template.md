@@ -290,7 +290,7 @@ The loader extracts `fonts.googleapis.com` links and injects them as `@import` i
 - [ ] All copy uses `{{FIELD_KEY}}` placeholders
 - [ ] `mark` / `.highlight-red` styled if headlines use `[…]` / `[[…]]`
 - [ ] `PHOTO` image uses `object-fit: cover` (or documented crop region)
-- [ ] Registered in `htmlTemplateLoader.js` with `fields` array
+- [ ] Registered in `legacyTemplateRegistry.js` or `nicheTemplateRegistry.js` with `category` and `fields`
 - [ ] Sample row added to `templateSampleData.js`
 - [ ] Preview tested in all four buckets (square, portrait, story, landscape)
 - [ ] Export PNG verified via Step 3

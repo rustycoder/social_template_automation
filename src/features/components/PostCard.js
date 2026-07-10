@@ -8,6 +8,7 @@
 import { BUCKET_RATIO_LABELS } from '../shared/constants.js';
 import { createPlatformIcon } from '../shared/platformIcons.js';
 import { getPlatformLabelsForBucket } from '../rendering/socialFormats.js';
+import { getCategoryLabel } from '../../templates/templateCategories.js';
 
 /**
  * @description Creates a row of platform icon badges for the active aspect-ratio bucket.
@@ -41,11 +42,19 @@ export function createPlatformTags(bucket, mediaType = 'image') {
  * @description Builds the card body with title and optional platform tags.
  * @param {string} title Card heading text.
  * @param {string} [bucket] When set, renders platform tags for this aspect bucket.
+ * @param {string} [categoryId] Template category id for badge display.
  * @returns {HTMLElement}
  */
-function createCardBody(title, bucket = '') {
+function createCardBody(title, bucket = '', categoryId = '') {
   const body = document.createElement('div');
   body.className = 'template-card-body post-card__body';
+
+  if (categoryId) {
+    const category = document.createElement('span');
+    category.className = 'template-card-category post-card__category';
+    category.textContent = getCategoryLabel(categoryId);
+    body.appendChild(category);
+  }
 
   const heading = document.createElement('h4');
   heading.textContent = title;
@@ -131,6 +140,7 @@ export function createPostCardPreview({
  * @param {string} options.bucket Active gallery bucket for aspect ratio.
  * @param {boolean} [options.selected=false] Whether this card is the current selection.
  * @param {boolean} [options.unavailable=false] Whether the template lacks a layout for the bucket.
+ * @param {string} [options.categoryId] Category id shown as a badge on the card.
  * @param {(key: string) => void} [options.onSelect] Invoked when an available card is clicked.
  * @returns {HTMLElement} Fully assembled template card element.
  */
@@ -140,6 +150,7 @@ export function createTemplateCard({
   bucket,
   selected = false,
   unavailable = false,
+  categoryId = '',
   onSelect = null,
 }) {
   const card = document.createElement('div');
@@ -149,7 +160,7 @@ export function createTemplateCard({
   const preview = createPostCardPreview({ bucket, templateId: templateKey });
   card.appendChild(preview);
 
-  card.appendChild(createCardBody(title, bucket));
+  card.appendChild(createCardBody(title, bucket, categoryId));
 
   if (!unavailable && typeof onSelect === 'function') {
     card.addEventListener('click', () => onSelect(templateKey));

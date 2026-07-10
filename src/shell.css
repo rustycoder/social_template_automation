@@ -526,11 +526,80 @@ html {
 
 .template-page__toolbar .search-field {
   position: relative;
-  flex: 0 1 380px;
+  flex: 1 1 240px;
   width: 100%;
-  min-width: 200px;
-  max-width: 420px;
+  min-width: 180px;
+  max-width: 360px;
   margin: 0;
+}
+
+.template-page__filters {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex: 0 1 520px;
+  width: 100%;
+  max-width: 560px;
+}
+
+.category-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1 1 200px;
+  min-width: 160px;
+}
+
+.category-field__label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-dim);
+}
+
+.category-field__select {
+  width: 100%;
+  height: 44px;
+  padding: 0 36px 0 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-raised);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2.5 4.5L6 8L9.5 4.5' stroke='%2371717a' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.category-field__select:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-glow);
+}
+
+.template-card-category,
+.post-card__category {
+  display: inline-block;
+  width: fit-content;
+  max-width: 100%;
+  margin-bottom: 6px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--color-bg-hover);
+  border: 1px solid var(--color-border);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .search-field {
@@ -1175,6 +1244,18 @@ html {
   .template-page__toolbar .search-field {
     flex: 1 1 100%;
     max-width: none;
+  }
+
+  .template-page__filters {
+    flex: 1 1 100%;
+    max-width: none;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .category-field__select {
+    height: 36px;
+    font-size: 0.85rem;
   }
 
   .search-field__input {

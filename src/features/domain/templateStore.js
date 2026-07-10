@@ -13,6 +13,7 @@ import {
   HTML_TEMPLATES,
   DEFAULT_TEMPLATE_ID,
 } from '../../templates/htmlTemplateLoader.js';
+import { CATEGORY_OPTIONS } from '../../templates/templateCategories.js';
 
 function cloneTemplate(template) {
   return structuredClone(template);
@@ -32,5 +33,9 @@ export class TemplateStore {
 
   getVisibleTemplateKeys() {
     return Object.keys(HTML_TEMPLATES);
+  }
+
+  getCategoryOptions() {
+    return CATEGORY_OPTIONS;
   }
 }
