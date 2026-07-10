@@ -13,9 +13,9 @@ A clean, high-contrast, modern SaaS aesthetic designed for productivity and clar
 - **Text Secondary:** `#71717a` (Zinc-500) - Low-emphasis text for labels and secondary information.
 - **Outline:** `#e4e4e7` (Zinc-200) - Crisp borders for cards and inputs.
 
-### Typography (Inter)
+### Typography (Google Sans Flex)
 - **Headlines:** Semi-bold/Bold, tight tracking, Zinc-950.
-- **Body:** Regular/Medium, Inter, Zinc-900.
+- **Body:** Regular/Medium, Google Sans Flex, Zinc-900.
 - **Labels:** Medium, uppercase or small caps for hierarchy, Zinc-500.
 
 ### Shape & Spacing

@@ -90,8 +90,17 @@ html {
   display: none;
 }
 
-.btn-icon {
+/* Inline icons inside .btn — match label height, no inner chrome */
+.btn svg.btn-icon {
   flex-shrink: 0;
+  width: 1em;
+  height: 1em;
+  display: block;
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  color: currentColor;
 }
 
 #main-content {
@@ -1203,15 +1212,6 @@ html {
     align-items: center;
     justify-content: center;
     gap: 0;
-    font-size: 0;
-  }
-
-  #app-footer .btn-outline svg,
-  #app-footer .btn-primary svg {
-    display: block;
-    width: 18px;
-    height: 18px;
-    flex-shrink: 0;
   }
 
   #app-footer .btn-export .btn-export-count {
