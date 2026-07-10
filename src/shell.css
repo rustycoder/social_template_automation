@@ -394,6 +394,10 @@ html {
   font-size: 0.875rem;
 }
 
+#app-footer .btn-primary.btn-export {
+  font-weight: 600;
+}
+
 /* ---------- Aspect segment (footer) ---------- */
 .aspect-segment {
   display: flex;

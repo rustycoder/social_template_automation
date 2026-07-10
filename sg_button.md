@@ -11,7 +11,7 @@ This guide documents every button pattern used in the app. Combine a **base clas
 ## Principles
 
 1. **One primary action per region** — use `.btn-primary` for the main CTA; secondary actions use `.btn-outline` or `.btn-ghost`.
-2. **Icon left, label right** — place SVG icons before text in nav and action buttons.
+2. **Icon placement by direction** — Back buttons: icon **left**, label right. Forward CTAs (Next, Export Selected): label **left**, icon **right**.
 3. **Always set `type="button"`** on non-submit controls to avoid accidental form submits.
 4. **Use `aria-label`** when the visible label is hidden on mobile (footer icon-only mode).
 5. **Disabled state** — use the native `disabled` attribute; do not simulate with classes alone.
@@ -52,13 +52,15 @@ All standard buttons should include `.btn` plus a variant.
 | Disabled | 40% opacity                                             |
 
 ```html
-<button type="button" class="btn btn-primary" id="btn-to-preview">
+<button type="button" class="btn btn-primary btn-export" id="btn-to-preview">
+  <span class="btn-text">Next</span>
   <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
     <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
   </svg>
-  <span class="btn-text">Next</span>
 </button>
 ```
+
+**Footer forward CTAs** (Next, Export Selected) use `.btn-export` for **semibold** (`font-weight: 600`) and place the icon **after** the label.
 
 **Footer primary** uses fixed height `40px` and padding `0 24px` (`shell.css`).
 
@@ -114,7 +116,7 @@ On mobile (`≤768px`), Sign in shows **icon only**; text is hidden via `#btn-lo
 |--------------|---------------------------------------------|----------------------------|
 | `.btn-sm`    | Padding `6px 12px`, font `0.78rem`          | Compact inline actions     |
 | `.btn-block` | `width: 100%`, centered content             | Modal submit buttons       |
-| `.btn-export`| Larger padding (`14px 28px`), font `0.95rem`, weight `600` | Export CTA (legacy sizing; footer uses standard height) |
+| `.btn-export`| Semibold (`font-weight: 600`); footer forward CTAs (Next, Export Selected). Legacy non-footer sizing: `14px 28px` padding, `0.95rem` font |
 
 ```html
 <button type="submit" class="btn btn-primary btn-block" id="auth-submit-btn">Sign in</button>
@@ -165,12 +167,19 @@ Apply `class="btn-icon"` to **SVG elements** inside `.btn` buttons. Styled by `.
 
 Do **not** set fixed `width`/`height` attributes on the SVG; size is driven by the button’s `font-size`.
 
-**Order:** icon first, then `<span class="btn-text">` label.
+**Order:** depends on direction — Back: icon then label. Forward CTA: label then icon.
 
 ```html
+<!-- Forward CTA — label left, icon right -->
 <button type="button" class="btn btn-primary btn-export" aria-label="Export selected">
-  <svg class="btn-icon" viewBox="0 0 16 16" …></svg>
   <span class="btn-text">Export Selected <span class="btn-export-count">(0)</span></span>
+  <svg class="btn-icon" viewBox="0 0 16 16" …></svg>
+</button>
+
+<!-- Back — icon left, label right -->
+<button type="button" class="btn btn-outline" aria-label="Back to data">
+  <svg class="btn-icon" viewBox="0 0 16 16" …></svg>
+  <span class="btn-text">Back</span>
 </button>
 ```
 
@@ -197,7 +206,7 @@ Footer nav uses the same `.btn-outline` / `.btn-primary` variants with shell ove
 ### Desktop (`>768px`)
 
 - Height: `40px`
-- Icon + label visible
+- Back: icon left + label. Next / Export: **semibold label** + icon right
 - Gap: `8px`
 - Outline buttons have explicit border
 
@@ -250,7 +259,8 @@ Footer nav uses the same `.btn-outline` / `.btn-primary` variants with shell ove
 | Do | Don't |
 |----|-------|
 | Use `.btn.btn-primary` for one main CTA per toolbar/footer | Stack multiple primary buttons side by side |
-| Put icons before labels | Put icons after labels (except legacy patterns) |
+| Put Back icons before labels | Put forward CTA icons before labels (Next, Export) |
+| Use `.btn-export` on footer forward CTAs for semibold text | Leave Next at default weight `500` while Export is `600` |
 | Use `1em` inline icons with transparent background | Add borders or backgrounds on SVG icons inside buttons |
 | Wrap labels in `<span class="btn-text">` in the footer | Use `font-size: 0` on buttons (breaks `1em` icon sizing) |
 | Use `.text-link` for inline supplementary actions | Use `.btn-outline` for every minor link |
@@ -264,7 +274,7 @@ Footer nav uses the same `.btn-outline` / `.btn-primary` variants with shell ove
 | File | Contents |
 |------|----------|
 | `src/style.css` | `.btn`, `.btn-primary`, `.btn-ghost`, `.btn-sm`, `.btn-block`, `.btn-export`, `button.btn-icon` (icon-only), `.link-btn` |
-| `src/shell.css` | `.btn svg.btn-icon`, `.btn-outline`, footer button rules, `.text-link`, `.aspect-segment__btn`, mobile icon-only overrides |
+| `src/shell.css` | `.btn svg.btn-icon`, `.btn-outline`, footer button rules, `#app-footer .btn-primary.btn-export`, `.text-link`, `.aspect-segment__btn`, mobile icon-only overrides |
 | `index.html` | Footer nav, auth modal, billing back button |
 | `design.md` | Global Kinetic Logic design system overview |
 
@@ -279,7 +289,8 @@ Tertiary        →  .btn .btn-ghost
 Compact         →  + .btn-sm
 Full width      →  + .btn-block
 Inline link     →  .text-link  or  .link-btn
-Icon in button  →  <svg class="btn-icon">  (1em, no border/bg)
+Back button      →  icon left, label right  (.btn-outline)
+Forward CTA      →  label left, icon right  (.btn-primary .btn-export, weight 600)
 Icon-only btn   →  <button class="btn-icon" aria-label="…">  (button.btn-icon)
 Footer mobile   →  icon + aria-label; .btn-text hidden via CSS
 ```
