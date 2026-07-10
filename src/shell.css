@@ -524,6 +524,25 @@ html {
   margin-bottom: 0;
 }
 
+.template-page__subtitle-row {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+}
+
+.template-page__subtitle-row .page-desc {
+  margin-bottom: 0;
+}
+
+.template-page__count {
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--color-accent);
+  white-space: nowrap;
+}
+
 .template-page__toolbar .search-field {
   position: relative;
   flex: 1 1 240px;

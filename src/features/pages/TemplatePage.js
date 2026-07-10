@@ -45,13 +45,27 @@ export class TemplatePage {
     this.templateGrid = document.getElementById('template-grid');
     this.templateSearchInput = document.getElementById('template-search');
     this.templateCategorySelect = document.getElementById('template-category-filter');
+    this.templatePageCount = document.getElementById('template-page-count');
     this.loadMoreBtn = document.getElementById('btn-load-more-templates');
     this.galleryFormatTabBtns = document.querySelectorAll('#template-format-tabs [data-gallery-bucket]');
 
+    this._updateTemplateCount();
     this._populateCategoryFilter();
     this._bindEvents();
     this.render();
     this.selectInitialBucket(this.currentTemplateKey);
+  }
+
+  /**
+   * @description Updates the total template count shown beside the page subtitle.
+   * @returns {void}
+   * @private
+   */
+  _updateTemplateCount() {
+    if (!this.templatePageCount) return;
+
+    const total = this.templateStore.getTotalTemplateCount();
+    this.templatePageCount.textContent = `${total} template${total === 1 ? '' : 's'}`;
   }
 
   /**
@@ -62,12 +76,23 @@ export class TemplatePage {
   _populateCategoryFilter() {
     if (!this.templateCategorySelect) return;
 
+    const total = this.templateStore.getTotalTemplateCount();
+    const counts = this.templateStore.getCategoryCounts();
     const options = this.templateStore.getCategoryOptions();
+
     for (const { id, label } of options) {
+      const count = counts[id] ?? 0;
+      if (count === 0) continue;
+
       const option = document.createElement('option');
       option.value = id;
-      option.textContent = label;
+      option.textContent = `${label} (${count})`;
       this.templateCategorySelect.appendChild(option);
+    }
+
+    const allOption = this.templateCategorySelect.querySelector('option[value=""]');
+    if (allOption) {
+      allOption.textContent = `All categories (${total})`;
     }
   }
 
