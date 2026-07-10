@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>General Information</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{width:1080px;height:1080px;overflow:hidden;font-family:'Inter',sans-serif;}
+  .card{position:relative;width:1080px;height:1080px;background:#f1f5f9;}
+  .t-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  .scrim{position:absolute;inset:0;background:linear-gradient(135deg,rgba(241,245,249,0.88) 0%,rgba(226,232,240,0.82) 50%,rgba(203,213,225,0.9) 100%);}
+  .logo-slot{position:absolute;bottom:48px;left:52px;width:72px;height:72px;border:2px dashed rgba(100,116,139,0.4);border-radius:12px;background:rgba(255,255,255,0.75);overflow:hidden;z-index:2;}
+  .logo-slot img{width:100%;height:100%;object-fit:contain;padding:8px;}
+  .content{position:absolute;left:56px;right:56px;top:50%;transform:translateY(-50%);z-index:2;text-align:center;}
+  .t-title{font-size:52px;font-weight:700;color:#1e293b;line-height:1.2;margin-bottom:16px;}
+  .t-title mark{background:#38bdf8;color:#fff;padding:2px 10px;border-radius:4px;}
+  .t-title .highlight-red{background:#64748b;color:#fff;padding:2px 10px;border-radius:4px;}
+  .t-subtitle{font-size:26px;font-weight:500;color:#475569;margin-bottom:28px;}
+  .divider{width:64px;height:3px;background:linear-gradient(90deg,#38bdf8,#94a3b8);margin:0 auto 28px;border-radius:2px;}
+  .t-description{font-size:22px;line-height:1.55;color:#64748b;max-width:820px;margin:0 auto;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <img class="t-photo" src="{{PHOTO}}" alt="">
+    <div class="scrim"></div>
+    <div class="content">
+      <div class="t-title">{{TITLE}}</div>
+      <div class="t-subtitle">{{SUBTITLE}}</div>
+      <div class="divider"></div>
+      <div class="t-description">{{DESCRIPTION}}</div>
+    </div>
+    <div class="logo-slot"><img class="t-logo" src="{{LOGO}}" alt=""></div>
+  </div>
+</body>
+</html>

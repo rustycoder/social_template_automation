@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Space Fact of the Week</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Orbitron:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{width:1080px;height:1080px;overflow:hidden;font-family:'Inter',sans-serif;}
+  .card{position:relative;width:1080px;height:1080px;background:#0f0a2e;}
+  .t-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  .scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(15,10,46,0.5) 0%,rgba(49,46,129,0.85) 55%,rgba(76,29,149,0.92) 100%);}
+  .stars-deco{position:absolute;inset:0;background-image:radial-gradient(2px 2px at 20% 30%,#fff,transparent),radial-gradient(2px 2px at 60% 70%,#fff,transparent),radial-gradient(1px 1px at 50% 50%,#fff,transparent),radial-gradient(1px 1px at 80% 10%,#fff,transparent),radial-gradient(2px 2px at 90% 60%,#fff,transparent);opacity:0.4;z-index:1;}
+  .logo-slot{position:absolute;bottom:48px;right:52px;width:72px;height:72px;border:2px dashed rgba(167,139,250,0.45);border-radius:12px;background:rgba(0,0,0,0.3);overflow:hidden;z-index:2;}
+  .logo-slot img{width:100%;height:100%;object-fit:contain;padding:8px;}
+  .label{position:absolute;top:52px;left:56px;font-family:'Orbitron',sans-serif;font-size:14px;font-weight:600;letter-spacing:.25em;color:#a78bfa;z-index:2;}
+  .content{position:absolute;left:56px;right:56px;top:50%;transform:translateY(-52%);z-index:2;}
+  .t-fact{font-family:'Orbitron',sans-serif;font-size:44px;font-weight:700;line-height:1.25;color:#fff;margin-bottom:28px;text-shadow:0 0 40px rgba(139,92,246,0.4);}
+  .t-fact mark{background:linear-gradient(90deg,#7c3aed,#a78bfa);color:#fff;padding:4px 12px;border-radius:4px;}
+  .t-explanation{font-size:22px;line-height:1.5;color:rgba(255,255,255,0.88);margin-bottom:24px;max-width:900px;}
+  .t-more{font-size:17px;font-weight:600;color:#c4b5fd;letter-spacing:.04em;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <img class="t-photo" src="{{PHOTO}}" alt="">
+    <div class="scrim"></div>
+    <div class="stars-deco"></div>
+    <div class="label">SPACE FACT OF THE WEEK</div>
+    <div class="content">
+      <div class="t-fact">{{FACT}}</div>
+      <div class="t-explanation">{{EXPLANATION}}</div>
+      <div class="t-more">{{MORE_INFO}}</div>
+    </div>
+    <div class="logo-slot"><img class="t-logo" src="{{LOGO}}" alt=""></div>
+  </div>
+</body>
+</html>

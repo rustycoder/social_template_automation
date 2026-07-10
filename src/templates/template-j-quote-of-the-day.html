@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Quote of the Day</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{width:1080px;height:1080px;overflow:hidden;font-family:'Inter',sans-serif;}
+  .card{position:relative;width:1080px;height:1080px;background:#e8f4fc;}
+  .t-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(2px) brightness(0.85);}
+  .scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(232,244,252,0.55) 0%,rgba(186,230,253,0.75) 50%,rgba(224,242,254,0.88) 100%);}
+  .logo-slot{position:absolute;bottom:48px;left:52px;width:72px;height:72px;border:2px dashed rgba(12,74,110,0.35);border-radius:50%;background:rgba(255,255,255,0.65);overflow:hidden;z-index:2;}
+  .logo-slot img{width:100%;height:100%;object-fit:contain;padding:8px;}
+  .quote-wrap{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:100px 90px 140px;text-align:center;z-index:2;}
+  .quote-mark{font-family:'Cormorant Garamond',serif;font-size:120px;line-height:.6;color:rgba(14,116,144,0.25);margin-bottom:-10px;}
+  .t-quote{font-family:'Cormorant Garamond',serif;font-size:48px;font-weight:500;font-style:italic;line-height:1.35;color:#0c4a6e;max-width:880px;margin-bottom:36px;}
+  .t-quote mark{background:rgba(255,255,255,0.85);color:#0369a1;padding:2px 8px;border-radius:3px;font-style:normal;}
+  .t-author{font-size:22px;font-weight:500;color:#475569;letter-spacing:.06em;text-transform:uppercase;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <img class="t-photo" src="{{PHOTO}}" alt="">
+    <div class="scrim"></div>
+    <div class="quote-wrap">
+      <div class="quote-mark">"</div>
+      <div class="t-quote">{{QUOTE}}</div>
+      <div class="t-author">— {{AUTHOR}}</div>
+    </div>
+    <div class="logo-slot"><img class="t-logo" src="{{LOGO}}" alt=""></div>
+  </div>
+</body>
+</html>

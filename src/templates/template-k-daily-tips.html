@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Daily Tips</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&family=Nunito:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{width:1080px;height:1080px;overflow:hidden;font-family:'Inter',sans-serif;}
+  .card{position:relative;width:1080px;height:1080px;background:linear-gradient(180deg,#fff1f2 0%,#fef9c3 100%);}
+  .logo-slot{position:absolute;top:40px;left:44px;width:68px;height:68px;border:2px dashed rgba(236,72,153,0.4);border-radius:14px;background:rgba(255,255,255,0.7);overflow:hidden;z-index:2;}
+  .logo-slot img{width:100%;height:100%;object-fit:contain;padding:6px;}
+  .header{font-family:'Nunito',sans-serif;font-size:42px;font-weight:800;color:#be185d;text-align:center;padding:44px 120px 24px;}
+  .grid{position:absolute;left:40px;right:40px;top:130px;bottom:44px;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:20px;}
+  .tip{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 8px 24px rgba(236,72,153,0.12);display:flex;flex-direction:column;}
+  .tip-img{height:42%;overflow:hidden;}
+  .tip-img img{width:100%;height:100%;object-fit:cover;}
+  .tip-body{padding:16px 18px;flex:1;display:flex;flex-direction:column;gap:6px;}
+  .tip-icon{font-size:22px;line-height:1;}
+  .tip-title{font-family:'Nunito',sans-serif;font-size:20px;font-weight:800;color:#db2777;}
+  .tip-desc{font-size:15px;line-height:1.4;color:#64748b;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo-slot"><img class="t-logo" src="{{LOGO}}" alt=""></div>
+    <div class="header">{{HEADER}}</div>
+    <div class="grid">
+      <div class="tip">
+        <div class="tip-img"><img src="{{PHOTO_1}}" alt=""></div>
+        <div class="tip-body">
+          <div class="tip-icon">{{TIP1_ICON}}</div>
+          <div class="tip-title">{{TIP1_TITLE}}</div>
+          <div class="tip-desc">{{TIP1_DESC}}</div>
+        </div>
+      </div>
+      <div class="tip">
+        <div class="tip-img"><img src="{{PHOTO_2}}" alt=""></div>
+        <div class="tip-body">
+          <div class="tip-icon">{{TIP2_ICON}}</div>
+          <div class="tip-title">{{TIP2_TITLE}}</div>
+          <div class="tip-desc">{{TIP2_DESC}}</div>
+        </div>
+      </div>
+      <div class="tip">
+        <div class="tip-img"><img src="{{PHOTO_3}}" alt=""></div>
+        <div class="tip-body">
+          <div class="tip-icon">{{TIP3_ICON}}</div>
+          <div class="tip-title">{{TIP3_TITLE}}</div>
+          <div class="tip-desc">{{TIP3_DESC}}</div>
+        </div>
+      </div>
+      <div class="tip">
+        <div class="tip-img"><img src="{{PHOTO_4}}" alt=""></div>
+        <div class="tip-body">
+          <div class="tip-icon">{{TIP4_ICON}}</div>
+          <div class="tip-title">{{TIP4_TITLE}}</div>
+          <div class="tip-desc">{{TIP4_DESC}}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
