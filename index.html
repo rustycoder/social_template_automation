@@ -82,6 +82,13 @@
             <div class="profile-dropdown-sub" id="dropdown-sub-section">
               <span class="user-sub-badge inactive" id="dropdown-sub-badge">No subscription</span>
             </div>
+            <button type="button" class="profile-dropdown-item" id="btn-my-posts" role="menuitem">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M3.333 2.667h9.334A1.333 1.333 0 0 1 14 4v8a1.333 1.333 0 0 1-1.333 1.333H3.333A1.333 1.333 0 0 1 2 12V4a1.333 1.333 0 0 1 1.333-1.333Z" stroke="currentColor" stroke-width="1.25"/>
+                <path d="M5.333 6h5.334M5.333 8.667h3.334" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/>
+              </svg>
+              My Posts
+            </button>
             <button type="button" class="profile-dropdown-item" id="btn-my-billing" role="menuitem">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                 <path d="M2.667 4.667h10.666M4.667 2.667h6.666a1.333 1.333 0 0 1 1.334 1.333v9.334a1.333 1.333 0 0 1-1.334 1.333H4.667a1.333 1.333 0 0 1-1.334-1.333V4a1.333 1.333 0 0 1 1.334-1.333Z" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
@@ -316,7 +323,7 @@
         </button>
       </div>
 
-      <!-- Step 3: Back / Export -->
+      <!-- Step 3: Back / Download / Save -->
       <div class="footer-panel footer-panel--nav" id="footer-step-3" data-footer-step="3">
         <button type="button" class="btn btn-outline" id="btn-back-data" aria-label="Back to data">
           <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -324,13 +331,18 @@
           </svg>
           <span class="btn-text">Back</span>
         </button>
-        <button type="button" class="btn btn-primary btn-export" id="btn-export" aria-label="Export selected">
-          <span class="btn-text">Export Selected <span class="btn-export-count">(0)</span></span>
-          <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <path d="M8 2.667v7.333M5.333 8 8 10.667 10.667 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M3.333 13.333h9.334" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
-        </button>
+        <div class="footer-actions-group">
+          <button type="button" class="btn btn-outline btn-export" id="btn-save-post" aria-label="Save selected" disabled>
+            <span class="btn-text">Save <span class="btn-save-count">(0)</span></span>
+          </button>
+          <button type="button" class="btn btn-primary btn-export" id="btn-export" aria-label="Download selected">
+            <span class="btn-text">Download <span class="btn-export-count">(0)</span></span>
+            <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M8 2.667v7.333M5.333 8 8 10.667 10.667 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M3.333 13.333h9.334" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
       </div>
 
       <!-- Billing: Back -->
@@ -384,6 +396,52 @@
         <p class="modal-desc" id="subscribe-modal-desc">Get unlimited access to the full template library and all export downloads.</p>
         <div class="subscribe-plans" id="subscribe-plans"></div>
         <p class="form-error hidden" id="subscribe-error"></p>
+      </div>
+    </div>
+
+    <!-- Save post modal -->
+    <div class="modal-overlay hidden" id="save-post-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="save-post-modal-title">
+      <div class="modal-card save-post-modal">
+        <button type="button" class="modal-close" id="save-post-modal-close" aria-label="Close">✕</button>
+        <h2 id="save-post-modal-title">Save post</h2>
+        <p class="modal-desc">Schedule this post for later. Caption comes from your data entry.</p>
+        <div class="form-group">
+          <label>Caption</label>
+          <p class="save-caption-preview" id="save-caption-preview"></p>
+        </div>
+        <div class="form-group">
+          <label for="save-platform">Platform</label>
+          <select id="save-platform" class="text-input">
+            <option value="facebook">Facebook</option>
+            <option value="instagram">Instagram</option>
+            <option value="linkedin">LinkedIn</option>
+            <option value="youtube">YouTube</option>
+            <option value="tiktok">TikTok</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="save-date">Date</label>
+            <input type="date" id="save-date" class="text-input" required />
+          </div>
+          <div class="form-group">
+            <label for="save-time">Time</label>
+            <input type="time" id="save-time" class="text-input" required />
+          </div>
+        </div>
+        <p class="form-error hidden" id="save-post-error"></p>
+        <button type="button" class="btn btn-primary btn-block" id="save-post-confirm">Save to library</button>
+      </div>
+    </div>
+
+    <!-- My Posts modal -->
+    <div class="modal-overlay hidden" id="posts-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="posts-modal-title">
+      <div class="modal-card posts-modal">
+        <button type="button" class="modal-close" id="posts-modal-close" aria-label="Close">✕</button>
+        <h2 id="posts-modal-title">My Posts</h2>
+        <p class="modal-desc">Saved and scheduled posts</p>
+        <div id="posts-list" class="posts-list"></div>
+        <p class="posts-empty hidden" id="posts-empty">No saved posts yet.</p>
       </div>
     </div>
   </div>

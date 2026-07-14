@@ -27,4 +27,9 @@ export const config = {
     // Default: every hour at minute 0
     expireSubscriptions: process.env.CRON_EXPIRE_SCHEDULE || '0 * * * *',
   },
+  admin: {
+    email: process.env.ADMIN_EMAIL || '',
+    password: process.env.ADMIN_PASSWORD || '',
+  },
+  uploadsDir: process.env.UPLOADS_DIR || '',
 };

@@ -49,11 +49,12 @@ async function getPaymentByOrderId(orderId) {
 }
 
 async function createPaymentRecord({ userId, planId, orderId, amountCents, currency, mpgsSessionId, successIndicator }) {
+  const now = new Date();
   const result = await query(
     `INSERT INTO payment_transactions
-      (user_id, plan_id, order_id, amount_cents, currency, status, mpgs_session_id, success_indicator)
-     VALUES (?, ?, ?, ?, ?, 'pending', ?, ?)`,
-    [userId, planId, orderId, amountCents, currency, mpgsSessionId, successIndicator],
+      (user_id, plan_id, order_id, amount_cents, currency, status, mpgs_session_id, success_indicator, created_at)
+     VALUES (?, ?, ?, ?, ?, 'pending', ?, ?, ?)`,
+    [userId, planId, orderId, amountCents, currency, mpgsSessionId, successIndicator, now],
   );
 
   return result.insertId;

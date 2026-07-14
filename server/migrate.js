@@ -35,8 +35,8 @@ async function ensureDatabase() {
   try {
     await connection.query(
       `CREATE DATABASE IF NOT EXISTS \`${config.db.database}\`
-       CHARACTER SET utf8mb4
-       COLLATE utf8mb4_unicode_ci`
+       CHARACTER SET utf8
+       COLLATE utf8_general_ci`
     );
     console.log(`✓ Database "${config.db.database}" ready`);
   } finally {
@@ -99,7 +99,16 @@ async function runMigration(connection, filename) {
 }
 
 async function printSummary(connection) {
-  const tables = ['users', 'subscription_plans', 'payment_transactions', 'subscriptions', 'schema_migrations'];
+  const tables = [
+    'users',
+    'subscription_plans',
+    'payment_transactions',
+    'subscriptions',
+    'categories',
+    'templates',
+    'saved_posts',
+    'schema_migrations',
+  ];
 
   console.log('\nTable row counts:');
   for (const table of tables) {

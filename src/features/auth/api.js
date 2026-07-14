@@ -19,9 +19,12 @@ class ApiError extends Error {
 
 async function request(path, options = {}) {
   const headers = {
-    'Content-Type': 'application/json',
     ...options.headers,
   };
+
+  if (!(options.body instanceof FormData)) {
+    headers['Content-Type'] = headers['Content-Type'] || 'application/json';
+  }
 
   const token = tokenStorage.get();
   if (token) {
@@ -108,6 +111,36 @@ export const api = {
 
   getBilling() {
     return request('/subscriptions/billing');
+  },
+
+  getCategories() {
+    return request('/categories');
+  },
+
+  getTemplates() {
+    return request('/templates');
+  },
+
+  getTemplate(id) {
+    return request(`/templates/${encodeURIComponent(id)}`);
+  },
+
+  getPosts() {
+    return request('/posts');
+  },
+
+  /**
+   * @param {FormData} formData
+   */
+  createPost(formData) {
+    return request('/posts', {
+      method: 'POST',
+      body: formData,
+    });
+  },
+
+  deletePost(id) {
+    return request(`/posts/${encodeURIComponent(id)}`, { method: 'DELETE' });
   },
 };
 

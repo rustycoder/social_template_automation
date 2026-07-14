@@ -11,6 +11,7 @@
 import ExcelJS from 'exceljs';
 import { getTemplateFields } from './templateFields.js';
 import { getSampleRowForTemplate } from './templateSampleData.js';
+import { POST_CAPTION_KEY } from '../shared/postMeta.js';
 
 /**
  * @param {string} value
@@ -31,7 +32,7 @@ function sanitizeFilename(value) {
 export async function buildSampleExcelBlob(template) {
   const fields = getTemplateFields(template);
   const sampleRow = getSampleRowForTemplate(template);
-  const keys = fields.map((field) => field.key);
+  const keys = [...fields.map((field) => field.key), POST_CAPTION_KEY];
 
   const workbook = new ExcelJS.Workbook();
   const sheet = workbook.addWorksheet('Posts');
@@ -46,13 +47,18 @@ export async function buildSampleExcelBlob(template) {
     };
   });
 
-  sheet.addRow(keys.map((key) => sampleRow[key] ?? ''));
+  const sampleValues = keys.map((key) =>
+    key === POST_CAPTION_KEY
+      ? 'Your social media caption goes here'
+      : sampleRow[key] ?? ''
+  );
+  sheet.addRow(sampleValues);
   sheet.addRow(keys.map(() => ''));
 
   keys.forEach((key, index) => {
     const col = sheet.getColumn(index + 1);
     const headerLen = key.length;
-    const sampleVal = String(sampleRow[key] ?? '');
+    const sampleVal = String(sampleValues[index] ?? '');
     const width = Math.min(48, Math.max(headerLen, Math.min(sampleVal.length, 40)) + 2);
     col.width = width;
   });

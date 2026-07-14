@@ -9,6 +9,8 @@
  * Template field helpers — extraction, validation, and form building.
  */
 
+import { POST_CAPTION_KEY } from '../shared/postMeta.js';
+
 /** @typedef {{ key: string, label: string, type: 'text'|'textarea'|'image', required?: boolean }} TemplateField */
 
 const PLACEHOLDER_RE = /\{\{\s*([^#/}][^}]*?)\s*\}\}/g;
@@ -79,7 +81,11 @@ export function validateExcelHeaders(template, headers) {
   }
 
   const matchedHeaderSet = new Set(matched.map((m) => m.header.toLowerCase()));
-  const extra = normalizedHeaders.filter((h) => !matchedHeaderSet.has(h.toLowerCase()));
+  const extra = normalizedHeaders.filter(
+    (h) =>
+      !matchedHeaderSet.has(h.toLowerCase()) &&
+      h.toLowerCase() !== POST_CAPTION_KEY.toLowerCase()
+  );
 
   return {
     fields,
@@ -120,6 +126,9 @@ export function buildRowFromManualFields(template, fieldValues) {
   const row = {};
   for (const field of getTemplateFields(template)) {
     row[field.key] = fieldValues[field.key] ?? '';
+  }
+  if (fieldValues[POST_CAPTION_KEY] != null) {
+    row[POST_CAPTION_KEY] = fieldValues[POST_CAPTION_KEY];
   }
   return row;
 }

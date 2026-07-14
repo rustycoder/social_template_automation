@@ -16,6 +16,7 @@ import { handleCheckoutReturn } from './auth/checkout.js';
 import { AuthUI } from './auth/authUI.js';
 import { SubscriptionUI } from './auth/subscriptionUI.js';
 import { BillingUI } from './auth/billingUI.js';
+import { PostsUI } from './auth/postsUI.js';
 
 import { LayoutModule } from './modules/LayoutModule.js';
 import { DataEntryModule } from './modules/DataEntryModule.js';
@@ -27,9 +28,10 @@ import { ExportPage } from './pages/ExportPage.js';
 export class App {
   /**
    * @description Bootstraps all workflow modules and page controllers.
+   * @param {{ templateStore: import('./domain/templateStore.js').TemplateStore }} deps
    */
-  constructor() {
-    this.templateStore = new TemplateStore();
+  constructor(deps) {
+    this.templateStore = deps.templateStore;
     this.dataSource = new DataSource();
 
     /** @type {string} */
@@ -72,7 +74,9 @@ export class App {
     this.authUI = new AuthUI();
     this.subscriptionUI = new SubscriptionUI(this.authUI);
     this.billingUI = new BillingUI(this.authUI);
+    this.postsUI = new PostsUI(this.authUI);
     this.authUI.onBillingClick = () => this.billingUI.show();
+    this.authUI.onPostsClick = () => this.postsUI.show();
 
     this.layout = new LayoutModule({
       initialStep: 1,
@@ -100,6 +104,7 @@ export class App {
       getBucketCss: (bucket) => this._getBucketCss(bucket),
       getSelectedBuckets: () => this._getSelectedBuckets(),
       requireSubscription: () => this.subscriptionUI.requireSubscription(),
+      getTemplateId: () => this.currentTemplateKey,
     });
 
     this.currentTemplateKey = this.templatePage.getCurrentTemplateKey();
@@ -260,11 +265,26 @@ export class App {
 }
 
 /**
- * @description Application entry bootstrap — awaits auth/checkout then mounts App.
+ * @description Application entry bootstrap — awaits auth/checkout/templates then mounts App.
  * @returns {Promise<void>}
  */
 export async function bootstrapApp() {
   await authService.ready();
   await handleCheckoutReturn();
-  new App();
+
+  const templateStore = new TemplateStore();
+  try {
+    await templateStore.load();
+  } catch (error) {
+    console.error(error);
+    const toastContainer = document.getElementById('toast-container');
+    if (toastContainer) {
+      const toast = document.createElement('div');
+      toast.className = 'toast error';
+      toast.innerHTML = `<span class="toast-icon">✕</span><span>Failed to load templates from server. Is the API running?</span>`;
+      toastContainer.appendChild(toast);
+    }
+  }
+
+  new App({ templateStore });
 }

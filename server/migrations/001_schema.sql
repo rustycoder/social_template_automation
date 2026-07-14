@@ -1,5 +1,6 @@
 -- 001_schema.sql
 -- Full database schema for Social Media Template Automation.
+-- MariaDB 5.2.2 compatible: DATETIME timestamps, utf8 charset.
 -- Run: npm run db:reset
 
 CREATE TABLE IF NOT EXISTS users (
@@ -7,10 +8,10 @@ CREATE TABLE IF NOT EXISTS users (
   email VARCHAR(255) NOT NULL UNIQUE,
   password_hash VARCHAR(255) NOT NULL,
   name VARCHAR(120) NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  created_at DATETIME NOT NULL,
+  updated_at DATETIME NOT NULL,
   INDEX idx_users_email (email)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 CREATE TABLE IF NOT EXISTS subscription_plans (
   id VARCHAR(32) PRIMARY KEY,
@@ -19,8 +20,9 @@ CREATE TABLE IF NOT EXISTS subscription_plans (
   billing_interval ENUM('month', 'year') NOT NULL,
   description TEXT,
   is_active TINYINT(1) NOT NULL DEFAULT 1,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB;
+  created_at DATETIME NOT NULL,
+  INDEX idx_plans_active (is_active)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 CREATE TABLE IF NOT EXISTS payment_transactions (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -34,14 +36,14 @@ CREATE TABLE IF NOT EXISTS payment_transactions (
   success_indicator VARCHAR(128) NULL,
   mpgs_transaction_id VARCHAR(128) NULL,
   subscription_id INT UNSIGNED NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  completed_at TIMESTAMP NULL,
+  created_at DATETIME NOT NULL,
+  completed_at DATETIME NULL,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
   FOREIGN KEY (plan_id) REFERENCES subscription_plans(id),
   UNIQUE KEY uk_payment_order_id (order_id),
   INDEX idx_payment_user_status (user_id, status),
   INDEX idx_payment_subscription (subscription_id)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 CREATE TABLE IF NOT EXISTS subscriptions (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -49,26 +51,26 @@ CREATE TABLE IF NOT EXISTS subscriptions (
   plan_id VARCHAR(32) NOT NULL,
   payment_transaction_id INT UNSIGNED NULL,
   status ENUM('active', 'cancelled', 'expired') NOT NULL DEFAULT 'active',
-  starts_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  expires_at TIMESTAMP NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  starts_at DATETIME NOT NULL,
+  expires_at DATETIME NOT NULL,
+  created_at DATETIME NOT NULL,
+  updated_at DATETIME NOT NULL,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
   FOREIGN KEY (plan_id) REFERENCES subscription_plans(id),
   FOREIGN KEY (payment_transaction_id) REFERENCES payment_transactions(id) ON DELETE SET NULL,
   INDEX idx_subscriptions_user_status (user_id, status),
   INDEX idx_subscriptions_expires (expires_at),
   INDEX idx_subscriptions_payment (payment_transaction_id)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 ALTER TABLE payment_transactions
   ADD CONSTRAINT fk_payment_transactions_subscription
     FOREIGN KEY (subscription_id) REFERENCES subscriptions(id) ON DELETE SET NULL;
 
-INSERT INTO subscription_plans (id, name, price_cents, billing_interval, description)
+INSERT INTO subscription_plans (id, name, price_cents, billing_interval, description, created_at)
 VALUES
-  ('monthly', 'Monthly Pro', 5000, 'month', 'Full access to all templates and unlimited downloads — billed monthly.'),
-  ('yearly', 'Yearly Pro', 49900, 'year', 'Full access to all templates and unlimited downloads — billed yearly.')
+  ('monthly', 'Monthly Pro', 5000, 'month', 'Full access to all templates and unlimited downloads — billed monthly.', NOW()),
+  ('yearly', 'Yearly Pro', 49900, 'year', 'Full access to all templates and unlimited downloads — billed yearly.', NOW())
 ON DUPLICATE KEY UPDATE
   name = VALUES(name),
   price_cents = VALUES(price_cents),

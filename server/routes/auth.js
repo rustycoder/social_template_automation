@@ -15,9 +15,9 @@ const router = Router();
  * @param {string} email
  * @returns {Promise<string>}
  */
-async function issueSessionToken(userId, email) {
+async function issueSessionToken(userId, email, role = 'user') {
   const sessionVersion = await bumpSessionVersion(userId);
-  return jwt.sign({ email, sessionVersion }, config.jwtSecret, {
+  return jwt.sign({ email, sessionVersion, role }, config.jwtSecret, {
     expiresIn: config.jwtExpiresIn,
     subject: String(userId),
   });
@@ -29,7 +29,7 @@ function isValidEmail(email) {
 
 async function buildUserResponse(userId) {
   const users = await query(
-    'SELECT id, email, name, created_at AS createdAt FROM users WHERE id = ? LIMIT 1',
+    'SELECT id, email, name, role, created_at AS createdAt FROM users WHERE id = ? LIMIT 1',
     [userId]
   );
   const user = users[0];
@@ -53,6 +53,7 @@ async function buildUserResponse(userId) {
     id: user.id,
     email: user.email,
     name: user.name,
+    role: user.role === 'admin' ? 'admin' : 'user',
     createdAt: user.createdAt,
     hasActiveSubscription: !!subscription,
     subscriptionExpired,
@@ -93,12 +94,13 @@ router.post('/register', async (req, res) => {
     }
 
     const passwordHash = await bcrypt.hash(password, 12);
+    const now = new Date();
     const result = await query(
-      'INSERT INTO users (email, password_hash, name) VALUES (?, ?, ?)',
-      [normalizedEmail, passwordHash, name.trim()]
+      'INSERT INTO users (email, password_hash, name, created_at, updated_at) VALUES (?, ?, ?, ?, ?)',
+      [normalizedEmail, passwordHash, name.trim(), now, now]
     );
 
-    const token = await issueSessionToken(result.insertId, normalizedEmail);
+    const token = await issueSessionToken(result.insertId, normalizedEmail, 'user');
     const user = await buildUserResponse(result.insertId);
 
     res.status(201).json({ token, user });
@@ -118,7 +120,7 @@ router.post('/login', async (req, res) => {
 
     const normalizedEmail = email.trim().toLowerCase();
     const rows = await query(
-      'SELECT id, email, password_hash, name FROM users WHERE email = ? LIMIT 1',
+      'SELECT id, email, password_hash, name, role FROM users WHERE email = ? LIMIT 1',
       [normalizedEmail]
     );
     const user = rows[0];
@@ -131,7 +133,8 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
-    const token = await issueSessionToken(user.id, user.email);
+    const role = user.role === 'admin' ? 'admin' : 'user';
+    const token = await issueSessionToken(user.id, user.email, role);
     const userResponse = await buildUserResponse(user.id);
 
     res.json({ token, user: userResponse });

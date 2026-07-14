@@ -8,6 +8,7 @@
 
 import { getTemplateFields, validateExcelHeaders, validateManualFields } from '../domain/templateFields.js';
 import { downloadSampleExcel } from '../domain/sampleExcelExport.js';
+import { POST_CAPTION_KEY } from '../shared/postMeta.js';
 
 export class DataEntryModule {
   /**
@@ -195,6 +196,20 @@ export class DataEntryModule {
 
       this.fieldsList.appendChild(row);
     }
+
+    const captionRow = document.createElement('div');
+    captionRow.className = 'field-row field-row--caption';
+    captionRow.dataset.fieldKey = POST_CAPTION_KEY;
+    captionRow.innerHTML = `
+      <div class="field-grid">
+        <div class="setting-group">
+          <label for="field-${POST_CAPTION_KEY}">Post caption</label>
+          <textarea id="field-${POST_CAPTION_KEY}" class="text-input field-textarea field-value" data-key="${POST_CAPTION_KEY}" rows="3" placeholder="Caption for social platforms…" name="${POST_CAPTION_KEY}" autocomplete="off"></textarea>
+          <p class="field-hint">Used when you save the post — not drawn into the image unless the template includes {{CAPTION}}.</p>
+        </div>
+      </div>
+    `;
+    this.fieldsList.appendChild(captionRow);
 
     this.dataSource.clear();
     this._hideMismatch();

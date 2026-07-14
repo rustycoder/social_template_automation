@@ -1,21 +1,9 @@
 /**
  * Unified HTML Template Loader
  *
- * Loads standalone HTML template files via glob, merges registry metadata,
- * and produces template objects for the preview/export pipeline.
+ * Parses HTML template strings into runtime template objects with
+ * per-bucket layout CSS. Templates are loaded from the API (DB), not Vite glob.
  */
-
-import { LEGACY_TEMPLATE_REGISTRY } from './legacyTemplateRegistry.js';
-import { NICHE_TEMPLATE_REGISTRY } from './nicheTemplateRegistry.js';
-import { AUDIENCE_TEMPLATE_REGISTRY } from './audienceTemplateRegistry.js';
-
-const htmlModules = import.meta.glob('./*.html', {
-  query: '?raw',
-  import: 'default',
-  eager: true,
-});
-
-const TEMPLATE_REGISTRY = [...LEGACY_TEMPLATE_REGISTRY, ...NICHE_TEMPLATE_REGISTRY, ...AUDIENCE_TEMPLATE_REGISTRY];
 
 const LAYOUTS = {
   square: { width: 1080, height: 1080 },
@@ -63,7 +51,11 @@ function adaptCssToLayout(baseCss, fontImports, width, height) {
   return css;
 }
 
-function parseHtmlTemplate(rawHtml, { id, name, category, previewBucket, fields }) {
+/**
+ * @param {string} rawHtml
+ * @param {{ id: string, name: string, category?: string, previewBucket?: string, fields?: object[] }} meta
+ */
+export function parseHtmlTemplate(rawHtml, { id, name, category, previewBucket, fields }) {
   const fontImports = extractFontImports(rawHtml);
   const baseCss = extractCss(rawHtml);
   const bodyHtml = extractBody(rawHtml);
@@ -82,7 +74,7 @@ function parseHtmlTemplate(rawHtml, { id, name, category, previewBucket, fields 
     name,
     category: category || 'general',
     previewBucket: previewBucket || 'square',
-    fields,
+    fields: Array.isArray(fields) ? fields : [],
     content: { html: bodyHtml },
     layouts,
     isAnimated: false,
@@ -90,22 +82,32 @@ function parseHtmlTemplate(rawHtml, { id, name, category, previewBucket, fields 
   };
 }
 
-function loadTemplateRegistry() {
+/**
+ * Map API template rows into the runtime catalog.
+ * @param {Array<object>} apiTemplates
+ * @returns {Record<string, object>}
+ */
+export function buildTemplateCatalog(apiTemplates) {
+  /** @type {Record<string, object>} */
   const templates = {};
 
-  for (const def of TEMPLATE_REGISTRY) {
-    const moduleKey = `./${def.file}`;
-    const rawHtml = htmlModules[moduleKey];
+  for (const row of apiTemplates || []) {
+    const rawHtml = row.htmlSource || row.html_source || '';
     if (!rawHtml) {
-      console.warn(`[htmlTemplateLoader] Missing template file: ${def.file}`);
+      console.warn(`[htmlTemplateLoader] Template missing HTML: ${row.id}`);
       continue;
     }
-    templates[def.id] = parseHtmlTemplate(rawHtml, def);
+
+    templates[row.id] = parseHtmlTemplate(rawHtml, {
+      id: row.id,
+      name: row.name,
+      category: row.categoryId || row.category || 'general',
+      previewBucket: row.previewBucket || 'square',
+      fields: row.fields || [],
+    });
   }
 
   return templates;
 }
 
 export const DEFAULT_TEMPLATE_ID = 'viral-shock-card';
-export const HTML_TEMPLATES = loadTemplateRegistry();
-export { TEMPLATE_REGISTRY };

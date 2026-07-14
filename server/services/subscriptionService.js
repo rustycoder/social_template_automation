@@ -71,9 +71,9 @@ export async function createSubscription(userId, planId, { paymentTransactionId 
   );
 
   const result = await query(
-    `INSERT INTO subscriptions (user_id, plan_id, payment_transaction_id, status, starts_at, expires_at)
-     VALUES (?, ?, ?, 'active', ?, ?)`,
-    [userId, planId, paymentTransactionId ?? null, now, expiresAt]
+    `INSERT INTO subscriptions (user_id, plan_id, payment_transaction_id, status, starts_at, expires_at, created_at, updated_at)
+     VALUES (?, ?, ?, 'active', ?, ?, ?, ?)`,
+    [userId, planId, paymentTransactionId ?? null, now, expiresAt, now, now]
   );
 
   const subscriptionId = result.insertId;

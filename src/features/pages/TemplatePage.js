@@ -208,7 +208,12 @@ export class TemplatePage {
 
       if (!this.templateSearchQuery) return true;
 
-      const categoryLabel = getCategoryLabel(template.category).toLowerCase();
+      const categoryOption = this.templateStore
+        .getCategoryOptions()
+        .find((c) => c.id === template.category);
+      const categoryLabel = (
+        categoryOption?.label || getCategoryLabel(template.category)
+      ).toLowerCase();
       return (
         template.name.toLowerCase().includes(this.templateSearchQuery) ||
         categoryLabel.includes(this.templateSearchQuery)

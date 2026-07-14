@@ -22,6 +22,7 @@ export class AuthUI {
     this.profileAvatar = document.getElementById('profile-avatar');
     this.logoutBtn = document.getElementById('btn-logout');
     this.billingBtn = document.getElementById('btn-my-billing');
+    this.postsBtn = document.getElementById('btn-my-posts');
     this.userNameEl = document.getElementById('user-name');
     this.dropdownUserName = document.getElementById('dropdown-user-name');
     this.dropdownUserEmail = document.getElementById('dropdown-user-email');
@@ -31,6 +32,7 @@ export class AuthUI {
     this._resolveOpen = null;
     this._dropdownOpen = false;
     this.onBillingClick = null;
+    this.onPostsClick = null;
 
     this._bindEvents();
     authService.onChange((user) => this._renderHeader(user));
@@ -46,6 +48,10 @@ export class AuthUI {
     this.billingBtn?.addEventListener('click', () => {
       this._closeDropdown();
       this.onBillingClick?.();
+    });
+    this.postsBtn?.addEventListener('click', () => {
+      this._closeDropdown();
+      this.onPostsClick?.();
     });
     this.profileTrigger?.addEventListener('click', (e) => {
       e.stopPropagation();
