@@ -86,6 +86,12 @@ function findCaption(rowData) {
   return key ? String(rowData[key] ?? '') : '';
 }
 
+function defaultScheduleIso() {
+  const when = new Date();
+  when.setMinutes(when.getMinutes() + 60);
+  return when.toISOString();
+}
+
 export class ExportPage {
   /**
    * @param {import('../modules/SelectionModule.js').SelectionModule} selection
@@ -114,25 +120,8 @@ export class ExportPage {
     this.formatTag = document.getElementById('export-format-tag');
     this._exportStartedAt = null;
 
-    this.saveOverlay = document.getElementById('save-post-modal-overlay');
-    this.saveCaptionPreview = document.getElementById('save-caption-preview');
-    this.savePlatform = document.getElementById('save-platform');
-    this.saveDate = document.getElementById('save-date');
-    this.saveTime = document.getElementById('save-time');
-    this.saveError = document.getElementById('save-post-error');
-    this.saveConfirmBtn = document.getElementById('save-post-confirm');
-    this.saveCloseBtn = document.getElementById('save-post-modal-close');
-
-    /** @type {{ rowData: object, index: number } | null} */
-    this._pendingSaveRow = null;
-
     this.exportBtn?.addEventListener('click', () => this.handleExport());
     this.saveBtn?.addEventListener('click', () => this.handleSaveClick());
-    this.saveCloseBtn?.addEventListener('click', () => this._closeSaveModal());
-    this.saveOverlay?.addEventListener('click', (e) => {
-      if (e.target === this.saveOverlay) this._closeSaveModal();
-    });
-    this.saveConfirmBtn?.addEventListener('click', () => this._confirmSave());
   }
 
   syncFormatTag() {
@@ -276,6 +265,9 @@ export class ExportPage {
     }
   }
 
+  /**
+   * Save all selected posts immediately. Caption/platform/schedule can be edited later in My Posts.
+   */
   async handleSaveClick() {
     const hasSubscription = await this.requireSubscription();
     if (!hasSubscription) return;
@@ -292,114 +284,86 @@ export class ExportPage {
       return;
     }
 
-    if (selectedRows.length > 1) {
-      window.dispatchEvent(
-        new CustomEvent('toast', {
-          detail: {
-            message: 'Select one post at a time to save',
-            type: 'error',
-          },
-        })
-      );
-      return;
-    }
+    if (this.exportBtn) this.exportBtn.disabled = true;
+    if (this.saveBtn) this.saveBtn.disabled = true;
 
-    this._pendingSaveRow = selectedRows[0];
-    const caption = findCaption(this._pendingSaveRow.rowData);
-    if (this.saveCaptionPreview) {
-      this.saveCaptionPreview.textContent = caption.trim() || '(No caption provided)';
-    }
+    const template = this.getTemplate();
+    const bucket = this.getCurrentBucket();
+    const templateId = this.getTemplateId() || template.id;
+    const total = selectedRows.length;
+    const scheduledAt = defaultScheduleIso();
 
-    const now = new Date();
-    now.setMinutes(now.getMinutes() + 60);
-    if (this.saveDate) {
-      this.saveDate.value = now.toISOString().slice(0, 10);
-    }
-    if (this.saveTime) {
-      this.saveTime.value = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-    }
-    if (this.saveError) {
-      this.saveError.textContent = '';
-      this.saveError.classList.add('hidden');
-    }
+    this._exportStartedAt = Date.now();
+    this._updateExportProgress(0, total, 'Preparing export…');
 
-    this.saveOverlay?.classList.remove('hidden');
-  }
-
-  _closeSaveModal() {
-    this.saveOverlay?.classList.add('hidden');
-    this._pendingSaveRow = null;
-  }
-
-  async _confirmSave() {
-    if (!this._pendingSaveRow) return;
-
-    const platform = this.savePlatform?.value;
-    const date = this.saveDate?.value;
-    const time = this.saveTime?.value;
-
-    if (!platform || !date || !time) {
-      if (this.saveError) {
-        this.saveError.textContent = 'Platform, date, and time are required';
-        this.saveError.classList.remove('hidden');
-      }
-      return;
-    }
-
-    const scheduledAt = new Date(`${date}T${time}`);
-    if (Number.isNaN(scheduledAt.getTime())) {
-      if (this.saveError) {
-        this.saveError.textContent = 'Invalid date or time';
-        this.saveError.classList.remove('hidden');
-      }
-      return;
-    }
-
-    if (this.saveConfirmBtn) this.saveConfirmBtn.disabled = true;
-    this._showExportProgress(0, 1, 'Rendering post…');
+    let saved = 0;
+    let failed = 0;
+    let lastError = '';
 
     try {
-      const template = this.getTemplate();
-      const bucket = this.getCurrentBucket();
-      const { rowData } = this._pendingSaveRow;
-      const { blob } = await exportBucketImage(
-        template,
-        rowData,
-        bucket,
-        (b) => this.getBucketCss(b)
-      );
+      for (let i = 0; i < selectedRows.length; i += 1) {
+        const { rowData } = selectedRows[i];
+        this._updateExportProgress(saved, total, `Saving post ${i + 1} of ${total}…`);
 
-      const formData = new FormData();
-      formData.append('image', blob, 'post.png');
-      formData.append('template_id', this.getTemplateId() || template.id);
-      formData.append('caption', findCaption(rowData));
-      formData.append('platform', platform);
-      formData.append('scheduled_at', scheduledAt.toISOString());
-      formData.append('format_bucket', bucket);
-      formData.append('field_data', JSON.stringify(rowData));
+        try {
+          const { blob } = await exportBucketImage(
+            template,
+            rowData,
+            bucket,
+            (b) => this.getBucketCss(b)
+          );
 
-      await api.createPost(formData);
+          const formData = new FormData();
+          formData.append('image', blob, `post-${i + 1}.png`);
+          formData.append('template_id', templateId);
+          formData.append('caption', findCaption(rowData));
+          formData.append('platform', 'instagram');
+          formData.append('scheduled_at', scheduledAt);
+          formData.append('format_bucket', bucket);
+          formData.append('field_data', JSON.stringify(rowData));
+          formData.append('status', 'saved');
 
-      this._closeSaveModal();
-      this._updateExportProgress(1, 1, 'Export complete');
-      window.dispatchEvent(
-        new CustomEvent('toast', {
-          detail: { message: 'Post saved to your library', type: 'success' },
-        })
-      );
-    } catch (error) {
-      console.error('Save post error:', error);
-      const message =
-        error instanceof ApiError ? error.message : error.message || 'Failed to save post';
-      if (this.saveError) {
-        this.saveError.textContent = message;
-        this.saveError.classList.remove('hidden');
+          await api.createPost(formData);
+          saved += 1;
+          this._updateExportProgress(saved, total);
+        } catch (error) {
+          failed += 1;
+          lastError =
+            error instanceof ApiError ? error.message : error.message || 'Failed to save post';
+          console.error('Save post error:', error);
+        }
       }
-      window.dispatchEvent(
-        new CustomEvent('toast', { detail: { message, type: 'error' } })
-      );
+
+      if (saved > 0 && failed === 0) {
+        this._updateExportProgress(total, total, 'Export complete');
+        window.dispatchEvent(
+          new CustomEvent('toast', {
+            detail: {
+              message:
+                saved === 1
+                  ? 'Post saved. Edit caption, platform, and schedule in My Posts.'
+                  : `${saved} posts saved. Edit details in My Posts.`,
+              type: 'success',
+            },
+          })
+        );
+      } else if (saved > 0) {
+        window.dispatchEvent(
+          new CustomEvent('toast', {
+            detail: {
+              message: `Saved ${saved} of ${total}. ${failed} failed${lastError ? `: ${lastError}` : ''}`,
+              type: 'error',
+            },
+          })
+        );
+      } else {
+        window.dispatchEvent(
+          new CustomEvent('toast', {
+            detail: { message: lastError || 'Failed to save posts', type: 'error' },
+          })
+        );
+      }
     } finally {
-      if (this.saveConfirmBtn) this.saveConfirmBtn.disabled = false;
       this.updateExportButton();
       setTimeout(() => this._hideExportProgress(), 800);
     }

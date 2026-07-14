@@ -9,6 +9,60 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const PLATFORMS = new Set(['facebook', 'instagram', 'linkedin', 'youtube', 'tiktok']);
 
+const DATA_URL_RE = /^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/s;
+
+/**
+ * Write any data-URL image values in field_data to disk and replace with /uploads URLs.
+ * Prevents field_data from bloating past DB limits.
+ * @param {number|string} userId
+ * @param {object} fieldData
+ * @returns {object}
+ */
+export function materializeFieldDataImages(userId, fieldData) {
+  if (!fieldData || typeof fieldData !== 'object' || Array.isArray(fieldData)) {
+    return fieldData && typeof fieldData === 'object' ? fieldData : {};
+  }
+
+  const postsDir = ensureUploadsDir();
+  const fieldDir = path.join(postsDir, 'fields', String(userId));
+  if (!fs.existsSync(fieldDir)) {
+    fs.mkdirSync(fieldDir, { recursive: true });
+  }
+
+  const out = {};
+  for (const [key, value] of Object.entries(fieldData)) {
+    if (typeof value !== 'string') {
+      out[key] = value;
+      continue;
+    }
+
+    const match = DATA_URL_RE.exec(value);
+    if (!match) {
+      out[key] = value;
+      continue;
+    }
+
+    const mime = match[1].toLowerCase();
+    const ext =
+      mime === 'image/png'
+        ? 'png'
+        : mime === 'image/webp'
+          ? 'webp'
+          : mime === 'image/gif'
+            ? 'gif'
+            : mime === 'image/svg+xml'
+              ? 'svg'
+              : 'jpg';
+    const safeKey = String(key || 'image')
+      .replace(/[^a-zA-Z0-9_-]/g, '_')
+      .slice(0, 64);
+    const filename = `${safeKey}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    fs.writeFileSync(path.join(fieldDir, filename), Buffer.from(match[2], 'base64'));
+    out[key] = `/uploads/posts/fields/${userId}/${filename}`;
+  }
+  return out;
+}
+
 export function getUploadsRoot() {
   if (config.uploadsDir) {
     return config.uploadsDir;
@@ -148,13 +202,17 @@ export async function createPost({
     throw error;
   }
 
-  const normalizedPlatform = normalizePlatform(platform);
-  const when = normalizeScheduledAt(scheduledAt);
+  const normalizedPlatform = normalizePlatform(platform || 'instagram');
+  const when = normalizeScheduledAt(
+    scheduledAt || new Date(Date.now() + 60 * 60 * 1000)
+  );
   const postsDir = ensureUploadsDir();
-  const filename = `post_${userId}_${Date.now()}.png`;
+  const filename = `post_${userId}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.png`;
   const relativePath = path.join('posts', filename).replace(/\\/g, '/');
   const absolutePath = path.join(postsDir, filename);
   fs.writeFileSync(absolutePath, imageBuffer);
+
+  const storedFieldData = materializeFieldDataImages(userId, fieldData ?? {});
 
   const now = nowDatetime();
   const result = await query(
@@ -169,9 +227,9 @@ export async function createPost({
       normalizedPlatform,
       when,
       relativePath,
-      stringifyJsonText(fieldData ?? {}),
+      stringifyJsonText(storedFieldData),
       formatBucket || 'square',
-      status === 'saved' ? 'saved' : 'scheduled',
+      status === 'scheduled' ? 'scheduled' : 'saved',
       now,
       now,
     ]
@@ -198,22 +256,27 @@ export async function deletePost(id, userId) {
 }
 
 /**
- * Admin update of post metadata (caption, platform, schedule, status).
+ * Update post metadata (caption, platform, schedule, status).
+ * @param {number} id
+ * @param {object} patch
+ * @param {number|null} [userId] When set, only that owner's post can be updated.
  */
-export async function updatePost(id, patch) {
-  const existing = await getPostById(id);
+export async function updatePost(id, patch, userId = null) {
+  const existing = await getPostById(id, userId);
   if (!existing) return null;
 
   const caption = patch.caption != null ? String(patch.caption) : existing.caption;
   const platform =
     patch.platform != null ? normalizePlatform(patch.platform) : existing.platform;
   const scheduledAt =
-    patch.scheduledAt != null
-      ? normalizeScheduledAt(patch.scheduledAt)
+    patch.scheduledAt != null || patch.scheduled_at != null
+      ? normalizeScheduledAt(patch.scheduledAt ?? patch.scheduled_at)
       : existing.scheduledAt;
   let status = existing.status;
   if (patch.status != null) {
     status = patch.status === 'saved' ? 'saved' : 'scheduled';
+  } else if (patch.scheduledAt != null || patch.scheduled_at != null) {
+    status = 'scheduled';
   }
 
   const now = nowDatetime();
@@ -224,7 +287,7 @@ export async function updatePost(id, patch) {
     [caption, platform, scheduledAt, status, now, id]
   );
 
-  return getPostById(id);
+  return getPostById(id, userId);
 }
 
 /**

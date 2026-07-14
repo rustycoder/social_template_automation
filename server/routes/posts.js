@@ -1,7 +1,12 @@
 import { Router } from 'express';
 import multer from 'multer';
 import { authenticate, requireActiveSubscription } from '../middleware/auth.js';
-import { createPost, deletePost, listPostsForUser } from '../services/postService.js';
+import {
+  createPost,
+  deletePost,
+  listPostsForUser,
+  updatePost,
+} from '../services/postService.js';
 
 const router = Router();
 const upload = multer({
@@ -28,19 +33,17 @@ router.post('/', upload.single('image'), async (req, res) => {
     }
 
     const templateId = req.body?.template_id || req.body?.templateId;
-    const platform = req.body?.platform;
-    const scheduledAt = req.body?.scheduled_at || req.body?.scheduledAt;
+    const platform = req.body?.platform || 'instagram';
+    const scheduledAt =
+      req.body?.scheduled_at ||
+      req.body?.scheduledAt ||
+      new Date(Date.now() + 60 * 60 * 1000).toISOString();
     const caption = req.body?.caption ?? '';
     const formatBucket = req.body?.format_bucket || req.body?.formatBucket || 'square';
+    const status = req.body?.status === 'scheduled' ? 'scheduled' : 'saved';
 
     if (!templateId) {
       return res.status(400).json({ error: 'template_id is required' });
-    }
-    if (!platform) {
-      return res.status(400).json({ error: 'platform is required' });
-    }
-    if (!scheduledAt) {
-      return res.status(400).json({ error: 'scheduled_at is required' });
     }
 
     let fieldData = {};
@@ -62,13 +65,26 @@ router.post('/', upload.single('image'), async (req, res) => {
       imageBuffer: req.file.buffer,
       fieldData,
       formatBucket,
-      status: 'scheduled',
+      status,
     });
 
     res.status(201).json({ post });
   } catch (error) {
     console.error('Create post error:', error);
     res.status(error.status || 500).json({ error: error.message || 'Failed to save post' });
+  }
+});
+
+router.patch('/:id', async (req, res) => {
+  try {
+    const post = await updatePost(Number(req.params.id), req.body || {}, req.user.id);
+    if (!post) {
+      return res.status(404).json({ error: 'Post not found' });
+    }
+    res.json({ post });
+  } catch (error) {
+    console.error('Update post error:', error);
+    res.status(error.status || 500).json({ error: error.message || 'Failed to update post' });
   }
 });
 

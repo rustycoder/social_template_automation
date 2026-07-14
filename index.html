@@ -406,49 +406,55 @@
       </div>
     </div>
 
-    <!-- Save post modal -->
-    <div class="modal-overlay hidden" id="save-post-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="save-post-modal-title">
-      <div class="modal-card save-post-modal">
-        <button type="button" class="modal-close" id="save-post-modal-close" aria-label="Close">✕</button>
-        <h2 id="save-post-modal-title">Save post</h2>
-        <p class="modal-desc">Schedule this post for later. Caption comes from your data entry.</p>
-        <div class="form-group">
-          <label>Caption</label>
-          <p class="save-caption-preview" id="save-caption-preview"></p>
-        </div>
-        <div class="form-group">
-          <label for="save-platform">Platform</label>
-          <select id="save-platform" class="text-input">
-            <option value="facebook">Facebook</option>
-            <option value="instagram">Instagram</option>
-            <option value="linkedin">LinkedIn</option>
-            <option value="youtube">YouTube</option>
-            <option value="tiktok">TikTok</option>
-          </select>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label for="save-date">Date</label>
-            <input type="date" id="save-date" class="text-input" required />
-          </div>
-          <div class="form-group">
-            <label for="save-time">Time</label>
-            <input type="time" id="save-time" class="text-input" required />
-          </div>
-        </div>
-        <p class="form-error hidden" id="save-post-error"></p>
-        <button type="button" class="btn btn-primary btn-block" id="save-post-confirm">Save to library</button>
-      </div>
-    </div>
-
     <!-- My Posts modal -->
     <div class="modal-overlay hidden" id="posts-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="posts-modal-title">
       <div class="modal-card posts-modal">
         <button type="button" class="modal-close" id="posts-modal-close" aria-label="Close">✕</button>
         <h2 id="posts-modal-title">My Posts</h2>
-        <p class="modal-desc">Saved and scheduled posts</p>
+        <p class="modal-desc">Edit caption, platform, and schedule for each saved post.</p>
         <div id="posts-list" class="posts-list"></div>
         <p class="posts-empty hidden" id="posts-empty">No saved posts yet.</p>
+      </div>
+    </div>
+
+    <!-- Edit post modal -->
+    <div class="modal-overlay hidden" id="post-edit-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="post-edit-modal-title">
+      <div class="modal-card post-edit-modal">
+        <button type="button" class="modal-close" id="post-edit-modal-close" aria-label="Close">✕</button>
+        <h2 id="post-edit-modal-title">Edit post</h2>
+        <p class="modal-desc" id="post-edit-meta"></p>
+        <img id="post-edit-image" class="post-edit-image hidden" alt="Post preview" />
+        <form id="post-edit-form" class="auth-form">
+          <div class="form-group">
+            <label for="post-edit-caption">Caption</label>
+            <textarea id="post-edit-caption" class="text-input" rows="4" placeholder="Write your caption…"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="post-edit-platform">Platform</label>
+            <select id="post-edit-platform" class="text-input" required>
+              <option value="facebook">Facebook</option>
+              <option value="instagram">Instagram</option>
+              <option value="linkedin">LinkedIn</option>
+              <option value="youtube">YouTube</option>
+              <option value="tiktok">TikTok</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="post-edit-date">Date</label>
+              <input type="date" id="post-edit-date" class="text-input" required />
+            </div>
+            <div class="form-group">
+              <label for="post-edit-time">Time</label>
+              <input type="time" id="post-edit-time" class="text-input" required />
+            </div>
+          </div>
+          <p class="form-error hidden" id="post-edit-error"></p>
+          <div class="admin-form-actions">
+            <button type="button" class="btn btn-outline" id="post-edit-cancel">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="post-edit-submit">Save changes</button>
+          </div>
+        </form>
       </div>
     </div>
 

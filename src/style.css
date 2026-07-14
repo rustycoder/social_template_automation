@@ -2695,7 +2695,7 @@ body.social-exporting * {
   border-top: 1px dashed var(--color-border);
 }
 
-.modal-card.save-post-modal,
+.modal-card.post-edit-modal,
 .modal-card.posts-modal {
   max-width: 520px;
 }
@@ -2706,16 +2706,14 @@ body.social-exporting * {
   gap: 12px;
 }
 
-.save-caption-preview {
-  margin: 0;
-  padding: 10px 12px;
-  min-height: 3rem;
-  background: var(--color-bg-raised, #f4f4f5);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md, 8px);
-  font-size: 0.9rem;
-  white-space: pre-wrap;
-  word-break: break-word;
+.post-edit-image {
+  display: block;
+  width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+  margin: 0 0 16px;
+  border-radius: 8px;
+  background: #f4f4f5;
 }
 
 .posts-list {
@@ -2729,7 +2727,7 @@ body.social-exporting * {
 
 .posts-card {
   display: grid;
-  grid-template-columns: 72px 1fr auto;
+  grid-template-columns: 72px 1fr;
   gap: 12px;
   align-items: start;
   padding: 10px;
@@ -2754,9 +2752,15 @@ body.social-exporting * {
 }
 
 .posts-card__meta {
-  margin: 0;
+  margin: 0 0 10px;
   font-size: 0.78rem;
   color: var(--color-text-muted, #71717a);
+}
+
+.posts-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .posts-empty,
@@ -2837,21 +2841,18 @@ html:has(body.admin-standalone) {
   flex: 1;
   width: 100%;
   max-width: none;
-  padding: 20px 24px 40px;
+  padding: 20px 24px calc(var(--footer-height, 64px) + 24px);
+}
+
+.admin-standalone #app-footer.admin-standalone__footer {
+  display: flex;
 }
 
 .admin-standalone #admin-page.step-panel.active {
   display: block;
 }
 
-.admin-page__title-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.admin-page__title-row .page-title {
+.admin-page__intro .page-title {
   margin: 0;
 }
 

@@ -78,12 +78,7 @@
         <div class="admin-page">
           <header class="admin-page__header">
             <div class="admin-page__intro">
-              <div class="admin-page__title-row">
-                <button type="button" class="btn btn-outline btn-sm" id="btn-admin-back" aria-label="Back to app">
-                  ← Back
-                </button>
-                <h2 class="page-title">Admin</h2>
-              </div>
+              <h2 class="page-title">Admin</h2>
               <p class="page-desc">Manage templates, categories, and saved posts.</p>
             </div>
             <div class="tab-switcher tab-switcher--underline" id="admin-tabs" role="tablist">
@@ -175,6 +170,19 @@
         </div>
       </section>
     </main>
+
+    <footer id="app-footer" class="admin-standalone__footer">
+      <div class="footer-panel footer-panel--nav active" id="footer-admin" data-footer-step="admin">
+        <div class="footer-slot footer-slot--left">
+          <button type="button" class="btn btn-outline" id="btn-admin-back" aria-label="Back to app">
+            <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M13 8H3M7 4L3 8L7 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span class="btn-text">Back</span>
+          </button>
+        </div>
+      </div>
+    </footer>
 
     <div class="toast-container" id="toast-container"></div>
 

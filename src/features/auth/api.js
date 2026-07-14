@@ -141,6 +141,13 @@ export const api = {
     });
   },
 
+  updatePost(id, body) {
+    return request(`/posts/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      body: JSON.stringify(body),
+    });
+  },
+
   deletePost(id) {
     return request(`/posts/${encodeURIComponent(id)}`, { method: 'DELETE' });
   },
