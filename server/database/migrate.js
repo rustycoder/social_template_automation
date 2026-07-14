@@ -35,8 +35,8 @@ async function ensureDatabase() {
   try {
     await connection.query(
       `CREATE DATABASE IF NOT EXISTS \`${config.db.database}\`
-       CHARACTER SET utf8
-       COLLATE utf8_general_ci`
+       CHARACTER SET utf8mb4
+       COLLATE utf8mb4_unicode_ci`
     );
     console.log(`✓ Database "${config.db.database}" ready`);
   } finally {

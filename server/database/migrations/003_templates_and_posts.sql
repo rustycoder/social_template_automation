@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS categories (
   created_at DATETIME NOT NULL,
   updated_at DATETIME NOT NULL,
   INDEX idx_categories_active_sort (is_active, sort_order)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS templates (
   id VARCHAR(120) NOT NULL PRIMARY KEY,
@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS templates (
   FOREIGN KEY (category_id) REFERENCES categories(id),
   INDEX idx_templates_category (category_id),
   INDEX idx_templates_active (is_active)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS saved_posts (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -47,4 +47,4 @@ CREATE TABLE IF NOT EXISTS saved_posts (
   INDEX idx_saved_posts_user (user_id),
   INDEX idx_saved_posts_scheduled (scheduled_at),
   INDEX idx_saved_posts_platform (platform)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
