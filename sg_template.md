@@ -283,7 +283,7 @@ The loader extracts `fonts.googleapis.com` links and injects them as `@import` i
 
 ## Checklist — new template
 
-- [ ] File added under `src/templates/template-*.html`
+- [ ] File added under `src/templates/html/template-*.html`
 - [ ] `html, body` and `.card` set to `1080px × 1080px`
 - [ ] `overflow: hidden` on root
 - [ ] Google Fonts loaded via `<link>` in `<head>`
@@ -301,7 +301,7 @@ The loader extracts `fonts.googleapis.com` links and injects them as `@import` i
 
 | File | Role |
 |------|------|
-| `src/templates/template-*.html` | Authoring source |
+| `src/templates/html/template-*.html` | Authoring source |
 | `src/templates/htmlTemplateLoader.js` | Parse, dimension adapt, export template objects |
 | `src/features/rendering/socialRenderHost.js` | Placeholder + highlight substitution |
 | `src/features/domain/templateSampleData.js` | Gallery / preview sample rows |

@@ -8,7 +8,7 @@ import { NICHE_TEMPLATE_REGISTRY } from '../../../src/templates/nicheTemplateReg
 import { AUDIENCE_TEMPLATE_REGISTRY } from '../../../src/templates/audienceTemplateRegistry.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const TEMPLATES_DIR = path.join(__dirname, '..', '..', '..', 'src', 'templates');
+const TEMPLATES_DIR = path.join(__dirname, '..', '..', '..', 'src', 'templates', 'html');
 
 const REGISTRY = [
   ...LEGACY_TEMPLATE_REGISTRY,

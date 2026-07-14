@@ -9,8 +9,9 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const OUT_DIR = path.resolve(__dirname, '../src/templates');
-const REGISTRY_PATH = path.join(OUT_DIR, 'audienceTemplateRegistry.js');
+const TEMPLATES_DIR = path.resolve(__dirname, '../src/templates');
+const HTML_DIR = path.join(TEMPLATES_DIR, 'html');
+const REGISTRY_PATH = path.join(TEMPLATES_DIR, 'audienceTemplateRegistry.js');
 
 const LOGO_POS = {
   tr: 'top:40px;right:44px;left:auto;bottom:auto;',
@@ -316,14 +317,14 @@ function writeRegistry(entries) {
 }
 
 function main() {
-  fs.mkdirSync(OUT_DIR, { recursive: true });
+  fs.mkdirSync(HTML_DIR, { recursive: true });
   const registry = [];
   for (const t of TEMPLATES) {
-    fs.writeFileSync(path.join(OUT_DIR, t.file), generateHtml(t), 'utf8');
+    fs.writeFileSync(path.join(HTML_DIR, t.file), generateHtml(t), 'utf8');
     registry.push({ file: t.file, id: t.id, name: t.name, category: t.category, fields: fieldDefs(t.fields) });
   }
   writeRegistry(registry);
-  console.log(`Generated ${TEMPLATES.length} audience templates`);
+  console.log(`Generated ${TEMPLATES.length} audience templates in ${HTML_DIR}`);
   console.log(`Registry: ${REGISTRY_PATH}`);
 }
 

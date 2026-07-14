@@ -3,8 +3,9 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const OUT_DIR = path.resolve(__dirname, '../src/templates');
-const REGISTRY_PATH = path.join(OUT_DIR, 'nicheTemplateRegistry.js');
+const TEMPLATES_DIR = path.resolve(__dirname, '../src/templates');
+const HTML_DIR = path.join(TEMPLATES_DIR, 'html');
+const REGISTRY_PATH = path.join(TEMPLATES_DIR, 'nicheTemplateRegistry.js');
 
 const LOGO_POS = {
   tr: 'top:40px;right:44px;left:auto;bottom:auto;',
@@ -311,11 +312,11 @@ function writeRegistry(entries) {
 }
 
 function main() {
-  fs.mkdirSync(OUT_DIR, { recursive: true });
+  fs.mkdirSync(HTML_DIR, { recursive: true });
   const registry = [];
   for (const t of TEMPLATES) {
     const html = generateHtml(t);
-    const outPath = path.join(OUT_DIR, t.file);
+    const outPath = path.join(HTML_DIR, t.file);
     fs.writeFileSync(outPath, html, 'utf8');
     registry.push({
       file: t.file,
@@ -326,7 +327,7 @@ function main() {
     });
   }
   writeRegistry(registry);
-  console.log(`Generated ${TEMPLATES.length} templates in ${OUT_DIR}`);
+  console.log(`Generated ${TEMPLATES.length} templates in ${HTML_DIR}`);
   console.log(`Registry: ${REGISTRY_PATH}`);
 }
 
