@@ -1,11 +1,11 @@
 /**
- * @file adminMain.js
- * @description Bootstrap for the standalone Admin HTML page.
+ * @file postsMain.js
+ * @description Bootstrap for the standalone My Posts HTML page.
  */
 
 import { authService } from './features/auth/auth.js';
 import { AuthUI } from './features/auth/authUI.js';
-import { AdminUI } from './features/auth/adminUI.js';
+import { PostsUI } from './features/auth/postsUI.js';
 
 function bindToasts() {
   const toastContainer = document.getElementById('toast-container');
@@ -27,32 +27,30 @@ function bindToasts() {
 
 async function boot() {
   bindToasts();
-
-  // Restore session from localStorage before gating on login — same as main app bootstrap.
   await authService.ready();
 
   const authUI = new AuthUI();
-  const adminUI = new AdminUI(authUI, { standalone: true });
+  const postsUI = new PostsUI(authUI, { standalone: true });
 
-  authUI.onAdminClick = () => {};
-  authUI.onBillingClick = () => {
-    window.location.href = '/';
+  authUI.onPostsClick = () => {};
+  authUI.onAdminClick = () => {
+    window.location.href = '/template.html';
   };
-  authUI.onPostsClick = () => {
+  authUI.onBillingClick = () => {
     window.location.href = '/';
   };
   authUI.onLogout = () => {
     window.location.href = '/';
   };
 
-  await adminUI.show();
+  await postsUI.show();
 }
 
 boot().catch((error) => {
-  console.error('Admin page failed to start:', error);
+  console.error('Posts page failed to start:', error);
   window.dispatchEvent(
     new CustomEvent('toast', {
-      detail: { message: 'Failed to start admin page', type: 'error' },
+      detail: { message: 'Failed to start posts page', type: 'error' },
     })
   );
 });

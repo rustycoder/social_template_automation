@@ -8,12 +8,13 @@ import { nowDatetime, parseJsonText, stringifyJsonText } from './jsonText.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const PLATFORMS = new Set(['facebook', 'instagram', 'linkedin', 'youtube', 'tiktok']);
+const STATUSES = new Set(['preparing', 'ready', 'completed']);
+const DEFAULT_STATUS = 'preparing';
 
 const DATA_URL_RE = /^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/s;
 
 /**
  * Write any data-URL image values in field_data to disk and replace with /uploads URLs.
- * Prevents field_data from bloating past DB limits.
  * @param {number|string} userId
  * @param {object} fieldData
  * @returns {object}
@@ -79,40 +80,70 @@ export function ensureUploadsDir() {
   return postsDir;
 }
 
-function mapPostRow(row) {
-  if (!row) return null;
-  return {
-    id: row.id,
-    userId: row.user_id,
-    userEmail: row.user_email || row.userEmail || null,
-    userName: row.user_name || row.userName || null,
-    templateId: row.template_id,
-    templateName: row.template_name || row.templateName || null,
-    caption: row.caption || '',
-    platform: row.platform,
-    scheduledAt: row.scheduled_at,
-    imagePath: row.image_path,
-    imageUrl: row.image_path ? `/uploads/${row.image_path.replace(/^\/+/, '')}` : null,
-    fieldData: parseJsonText(row.field_data, {}),
-    formatBucket: row.format_bucket,
-    status: row.status,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-  };
+/**
+ * @param {unknown} value
+ * @returns {string[]}
+ */
+export function normalizePlatforms(value) {
+  let list = value;
+  if (typeof list === 'string') {
+    const trimmed = list.trim();
+    if (!trimmed) return [];
+    if (trimmed.startsWith('[')) {
+      try {
+        list = JSON.parse(trimmed);
+      } catch {
+        list = trimmed.split(/[,|]/);
+      }
+    } else {
+      list = trimmed.split(/[,|]/);
+    }
+  }
+
+  if (!Array.isArray(list)) {
+    if (list == null) return [];
+    list = [list];
+  }
+
+  const seen = new Set();
+  const out = [];
+  for (const item of list) {
+    const platform = String(item || '')
+      .trim()
+      .toLowerCase();
+    if (!platform || seen.has(platform)) continue;
+    if (!PLATFORMS.has(platform)) {
+      const error = new Error(
+        `Invalid platform "${platform}". Allowed: ${[...PLATFORMS].join(', ')}`
+      );
+      error.status = 400;
+      throw error;
+    }
+    seen.add(platform);
+    out.push(platform);
+  }
+  return out;
 }
 
-export function normalizePlatform(value) {
-  const platform = String(value || '')
+/**
+ * @param {unknown} value
+ * @returns {string}
+ */
+export function normalizeStatus(value) {
+  const status = String(value || DEFAULT_STATUS)
     .trim()
     .toLowerCase();
-  if (!PLATFORMS.has(platform)) {
+  // Legacy aliases
+  if (status === 'saved') return 'preparing';
+  if (status === 'scheduled') return 'ready';
+  if (!STATUSES.has(status)) {
     const error = new Error(
-      `Invalid platform. Allowed: ${[...PLATFORMS].join(', ')}`
+      `Invalid status. Allowed: ${[...STATUSES].join(', ')}`
     );
     error.status = 400;
     throw error;
   }
-  return platform;
+  return status;
 }
 
 /**
@@ -128,10 +159,63 @@ export function normalizeScheduledAt(value) {
   return date;
 }
 
+function parsePlatformsColumn(row) {
+  try {
+    if (row.platforms != null) {
+      const parsed = parseJsonText(row.platforms, null);
+      if (Array.isArray(parsed)) return normalizePlatforms(parsed);
+      if (typeof row.platforms === 'string' && row.platforms.trim()) {
+        return normalizePlatforms(row.platforms);
+      }
+    }
+    if (row.platform) {
+      return normalizePlatforms([row.platform]);
+    }
+  } catch {
+    return [];
+  }
+  return [];
+}
+
+function coerceStatus(value) {
+  try {
+    return normalizeStatus(value || DEFAULT_STATUS);
+  } catch {
+    return DEFAULT_STATUS;
+  }
+}
+
+function mapPostRow(row) {
+  if (!row) return null;
+  const platforms = parsePlatformsColumn(row);
+  return {
+    id: row.id,
+    userId: row.user_id,
+    userEmail: row.user_email || row.userEmail || null,
+    userName: row.user_name || row.userName || null,
+    templateId: row.template_id,
+    templateName: row.template_name || row.templateName || null,
+    caption: row.caption || '',
+    platforms,
+    /** @deprecated use platforms */
+    platform: platforms[0] || null,
+    scheduledAt: row.scheduled_at,
+    imagePath: row.image_path,
+    imageUrl: row.image_path ? `/uploads/${row.image_path.replace(/^\/+/, '')}` : null,
+    fieldData: parseJsonText(row.field_data, {}),
+    formatBucket: row.format_bucket,
+    status: coerceStatus(row.status),
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+const POST_SELECT = `id, user_id, template_id, caption, platforms, scheduled_at, image_path,
+            field_data, format_bucket, status, created_at, updated_at`;
+
 export async function listPostsForUser(userId) {
   const rows = await query(
-    `SELECT id, user_id, template_id, caption, platform, scheduled_at, image_path,
-            field_data, format_bucket, status, created_at, updated_at
+    `SELECT ${POST_SELECT}
      FROM saved_posts
      WHERE user_id = ?
      ORDER BY scheduled_at DESC, id DESC`,
@@ -145,7 +229,7 @@ export async function listPostsForUser(userId) {
  */
 export async function listAllPosts() {
   const rows = await query(
-    `SELECT p.id, p.user_id, p.template_id, p.caption, p.platform, p.scheduled_at,
+    `SELECT p.id, p.user_id, p.template_id, p.caption, p.platforms, p.scheduled_at,
             p.image_path, p.field_data, p.format_bucket, p.status, p.created_at, p.updated_at,
             u.email AS user_email, u.name AS user_name,
             t.name AS template_name
@@ -160,13 +244,12 @@ export async function listAllPosts() {
 export async function getPostById(id, userId = null) {
   const rows = userId
     ? await query(
-        `SELECT id, user_id, template_id, caption, platform, scheduled_at, image_path,
-                field_data, format_bucket, status, created_at, updated_at
+        `SELECT ${POST_SELECT}
          FROM saved_posts WHERE id = ? AND user_id = ? LIMIT 1`,
         [id, userId]
       )
     : await query(
-        `SELECT p.id, p.user_id, p.template_id, p.caption, p.platform, p.scheduled_at,
+        `SELECT p.id, p.user_id, p.template_id, p.caption, p.platforms, p.scheduled_at,
                 p.image_path, p.field_data, p.format_bucket, p.status, p.created_at, p.updated_at,
                 u.email AS user_email, u.name AS user_name,
                 t.name AS template_name
@@ -188,12 +271,13 @@ export async function createPost({
   userId,
   templateId,
   caption,
+  platforms,
   platform,
   scheduledAt,
   imageBuffer,
   fieldData,
   formatBucket = 'square',
-  status = 'scheduled',
+  status = DEFAULT_STATUS,
 }) {
   const template = await query('SELECT id FROM templates WHERE id = ? LIMIT 1', [templateId]);
   if (!template[0]) {
@@ -202,7 +286,10 @@ export async function createPost({
     throw error;
   }
 
-  const normalizedPlatform = normalizePlatform(platform || 'instagram');
+  const normalizedPlatforms = normalizePlatforms(
+    platforms != null ? platforms : platform != null ? [platform] : []
+  );
+  const normalizedStatus = normalizeStatus(status || DEFAULT_STATUS);
   const when = normalizeScheduledAt(
     scheduledAt || new Date(Date.now() + 60 * 60 * 1000)
   );
@@ -217,19 +304,19 @@ export async function createPost({
   const now = nowDatetime();
   const result = await query(
     `INSERT INTO saved_posts
-      (user_id, template_id, caption, platform, scheduled_at, image_path, field_data,
+      (user_id, template_id, caption, platforms, scheduled_at, image_path, field_data,
        format_bucket, status, created_at, updated_at)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       userId,
       templateId,
       caption ?? '',
-      normalizedPlatform,
+      stringifyJsonText(normalizedPlatforms),
       when,
       relativePath,
       stringifyJsonText(storedFieldData),
       formatBucket || 'square',
-      status === 'scheduled' ? 'scheduled' : 'saved',
+      normalizedStatus,
       now,
       now,
     ]
@@ -256,7 +343,7 @@ export async function deletePost(id, userId) {
 }
 
 /**
- * Update post metadata (caption, platform, schedule, status).
+ * Update post metadata (caption, platforms, schedule, status).
  * @param {number} id
  * @param {object} patch
  * @param {number|null} [userId] When set, only that owner's post can be updated.
@@ -266,25 +353,28 @@ export async function updatePost(id, patch, userId = null) {
   if (!existing) return null;
 
   const caption = patch.caption != null ? String(patch.caption) : existing.caption;
-  const platform =
-    patch.platform != null ? normalizePlatform(patch.platform) : existing.platform;
+
+  let platforms = existing.platforms;
+  if (patch.platforms != null) {
+    platforms = normalizePlatforms(patch.platforms);
+  } else if (patch.platform != null) {
+    platforms = normalizePlatforms([patch.platform]);
+  }
+
   const scheduledAt =
     patch.scheduledAt != null || patch.scheduled_at != null
       ? normalizeScheduledAt(patch.scheduledAt ?? patch.scheduled_at)
       : existing.scheduledAt;
-  let status = existing.status;
-  if (patch.status != null) {
-    status = patch.status === 'saved' ? 'saved' : 'scheduled';
-  } else if (patch.scheduledAt != null || patch.scheduled_at != null) {
-    status = 'scheduled';
-  }
+
+  const status =
+    patch.status != null ? normalizeStatus(patch.status) : existing.status;
 
   const now = nowDatetime();
   await query(
     `UPDATE saved_posts
-     SET caption = ?, platform = ?, scheduled_at = ?, status = ?, updated_at = ?
+     SET caption = ?, platforms = ?, scheduled_at = ?, status = ?, updated_at = ?
      WHERE id = ?`,
-    [caption, platform, scheduledAt, status, now, id]
+    [caption, stringifyJsonText(platforms), scheduledAt, status, now, id]
   );
 
   return getPostById(id, userId);

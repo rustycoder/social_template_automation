@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="My Posts — view and edit saved social posts." />
+  <meta name="theme-color" content="#fcf8ff" />
+  <title>My Posts — Content Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,1..1000&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/style.css" />
+  <script>
+    window.global = window;
+  </script>
+</head>
+<body class="posts-standalone">
+  <div id="app" data-posts="true">
+    <header id="app-header" class="posts-standalone__header">
+      <div class="header-brand">
+        <a href="/" class="logo posts-standalone__brand-link">
+          <svg class="logo-mark" width="36" height="36" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+            <rect width="32" height="32" rx="8" fill="url(#logo-grad-posts)" />
+            <path d="M8 10h16M8 16h12M8 22h14" stroke="#fff" stroke-width="2" stroke-linecap="round" />
+            <defs>
+              <linearGradient id="logo-grad-posts" x1="0" y1="0" x2="32" y2="32">
+                <stop stop-color="#4f46e5" />
+                <stop offset="1" stop-color="#6366f1" />
+              </linearGradient>
+            </defs>
+          </svg>
+          <h1>Content Studio</h1>
+        </a>
+        <span class="posts-standalone__badge">My Posts</span>
+      </div>
+
+      <div class="header-auth" id="header-auth">
+        <button type="button" class="btn btn-ghost btn-sm" id="btn-login" aria-label="Sign in">
+          <span class="btn-text">Sign in</span>
+        </button>
+        <div class="user-menu hidden" id="user-menu">
+          <button
+            type="button"
+            class="profile-trigger"
+            id="profile-trigger"
+            aria-haspopup="menu"
+            aria-expanded="false"
+            aria-controls="profile-dropdown"
+          >
+            <span class="profile-avatar" id="profile-avatar" aria-hidden="true"></span>
+            <span class="user-name" id="user-name"></span>
+            <svg class="profile-chevron" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path d="M3.5 5.25L7 8.75L10.5 5.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div class="profile-dropdown hidden" id="profile-dropdown" role="menu">
+            <div class="profile-dropdown-header">
+              <span class="profile-dropdown-name" id="dropdown-user-name"></span>
+              <span class="profile-dropdown-email" id="dropdown-user-email"></span>
+            </div>
+            <div class="profile-dropdown-sub" id="dropdown-sub-section">
+              <span class="user-sub-badge inactive" id="dropdown-sub-badge">No subscription</span>
+            </div>
+            <button type="button" class="profile-dropdown-item" id="btn-my-posts" role="menuitem">My Posts</button>
+            <button type="button" class="profile-dropdown-item hidden" id="btn-admin" role="menuitem">Template</button>
+            <button type="button" class="profile-dropdown-item" id="btn-my-billing" role="menuitem">My Billing</button>
+            <button type="button" class="profile-dropdown-item profile-dropdown-item-danger" id="btn-logout" role="menuitem">
+              Sign out
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main id="main-content" class="posts-standalone__main">
+      <section class="step-panel active" id="posts-page">
+        <div class="posts-page">
+          <header class="posts-page__header">
+            <div class="posts-page__intro">
+              <h2 class="page-title">My Posts</h2>
+              <p class="page-desc">Edit caption, platform, and schedule for each saved post.</p>
+            </div>
+          </header>
+
+          <div class="posts-page__toolbar">
+            <input
+              type="search"
+              id="posts-search"
+              class="text-input posts-search"
+              placeholder="Search by caption or platform…"
+              autocomplete="off"
+            />
+            <select id="posts-status-filter" class="text-input posts-filter" aria-label="Filter by status">
+              <option value="all">All statuses</option>
+              <option value="preparing">Preparing for Scheduling</option>
+              <option value="ready">Ready for Scheduling</option>
+              <option value="completed">Completed</option>
+            </select>
+          </div>
+
+          <div id="posts-list" class="posts-page__grid"></div>
+          <p class="posts-empty hidden" id="posts-empty">No saved posts yet. Save posts from the export step to see them here.</p>
+        </div>
+      </section>
+    </main>
+
+    <footer id="app-footer" class="posts-standalone__footer">
+      <div class="footer-panel footer-panel--nav active" id="footer-posts" data-footer-step="posts">
+        <div class="footer-slot footer-slot--left">
+          <button type="button" class="btn btn-outline" id="btn-posts-back" aria-label="Back to app">
+            <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M13 8H3M7 4L3 8L7 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span class="btn-text">Back</span>
+          </button>
+        </div>
+      </div>
+    </footer>
+
+    <div class="toast-container" id="toast-container"></div>
+
+    <div class="modal-overlay hidden" id="auth-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
+      <div class="modal-card auth-modal" id="auth-modal">
+        <button type="button" class="modal-close" id="auth-modal-close" aria-label="Close">✕</button>
+        <h2 id="auth-modal-title">Sign in</h2>
+        <p class="modal-desc">Sign in to view and manage your saved posts.</p>
+        <form id="auth-form" class="auth-form">
+          <div class="form-group hidden" id="auth-name-group">
+            <label for="auth-name">Name</label>
+            <input type="text" id="auth-name" class="text-input" autocomplete="name" />
+          </div>
+          <div class="form-group">
+            <label for="auth-email">Email</label>
+            <input type="email" id="auth-email" class="text-input" required autocomplete="email" />
+          </div>
+          <div class="form-group">
+            <label for="auth-password">Password</label>
+            <input type="password" id="auth-password" class="text-input" required minlength="8" autocomplete="current-password" />
+          </div>
+          <p class="form-error hidden" id="auth-error"></p>
+          <button type="submit" class="btn btn-primary btn-block" id="auth-submit-btn">Sign in</button>
+        </form>
+        <p class="modal-footer-text">
+          <button type="button" class="link-btn" id="auth-toggle-mode">Create an account</button>
+        </p>
+      </div>
+    </div>
+
+    <div class="modal-overlay hidden" id="post-edit-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="post-edit-modal-title">
+      <div class="modal-card post-edit-modal">
+        <button type="button" class="modal-close" id="post-edit-modal-close" aria-label="Close">✕</button>
+        <h2 id="post-edit-modal-title">Edit post</h2>
+        <p class="modal-desc" id="post-edit-meta"></p>
+        <img id="post-edit-image" class="post-edit-image hidden" alt="Post preview" />
+        <form id="post-edit-form" class="auth-form post-edit-form">
+          <div class="form-group">
+            <label for="post-edit-caption">Caption</label>
+            <textarea id="post-edit-caption" class="text-input" rows="4" placeholder="Write your caption…"></textarea>
+          </div>
+          <div class="form-group">
+            <span class="form-label">Platforms</span>
+            <p class="form-hint">Select one or more platforms for this post.</p>
+            <div class="platform-checkboxes" id="post-edit-platforms" role="group" aria-label="Platforms">
+              <label class="platform-chip">
+                <input type="checkbox" name="post-platform" value="facebook" />
+                <span>Facebook</span>
+              </label>
+              <label class="platform-chip">
+                <input type="checkbox" name="post-platform" value="instagram" />
+                <span>Instagram</span>
+              </label>
+              <label class="platform-chip">
+                <input type="checkbox" name="post-platform" value="linkedin" />
+                <span>LinkedIn</span>
+              </label>
+              <label class="platform-chip">
+                <input type="checkbox" name="post-platform" value="youtube" />
+                <span>YouTube</span>
+              </label>
+              <label class="platform-chip">
+                <input type="checkbox" name="post-platform" value="tiktok" />
+                <span>TikTok</span>
+              </label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="post-edit-status">Status</label>
+            <select id="post-edit-status" class="text-input" required>
+              <option value="preparing">Preparing for Scheduling</option>
+              <option value="ready">Ready for Scheduling</option>
+              <option value="completed">Completed</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="post-edit-date">Schedule date</label>
+              <input type="date" id="post-edit-date" class="text-input" required />
+            </div>
+            <div class="form-group">
+              <label for="post-edit-time">Schedule time</label>
+              <input type="time" id="post-edit-time" class="text-input" required />
+            </div>
+          </div>
+          <p class="form-error hidden" id="post-edit-error"></p>
+          <div class="admin-form-actions">
+            <button type="button" class="btn btn-outline" id="post-edit-cancel">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="post-edit-submit">Save changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/postsMain.js"></script>
+</body>
+</html>

@@ -16,7 +16,6 @@ import { handleCheckoutReturn } from './auth/checkout.js';
 import { AuthUI } from './auth/authUI.js';
 import { SubscriptionUI } from './auth/subscriptionUI.js';
 import { BillingUI } from './auth/billingUI.js';
-import { PostsUI } from './auth/postsUI.js';
 
 import { LayoutModule } from './modules/LayoutModule.js';
 import { DataEntryModule } from './modules/DataEntryModule.js';
@@ -74,15 +73,15 @@ export class App {
     this.authUI = new AuthUI();
     this.subscriptionUI = new SubscriptionUI(this.authUI);
     this.billingUI = new BillingUI(this.authUI);
-    this.postsUI = new PostsUI(this.authUI);
     this.authUI.onBillingClick = () => this.billingUI.show();
-    this.authUI.onPostsClick = () => this.postsUI.show();
+    this.authUI.onPostsClick = () => {
+      window.location.assign('/post.html');
+    };
     this.authUI.onAdminClick = () => {
-      window.location.assign('/admin.html');
+      window.location.assign('/template.html');
     };
     this.authUI.onLogout = () => {
       this.billingUI?.hide();
-      this.postsUI?.hide();
       this.layout.goToStep(1);
     };
 

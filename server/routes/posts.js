@@ -33,14 +33,24 @@ router.post('/', upload.single('image'), async (req, res) => {
     }
 
     const templateId = req.body?.template_id || req.body?.templateId;
-    const platform = req.body?.platform || 'instagram';
+    let platforms = req.body?.platforms;
+    if (typeof platforms === 'string') {
+      try {
+        platforms = JSON.parse(platforms);
+      } catch {
+        platforms = platforms.split(/[,|]/).map((s) => s.trim()).filter(Boolean);
+      }
+    }
+    if (!platforms && req.body?.platform) {
+      platforms = [req.body.platform];
+    }
     const scheduledAt =
       req.body?.scheduled_at ||
       req.body?.scheduledAt ||
       new Date(Date.now() + 60 * 60 * 1000).toISOString();
     const caption = req.body?.caption ?? '';
     const formatBucket = req.body?.format_bucket || req.body?.formatBucket || 'square';
-    const status = req.body?.status === 'scheduled' ? 'scheduled' : 'saved';
+    const status = req.body?.status || 'preparing';
 
     if (!templateId) {
       return res.status(400).json({ error: 'template_id is required' });
@@ -60,7 +70,7 @@ router.post('/', upload.single('image'), async (req, res) => {
       userId: req.user.id,
       templateId,
       caption,
-      platform,
+      platforms: platforms || [],
       scheduledAt,
       imageBuffer: req.file.buffer,
       fieldData,

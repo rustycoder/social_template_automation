@@ -94,7 +94,7 @@
                 <path d="M8 2v2.5M8 11.5V14M2 8h2.5M11.5 8H14M4.05 4.05l1.77 1.77M10.18 10.18l1.77 1.77M4.05 11.95l1.77-1.77M10.18 5.82l1.77-1.77" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/>
                 <circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.25"/>
               </svg>
-              Admin
+              Template
             </button>
             <button type="button" class="profile-dropdown-item" id="btn-my-billing" role="menuitem">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -403,58 +403,6 @@
         <p class="modal-desc" id="subscribe-modal-desc">Get unlimited access to the full template library and all export downloads.</p>
         <div class="subscribe-plans" id="subscribe-plans"></div>
         <p class="form-error hidden" id="subscribe-error"></p>
-      </div>
-    </div>
-
-    <!-- My Posts modal -->
-    <div class="modal-overlay hidden" id="posts-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="posts-modal-title">
-      <div class="modal-card posts-modal">
-        <button type="button" class="modal-close" id="posts-modal-close" aria-label="Close">✕</button>
-        <h2 id="posts-modal-title">My Posts</h2>
-        <p class="modal-desc">Edit caption, platform, and schedule for each saved post.</p>
-        <div id="posts-list" class="posts-list"></div>
-        <p class="posts-empty hidden" id="posts-empty">No saved posts yet.</p>
-      </div>
-    </div>
-
-    <!-- Edit post modal -->
-    <div class="modal-overlay hidden" id="post-edit-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="post-edit-modal-title">
-      <div class="modal-card post-edit-modal">
-        <button type="button" class="modal-close" id="post-edit-modal-close" aria-label="Close">✕</button>
-        <h2 id="post-edit-modal-title">Edit post</h2>
-        <p class="modal-desc" id="post-edit-meta"></p>
-        <img id="post-edit-image" class="post-edit-image hidden" alt="Post preview" />
-        <form id="post-edit-form" class="auth-form">
-          <div class="form-group">
-            <label for="post-edit-caption">Caption</label>
-            <textarea id="post-edit-caption" class="text-input" rows="4" placeholder="Write your caption…"></textarea>
-          </div>
-          <div class="form-group">
-            <label for="post-edit-platform">Platform</label>
-            <select id="post-edit-platform" class="text-input" required>
-              <option value="facebook">Facebook</option>
-              <option value="instagram">Instagram</option>
-              <option value="linkedin">LinkedIn</option>
-              <option value="youtube">YouTube</option>
-              <option value="tiktok">TikTok</option>
-            </select>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="post-edit-date">Date</label>
-              <input type="date" id="post-edit-date" class="text-input" required />
-            </div>
-            <div class="form-group">
-              <label for="post-edit-time">Time</label>
-              <input type="time" id="post-edit-time" class="text-input" required />
-            </div>
-          </div>
-          <p class="form-error hidden" id="post-edit-error"></p>
-          <div class="admin-form-actions">
-            <button type="button" class="btn btn-outline" id="post-edit-cancel">Cancel</button>
-            <button type="submit" class="btn btn-primary" id="post-edit-submit">Save changes</button>
-          </div>
-        </form>
       </div>
     </div>
 

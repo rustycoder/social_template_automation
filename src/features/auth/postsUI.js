@@ -1,15 +1,15 @@
 /**
  * @file features/auth/postsUI.js
- * @description My Posts list — view, edit caption/platform/schedule, and delete.
+ * @description My Posts list — view, edit caption/platforms/schedule/status, and delete.
+ *              Supports modal (main app) or standalone full-page mode (`post.html`).
  */
 
 import { api, ApiError } from './api.js';
 import { authService } from './auth.js';
-import { SAVE_PLATFORMS } from '../shared/postMeta.js';
-
-function platformLabel(id) {
-  return SAVE_PLATFORMS.find((p) => p.id === id)?.label ?? id;
-}
+import {
+  platformsLabel,
+  postStatusLabel,
+} from '../shared/postMeta.js';
 
 function formatWhen(value) {
   if (!value) return '';
@@ -45,16 +45,29 @@ function splitDateTime(value) {
   };
 }
 
+function postPlatforms(post) {
+  if (Array.isArray(post?.platforms) && post.platforms.length) return post.platforms;
+  if (post?.platform) return [post.platform];
+  return [];
+}
+
 export class PostsUI {
   /**
    * @param {import('./authUI.js').AuthUI} authUI
+   * @param {{ standalone?: boolean }} [deps]
    */
-  constructor(authUI) {
+  constructor(authUI, deps = {}) {
     this.authUI = authUI;
+    this.standalone = !!deps.standalone;
+
+    this.page = document.getElementById('posts-page');
     this.overlay = document.getElementById('posts-modal-overlay');
     this.listEl = document.getElementById('posts-list');
     this.emptyEl = document.getElementById('posts-empty');
     this.closeBtn = document.getElementById('posts-modal-close');
+    this.backBtn = document.getElementById('btn-posts-back');
+    this.searchInput = document.getElementById('posts-search');
+    this.statusFilter = document.getElementById('posts-status-filter');
     this.loading = false;
 
     this.editOverlay = document.getElementById('post-edit-modal-overlay');
@@ -64,7 +77,8 @@ export class PostsUI {
     this.editError = document.getElementById('post-edit-error');
     this.editSubmitBtn = document.getElementById('post-edit-submit');
     this.editCaption = document.getElementById('post-edit-caption');
-    this.editPlatform = document.getElementById('post-edit-platform');
+    this.editPlatforms = document.getElementById('post-edit-platforms');
+    this.editStatus = document.getElementById('post-edit-status');
     this.editDate = document.getElementById('post-edit-date');
     this.editTime = document.getElementById('post-edit-time');
     this.editImage = document.getElementById('post-edit-image');
@@ -72,11 +86,17 @@ export class PostsUI {
 
     /** @type {number|null} */
     this._editingId = null;
+    /** @type {Array<object>} */
+    this._posts = [];
 
     this.closeBtn?.addEventListener('click', () => this.hide());
+    this.backBtn?.addEventListener('click', () => this.hide());
     this.overlay?.addEventListener('click', (e) => {
       if (e.target === this.overlay) this.hide();
     });
+
+    this.searchInput?.addEventListener('input', () => this._renderFiltered());
+    this.statusFilter?.addEventListener('change', () => this._renderFiltered());
 
     this.editCloseBtn?.addEventListener('click', () => this._closeEdit());
     this.editCancelBtn?.addEventListener('click', () => this._closeEdit());
@@ -91,8 +111,24 @@ export class PostsUI {
 
   async show() {
     if (!authService.isLoggedIn()) {
-      await this.authUI.open('login');
-      if (!authService.isLoggedIn()) return;
+      const hasSession = await authService.ensureSession();
+      if (!hasSession) {
+        const loggedIn = await this.authUI.requireLogin();
+        if (!loggedIn) {
+          if (this.standalone) {
+            window.location.href = '/';
+          }
+          return;
+        }
+      }
+    }
+
+    this.authUI._closeDropdown();
+
+    if (this.standalone) {
+      this.page?.classList.add('active');
+      await this._load();
+      return;
     }
 
     this.overlay?.classList.remove('hidden');
@@ -101,6 +137,10 @@ export class PostsUI {
 
   hide() {
     this._closeEdit();
+    if (this.standalone) {
+      window.location.href = '/';
+      return;
+    }
     this.overlay?.classList.add('hidden');
   }
 
@@ -112,7 +152,8 @@ export class PostsUI {
 
     try {
       const { posts } = await api.getPosts();
-      this._render(posts || []);
+      this._posts = posts || [];
+      this._renderFiltered();
     } catch (error) {
       const message =
         error instanceof ApiError ? error.message : 'Failed to load posts';
@@ -120,6 +161,31 @@ export class PostsUI {
     } finally {
       this.loading = false;
     }
+  }
+
+  _filteredPosts() {
+    const q = (this.searchInput?.value || '').trim().toLowerCase();
+    const status = this.statusFilter?.value || 'all';
+
+    return this._posts.filter((post) => {
+      if (status !== 'all' && post.status !== status) return false;
+      if (!q) return true;
+      const hay = [
+        post.caption,
+        platformsLabel(postPlatforms(post)),
+        ...postPlatforms(post),
+        postStatusLabel(post.status),
+        post.status,
+        String(post.id),
+      ]
+        .join(' ')
+        .toLowerCase();
+      return hay.includes(q);
+    });
+  }
+
+  _renderFiltered() {
+    this._render(this._filteredPosts());
   }
 
   /**
@@ -131,6 +197,12 @@ export class PostsUI {
     if (posts.length === 0) {
       this.listEl.innerHTML = '';
       this.emptyEl?.classList.remove('hidden');
+      if (this._posts.length > 0 && this.emptyEl) {
+        this.emptyEl.textContent = 'No posts match your filters.';
+      } else if (this.emptyEl) {
+        this.emptyEl.textContent =
+          'No saved posts yet. Save posts from the export step to see them here.';
+      }
       return;
     }
 
@@ -139,29 +211,31 @@ export class PostsUI {
 
     for (const post of posts) {
       const card = document.createElement('article');
-      card.className = 'posts-card';
+      card.className = this.standalone ? 'posts-page-card' : 'posts-card';
       const caption = (post.caption || '').trim() || '(No caption)';
-      const statusLabel = post.status === 'scheduled' ? 'Scheduled' : 'Saved';
+      const platforms = postPlatforms(post);
+      const statusLabel = postStatusLabel(post.status);
       card.innerHTML = `
-        <div class="posts-card__thumb">
+        <div class="${this.standalone ? 'posts-page-card__thumb' : 'posts-card__thumb'}">
           ${
             post.imageUrl
               ? `<img src="${escapeHtml(post.imageUrl)}" alt="" loading="lazy" />`
-              : '<div class="posts-card__thumb-empty"></div>'
+              : `<div class="${this.standalone ? 'posts-page-card__thumb-empty' : 'posts-card__thumb-empty'}"></div>`
           }
         </div>
-        <div class="posts-card__body">
-          <p class="posts-card__caption">${escapeHtml(caption)}</p>
-          <p class="posts-card__meta">
-            <span>${escapeHtml(platformLabel(post.platform))}</span>
+        <div class="${this.standalone ? 'posts-page-card__body' : 'posts-card__body'}">
+          <p class="${this.standalone ? 'posts-page-card__caption' : 'posts-card__caption'}">${escapeHtml(caption)}</p>
+          <p class="${this.standalone ? 'posts-page-card__meta' : 'posts-card__meta'}">
+            <span>${escapeHtml(platformsLabel(platforms))}</span>
             ·
             <span>${escapeHtml(formatWhen(post.scheduledAt))}</span>
-            ·
-            <span>${escapeHtml(statusLabel)}</span>
           </p>
-          <div class="posts-card__actions">
-            <button type="button" class="btn btn-outline btn-sm posts-card__edit" data-action="edit">Edit</button>
-            <button type="button" class="btn btn-ghost btn-sm posts-card__delete" data-action="delete">Delete</button>
+          <p class="${this.standalone ? 'posts-page-card__status' : 'posts-card__meta'}">
+            <span class="post-status-badge post-status-badge--${escapeHtml(post.status || 'preparing')}">${escapeHtml(statusLabel)}</span>
+          </p>
+          <div class="${this.standalone ? 'posts-page-card__actions' : 'posts-card__actions'}">
+            <button type="button" class="btn btn-outline btn-sm" data-action="edit">Edit</button>
+            <button type="button" class="btn btn-ghost btn-sm" data-action="delete">Delete</button>
           </div>
         </div>
       `;
@@ -194,6 +268,19 @@ export class PostsUI {
     }
   }
 
+  _setPlatformChecks(selected) {
+    const set = new Set(selected || []);
+    this.editPlatforms?.querySelectorAll('input[type="checkbox"]').forEach((input) => {
+      input.checked = set.has(input.value);
+    });
+  }
+
+  _getSelectedPlatforms() {
+    return [...(this.editPlatforms?.querySelectorAll('input[type="checkbox"]:checked') || [])].map(
+      (input) => input.value
+    );
+  }
+
   /**
    * @param {object} post
    */
@@ -205,7 +292,8 @@ export class PostsUI {
     }
 
     if (this.editCaption) this.editCaption.value = post.caption || '';
-    if (this.editPlatform) this.editPlatform.value = post.platform || 'instagram';
+    this._setPlatformChecks(postPlatforms(post));
+    if (this.editStatus) this.editStatus.value = post.status || 'preparing';
 
     const { date, time } = splitDateTime(post.scheduledAt);
     if (this.editDate) this.editDate.value = date;
@@ -236,13 +324,22 @@ export class PostsUI {
     if (!this._editingId) return;
 
     const caption = this.editCaption?.value ?? '';
-    const platform = this.editPlatform?.value;
+    const platforms = this._getSelectedPlatforms();
+    const status = this.editStatus?.value || 'preparing';
     const date = this.editDate?.value;
     const time = this.editTime?.value;
 
-    if (!platform || !date || !time) {
+    if (platforms.length === 0) {
       if (this.editError) {
-        this.editError.textContent = 'Platform, date, and time are required';
+        this.editError.textContent = 'Select at least one platform';
+        this.editError.classList.remove('hidden');
+      }
+      return;
+    }
+
+    if (!date || !time) {
+      if (this.editError) {
+        this.editError.textContent = 'Date and time are required';
         this.editError.classList.remove('hidden');
       }
       return;
@@ -266,9 +363,9 @@ export class PostsUI {
     try {
       await api.updatePost(this._editingId, {
         caption,
-        platform,
+        platforms,
         scheduled_at: scheduledAt.toISOString(),
-        status: 'scheduled',
+        status,
       });
       this._closeEdit();
       await this._load();

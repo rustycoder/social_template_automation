@@ -47,21 +47,16 @@ export class AdminUI {
     this.tabBtns = document.querySelectorAll('#admin-tabs .tab-switcher__btn');
     this.templatesPanel = document.getElementById('admin-templates-panel');
     this.categoriesPanel = document.getElementById('admin-categories-panel');
-    this.postsPanel = document.getElementById('admin-posts-panel');
 
     this.templatesGrid = document.getElementById('admin-templates-grid');
     this.categoriesBody = document.getElementById('admin-categories-body');
-    this.postsBody = document.getElementById('admin-posts-body');
     this.templateSearch = document.getElementById('admin-template-search');
     this.templateStatusFilter = document.getElementById('admin-template-status-filter');
     this.templateCategoryFilter = document.getElementById('admin-template-category-filter');
     this.categorySearch = document.getElementById('admin-category-search');
-    this.postSearch = document.getElementById('admin-post-search');
-    this.postStatusFilter = document.getElementById('admin-post-status-filter');
 
     this.templatesPagination = document.getElementById('admin-templates-pagination');
     this.categoriesPagination = document.getElementById('admin-categories-pagination');
-    this.postsPagination = document.getElementById('admin-posts-pagination');
 
     this.btnNewTemplate = document.getElementById('btn-admin-new-template');
     this.btnNewCategory = document.getElementById('btn-admin-new-category');
@@ -85,34 +80,20 @@ export class AdminUI {
     this.categoryFormCancel = document.getElementById('admin-category-form-cancel');
     this.categoryFormError = document.getElementById('admin-category-form-error');
 
-    this.postFormOverlay = document.getElementById('admin-post-form-overlay');
-    this.postForm = document.getElementById('admin-post-form');
-    this.postFormClose = document.getElementById('admin-post-form-close');
-    this.postFormCancel = document.getElementById('admin-post-form-cancel');
-    this.postFormError = document.getElementById('admin-post-form-error');
-    this.postFormSubmit = document.getElementById('admin-post-form-submit');
-    this.postImage = document.getElementById('admin-post-image');
-    this.postMeta = document.getElementById('admin-post-meta');
-
-    /** @type {'templates' | 'categories' | 'posts'} */
+    /** @type {'templates' | 'categories'} */
     this.activeTab = 'templates';
     /** @type {object[]} */
     this._templates = [];
     /** @type {object[]} */
     this._categories = [];
-    /** @type {object[]} */
-    this._posts = [];
     this._templatePage = 1;
     this._categoryPage = 1;
-    this._postPage = 1;
     /** @type {string | null} */
     this._editingTemplateId = null;
     /** @type {string} */
     this._editingPreviewBucket = 'square';
     /** @type {string | null} */
     this._editingCategoryId = null;
-    /** @type {number | null} */
-    this._editingPostId = null;
     this._previousStep = 1;
     this._visible = false;
     this._loadId = 0;
@@ -161,14 +142,6 @@ export class AdminUI {
       this._categoryPage = 1;
       this._renderCategories();
     });
-    this.postSearch?.addEventListener('input', () => {
-      this._postPage = 1;
-      this._renderPosts();
-    });
-    this.postStatusFilter?.addEventListener('change', () => {
-      this._postPage = 1;
-      this._renderPosts();
-    });
 
     this.page?.addEventListener('click', (e) => {
       const prev = e.target?.closest?.('[data-admin-page-prev]');
@@ -208,16 +181,6 @@ export class AdminUI {
     this.categoryForm?.addEventListener('submit', (e) => {
       e.preventDefault();
       this._submitCategoryForm();
-    });
-
-    this.postFormClose?.addEventListener('click', () => this._closePostForm());
-    this.postFormCancel?.addEventListener('click', () => this._closePostForm());
-    this.postFormOverlay?.addEventListener('click', (e) => {
-      if (e.target === this.postFormOverlay) this._closePostForm();
-    });
-    this.postForm?.addEventListener('submit', (e) => {
-      e.preventDefault();
-      this._submitPostForm();
     });
   }
 
@@ -283,7 +246,6 @@ export class AdminUI {
     if (this.standalone) {
       this._closeTemplateForm();
       this._closeCategoryForm();
-      this._closePostForm();
       window.location.href = '/';
       return;
     }
@@ -293,7 +255,6 @@ export class AdminUI {
     this.page?.classList.remove('active');
     this._closeTemplateForm();
     this._closeCategoryForm();
-    this._closePostForm();
 
     const step = parseInt(this._previousStep, 10) || 1;
     const app = document.getElementById('app');
@@ -316,9 +277,7 @@ export class AdminUI {
   }
 
   _switchTab(tab) {
-    if (tab === 'categories') this.activeTab = 'categories';
-    else if (tab === 'posts') this.activeTab = 'posts';
-    else this.activeTab = 'templates';
+    this.activeTab = tab === 'categories' ? 'categories' : 'templates';
 
     this.tabBtns.forEach((btn) => {
       const active = btn.dataset.adminTab === this.activeTab;
@@ -327,7 +286,6 @@ export class AdminUI {
     });
     this.templatesPanel?.classList.toggle('hidden', this.activeTab !== 'templates');
     this.categoriesPanel?.classList.toggle('hidden', this.activeTab !== 'categories');
-    this.postsPanel?.classList.toggle('hidden', this.activeTab !== 'posts');
   }
 
   _setLoading(loading) {
@@ -350,21 +308,17 @@ export class AdminUI {
     this._setError('');
     this._setLoading(true);
     try {
-      const [{ templates }, { categories }, { posts }] = await Promise.all([
+      const [{ templates }, { categories }] = await Promise.all([
         api.adminListTemplates(),
         api.adminListCategories(),
-        api.adminListPosts(),
       ]);
       if (loadId !== this._loadId) return;
       this._templates = templates || [];
       this._categories = categories || [];
-      this._posts = posts || [];
       this._templatePage = 1;
       this._categoryPage = 1;
-      this._postPage = 1;
       this._renderTemplates();
       this._renderCategories();
-      this._renderPosts();
       this._fillCategorySelects();
     } catch (error) {
       if (loadId !== this._loadId) return;
@@ -433,7 +387,7 @@ export class AdminUI {
   }
 
   /**
-   * @param {'templates'|'categories'|'posts'} kind
+   * @param {'templates'|'categories'} kind
    * @param {number} delta
    */
   _changePage(kind, delta) {
@@ -443,15 +397,12 @@ export class AdminUI {
     } else if (kind === 'categories') {
       this._categoryPage += delta;
       this._renderCategories();
-    } else if (kind === 'posts') {
-      this._postPage += delta;
-      this._renderPosts();
     }
   }
 
   /**
    * @param {HTMLElement|null} el
-   * @param {'templates'|'categories'|'posts'} kind
+   * @param {'templates'|'categories'} kind
    * @param {{ page: number, totalPages: number, total: number, start: number, end: number }} info
    */
   _updatePagination(el, kind, info) {
@@ -475,7 +426,7 @@ export class AdminUI {
 
   _filterTemplates() {
     const q = (this.templateSearch?.value || '').trim().toLowerCase();
-    const status = this.templateStatusFilter?.value || 'all';
+    const status = this.templateStatusFilter?.value || 'active';
     const categoryId = this.templateCategoryFilter?.value || '';
     let rows = this._templates;
 
@@ -506,34 +457,6 @@ export class AdminUI {
     return rows.filter(
       (c) => c.label?.toLowerCase().includes(q) || c.id?.toLowerCase().includes(q)
     );
-  }
-
-  _filterPosts() {
-    const q = (this.postSearch?.value || '').trim().toLowerCase();
-    const status = this.postStatusFilter?.value || 'all';
-    let rows = this._posts;
-
-    if (status !== 'all') {
-      rows = rows.filter((p) => String(p.status || '').toLowerCase() === status);
-    }
-
-    if (!q) return rows;
-    return rows.filter((p) => {
-      const hay = [
-        p.caption,
-        p.platform,
-        p.templateId,
-        p.templateName,
-        p.userEmail,
-        p.userName,
-        p.status,
-        String(p.id),
-      ]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase();
-      return hay.includes(q);
-    });
   }
 
   /**
@@ -1217,169 +1140,6 @@ html, body { margin: 0; padding: 0; width: 1080px; height: 1080px; overflow: hid
       await this.onCatalogChanged();
     } catch (error) {
       toast(error instanceof ApiError ? error.message : 'Update failed', 'error');
-    }
-  }
-
-  _formatSchedule(value) {
-    if (!value) return '—';
-    const d = new Date(value);
-    if (Number.isNaN(d.getTime())) return String(value);
-    return d.toLocaleString();
-  }
-
-  _renderPosts() {
-    if (!this.postsBody) return;
-    const filtered = this._filterPosts();
-    const pageInfo = this._paginate(filtered, this._postPage);
-    this._postPage = pageInfo.page;
-    this._updatePagination(this.postsPagination, 'posts', pageInfo);
-
-    this.postsBody.innerHTML = '';
-    if (pageInfo.rows.length === 0) {
-      this.postsBody.innerHTML =
-        '<tr><td colspan="6" class="admin-empty-cell">No saved posts yet.</td></tr>';
-      return;
-    }
-
-    for (const post of pageInfo.rows) {
-      const tr = document.createElement('tr');
-      const caption = (post.caption || '').trim() || '(No caption)';
-      const thumb = post.imageUrl
-        ? `<img src="${escapeHtml(post.imageUrl)}" alt="" class="admin-post-thumb" loading="lazy" />`
-        : '<div class="admin-post-thumb admin-post-thumb--empty"></div>';
-      tr.innerHTML = `
-        <td>
-          <div class="admin-post-cell">
-            ${thumb}
-            <div>
-              <strong>${escapeHtml(caption.slice(0, 80))}${caption.length > 80 ? '…' : ''}</strong>
-              <div class="admin-mono">${escapeHtml(post.templateName || post.templateId || '')} · #${post.id}</div>
-            </div>
-          </div>
-        </td>
-        <td>
-          ${escapeHtml(post.userName || '—')}
-          <div class="admin-mono">${escapeHtml(post.userEmail || '')}</div>
-        </td>
-        <td>${escapeHtml(post.platform)}</td>
-        <td>${escapeHtml(this._formatSchedule(post.scheduledAt))}</td>
-        <td>
-          <span class="admin-status-badge ${post.status === 'scheduled' ? 'active' : 'inactive'}">
-            ${escapeHtml(post.status)}
-          </span>
-        </td>
-        <td class="admin-actions">
-          <button type="button" class="btn btn-outline btn-sm" data-action="edit">Edit</button>
-          <button type="button" class="btn btn-outline btn-sm" data-action="delete">Delete</button>
-        </td>
-      `;
-      tr.querySelector('[data-action="edit"]')?.addEventListener('click', () =>
-        this._openPostForm(post)
-      );
-      tr.querySelector('[data-action="delete"]')?.addEventListener('click', () =>
-        this._deletePost(post)
-      );
-      this.postsBody.appendChild(tr);
-    }
-  }
-
-  _openPostForm(post) {
-    this._editingPostId = post.id;
-    this._setFormError(this.postFormError, '');
-
-    const captionInput = document.getElementById('admin-post-caption');
-    const platformSelect = document.getElementById('admin-post-platform');
-    const statusSelect = document.getElementById('admin-post-status');
-    const dateInput = document.getElementById('admin-post-date');
-    const timeInput = document.getElementById('admin-post-time');
-
-    if (captionInput) captionInput.value = post.caption || '';
-    if (platformSelect) platformSelect.value = post.platform || 'instagram';
-    if (statusSelect) statusSelect.value = post.status === 'saved' ? 'saved' : 'scheduled';
-
-    const when = post.scheduledAt ? new Date(post.scheduledAt) : new Date();
-    if (!Number.isNaN(when.getTime())) {
-      const pad = (n) => String(n).padStart(2, '0');
-      if (dateInput) {
-        dateInput.value = `${when.getFullYear()}-${pad(when.getMonth() + 1)}-${pad(when.getDate())}`;
-      }
-      if (timeInput) {
-        timeInput.value = `${pad(when.getHours())}:${pad(when.getMinutes())}`;
-      }
-    }
-
-    if (this.postImage) {
-      if (post.imageUrl) {
-        this.postImage.src = post.imageUrl;
-        this.postImage.classList.remove('hidden');
-      } else {
-        this.postImage.removeAttribute('src');
-        this.postImage.classList.add('hidden');
-      }
-    }
-    if (this.postMeta) {
-      this.postMeta.textContent = `#${post.id} · ${post.templateName || post.templateId || 'template'} · ${post.userEmail || ''}`;
-    }
-
-    this.postFormOverlay?.classList.remove('hidden');
-  }
-
-  _closePostForm() {
-    this.postFormOverlay?.classList.add('hidden');
-    this._editingPostId = null;
-  }
-
-  async _submitPostForm() {
-    if (!this._editingPostId) return;
-
-    const caption = document.getElementById('admin-post-caption')?.value ?? '';
-    const platform = document.getElementById('admin-post-platform')?.value;
-    const status = document.getElementById('admin-post-status')?.value;
-    const date = document.getElementById('admin-post-date')?.value;
-    const time = document.getElementById('admin-post-time')?.value;
-
-    if (!platform || !date || !time) {
-      this._setFormError(this.postFormError, 'Platform, date, and time are required');
-      return;
-    }
-
-    const scheduledAt = new Date(`${date}T${time}`);
-    if (Number.isNaN(scheduledAt.getTime())) {
-      this._setFormError(this.postFormError, 'Invalid date or time');
-      return;
-    }
-
-    if (this.postFormSubmit) this.postFormSubmit.disabled = true;
-    this._setFormError(this.postFormError, '');
-
-    try {
-      await api.adminUpdatePost(this._editingPostId, {
-        caption,
-        platform,
-        status,
-        scheduled_at: scheduledAt.toISOString(),
-      });
-      toast('Post updated');
-      this._closePostForm();
-      await this._load();
-    } catch (error) {
-      this._setFormError(
-        this.postFormError,
-        error instanceof ApiError ? error.message : 'Save failed'
-      );
-    } finally {
-      if (this.postFormSubmit) this.postFormSubmit.disabled = false;
-    }
-  }
-
-  async _deletePost(post) {
-    if (!window.confirm(`Delete post #${post.id}? This cannot be undone.`)) return;
-    try {
-      await api.adminDeletePost(post.id);
-      toast('Post deleted');
-      await this._load();
-    } catch (error) {
-      toast(error instanceof ApiError ? error.message : 'Delete failed', 'error');
     }
   }
 }

@@ -317,11 +317,11 @@ export class ExportPage {
           formData.append('image', blob, `post-${i + 1}.png`);
           formData.append('template_id', templateId);
           formData.append('caption', findCaption(rowData));
-          formData.append('platform', 'instagram');
+          formData.append('platforms', JSON.stringify([]));
           formData.append('scheduled_at', scheduledAt);
           formData.append('format_bucket', bucket);
           formData.append('field_data', JSON.stringify(rowData));
-          formData.append('status', 'saved');
+          formData.append('status', 'preparing');
 
           await api.createPost(formData);
           saved += 1;

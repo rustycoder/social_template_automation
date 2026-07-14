@@ -247,6 +247,7 @@ router.patch('/posts/:id', async (req, res) => {
     const body = req.body || {};
     const post = await updatePost(Number(req.params.id), {
       caption: body.caption,
+      platforms: body.platforms,
       platform: body.platform,
       scheduledAt: body.scheduled_at || body.scheduledAt,
       status: body.status,
