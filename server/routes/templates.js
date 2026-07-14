@@ -4,23 +4,25 @@ import { getTemplateById, listTemplates } from '../services/templateService.js';
 
 const router = Router();
 
-router.get('/categories', async (_req, res) => {
-  try {
-    const categories = await listCategories({ activeOnly: true });
-    res.json({ categories });
-  } catch (error) {
-    console.error('List categories error:', error);
-    res.status(500).json({ error: 'Failed to list categories' });
-  }
-});
-
 router.get('/templates', async (_req, res) => {
   try {
     const templates = await listTemplates({ activeOnly: true, includeHtml: true });
+    res.set('Cache-Control', 'private, max-age=60');
     res.json({ templates });
   } catch (error) {
     console.error('List templates error:', error);
     res.status(500).json({ error: 'Failed to list templates' });
+  }
+});
+
+router.get('/categories', async (_req, res) => {
+  try {
+    const categories = await listCategories({ activeOnly: true });
+    res.set('Cache-Control', 'private, max-age=60');
+    res.json({ categories });
+  } catch (error) {
+    console.error('List categories error:', error);
+    res.status(500).json({ error: 'Failed to list categories' });
   }
 });
 

@@ -3,6 +3,11 @@ import path from 'path';
 import { query } from '../database/db.js';
 import { nowDatetime, parseJsonText, stringifyJsonText, slugifyId } from './jsonText.js';
 import { getUploadsRoot } from './postService.js';
+import {
+  getCached,
+  setCached,
+  invalidateTemplateCatalogCache,
+} from './templateCache.js';
 
 const DATA_URL_RE = /^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/;
 
@@ -122,6 +127,10 @@ export function validateFieldsAgainstHtml(html, fields) {
 }
 
 export async function listTemplates({ activeOnly = true, includeHtml = false } = {}) {
+  const cacheKey = `templates:${activeOnly ? 'active' : 'all'}:${includeHtml ? 'html' : 'meta'}`;
+  const cached = getCached(cacheKey);
+  if (cached) return cached;
+
   const htmlCol = includeHtml ? ', t.html_source' : '';
   const sql = activeOnly
     ? `SELECT t.id, t.name, t.category_id, t.fields_json, t.preview_bucket, t.is_active,
@@ -135,7 +144,9 @@ export async function listTemplates({ activeOnly = true, includeHtml = false } =
        ORDER BY t.name ASC`;
 
   const rows = await query(sql);
-  return rows.map((row) => mapTemplateRow(row, { includeHtml }));
+  const templates = rows.map((row) => mapTemplateRow(row, { includeHtml }));
+  setCached(cacheKey, templates);
+  return structuredClone(templates);
 }
 
 export async function getTemplateById(id, { includeHtml = true } = {}) {
@@ -193,6 +204,7 @@ export async function createTemplate({
     ]
   );
 
+  invalidateTemplateCatalogCache();
   return getTemplateById(templateId, { includeHtml: true });
 }
 
@@ -239,6 +251,7 @@ export async function updateTemplate(id, patch) {
     ]
   );
 
+  invalidateTemplateCatalogCache();
   return getTemplateById(id, { includeHtml: true });
 }
 
@@ -247,6 +260,7 @@ export async function softDeleteTemplate(id) {
   if (!existing) return false;
   const now = nowDatetime();
   await query('UPDATE templates SET is_active = 0, updated_at = ? WHERE id = ?', [now, id]);
+  invalidateTemplateCatalogCache();
   return true;
 }
 
@@ -273,6 +287,7 @@ export async function hardDeleteTemplate(id) {
   }
 
   await query('DELETE FROM templates WHERE id = ?', [id]);
+  invalidateTemplateCatalogCache();
   return true;
 }
 
@@ -326,5 +341,6 @@ export async function upsertTemplateSeed({
     );
   }
 
+  invalidateTemplateCatalogCache();
   return getTemplateById(id, { includeHtml: false });
 }

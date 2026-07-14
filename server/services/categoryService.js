@@ -1,23 +1,33 @@
 import { query } from '../database/db.js';
 import { nowDatetime } from './jsonText.js';
+import {
+  getCached,
+  setCached,
+  invalidateTemplateCatalogCache,
+} from './templateCache.js';
 
 export async function listCategories({ activeOnly = true } = {}) {
-  if (activeOnly) {
-    return query(
-      `SELECT id, label, sort_order AS sortOrder, is_active AS isActive,
-              created_at AS createdAt, updated_at AS updatedAt
-       FROM categories
-       WHERE is_active = 1
-       ORDER BY sort_order ASC, label ASC`
-    );
-  }
+  const cacheKey = `categories:${activeOnly ? 'active' : 'all'}`;
+  const cached = getCached(cacheKey);
+  if (cached) return cached;
 
-  return query(
-    `SELECT id, label, sort_order AS sortOrder, is_active AS isActive,
-            created_at AS createdAt, updated_at AS updatedAt
-     FROM categories
-     ORDER BY sort_order ASC, label ASC`
-  );
+  const rows = activeOnly
+    ? await query(
+        `SELECT id, label, sort_order AS sortOrder, is_active AS isActive,
+                created_at AS createdAt, updated_at AS updatedAt
+         FROM categories
+         WHERE is_active = 1
+         ORDER BY sort_order ASC, label ASC`
+      )
+    : await query(
+        `SELECT id, label, sort_order AS sortOrder, is_active AS isActive,
+                created_at AS createdAt, updated_at AS updatedAt
+         FROM categories
+         ORDER BY sort_order ASC, label ASC`
+      );
+
+  setCached(cacheKey, rows);
+  return structuredClone(rows);
 }
 
 export async function getCategoryById(id) {
@@ -37,6 +47,7 @@ export async function createCategory({ id, label, sortOrder = 0, isActive = 1 })
      VALUES (?, ?, ?, ?, ?, ?)`,
     [id, label, sortOrder, isActive ? 1 : 0, now, now]
   );
+  invalidateTemplateCatalogCache();
   return getCategoryById(id);
 }
 
@@ -52,6 +63,7 @@ export async function upsertCategory({ id, label, sortOrder = 0, isActive = 1 })
        updated_at = VALUES(updated_at)`,
     [id, label, sortOrder, isActive ? 1 : 0, now, now]
   );
+  invalidateTemplateCatalogCache();
   return getCategoryById(id);
 }
 
@@ -71,6 +83,7 @@ export async function updateCategory(id, patch) {
      WHERE id = ?`,
     [label, sortOrder, isActive, now, id]
   );
+  invalidateTemplateCatalogCache();
   return getCategoryById(id);
 }
 
@@ -89,5 +102,6 @@ export async function deleteCategory(id) {
   }
 
   await query('DELETE FROM categories WHERE id = ?', [id]);
+  invalidateTemplateCatalogCache();
   return true;
 }
