@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Al Jazeera Explainer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{width:1080px;height:1080px;overflow:hidden;font-family:'Inter',sans-serif;}
+  .card{position:relative;width:1080px;height:1080px;background:#0a0a0a;}
+  .t-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  .scrim{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.92) 0%,rgba(0,0,0,0.75) 35%,rgba(0,0,0,0.2) 60%,rgba(0,0,0,0.1) 100%);}
+  .logo-slot{position:absolute;top:36px;left:44px;width:50px;height:50px;z-index:3;overflow:hidden;}
+  .logo-slot img{width:100%;height:100%;object-fit:contain;}
+  .tag{position:absolute;bottom:400px;left:56px;z-index:3;display:inline-block;background:#E74C3C;padding:10px 22px 8px;font-family:'Inter',sans-serif;font-size:16px;font-weight:700;color:#fff;letter-spacing:.1em;text-transform:uppercase;border-radius:3px;}
+  .headline-area{position:absolute;left:56px;right:56px;bottom:80px;z-index:3;}
+  .t-headline{font-family:'Inter',sans-serif;font-weight:700;font-size:46px;line-height:1.18;color:#fff;}
+  .t-headline mark{background:none;color:#E74C3C;font-style:normal;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <img class="t-photo" src="{{PHOTO}}" alt="">
+    <div class="scrim"></div>
+    <div class="logo-slot"><img src="{{LOGO}}" alt=""></div>
+    <div class="tag">{{TAG}}</div>
+    <div class="headline-area">
+      <div class="t-headline">{{HEADLINE}}</div>
+    </div>
+  </div>
+</body>
+</html>

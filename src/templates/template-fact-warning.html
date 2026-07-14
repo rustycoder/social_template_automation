@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Fact Warning Card</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{width:1080px;height:1080px;overflow:hidden;font-family:'Inter',sans-serif;}
+  img[src=""],img:not([src]){display:none;}
+  .card{position:relative;width:1080px;height:1080px;background:#0a0a0a;}
+  .t-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  .scrim{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.95) 0%,rgba(0,0,0,0.7) 45%,rgba(0,0,0,0.2) 70%,rgba(0,0,0,0.1) 100%);}
+  .inset-circle{position:absolute;top:20px;left:20px;width:120px;height:120px;border-radius:50%;overflow:hidden;border:4px solid #fff;box-shadow:0 4px 24px rgba(0,0,0,0.4);z-index:4;background:#222;}
+  .inset-circle img{width:100%;height:100%;object-fit:cover;}
+  .arrow-graphic{position:absolute;top:140px;left:80px;width:2px;height:260px;z-index:3;}
+  .arrow-graphic::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:3px;height:100%;background:rgba(255,255,255,0.5);border-radius:2px;}
+  .arrow-graphic::after{content:'';position:absolute;bottom:-10px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:12px solid rgba(255,255,255,0.5);}
+  .brand-text{position:absolute;top:24px;right:40px;z-index:4;font-family:'Inter',sans-serif;font-weight:800;font-size:18px;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:.2em;}
+  .text-area{position:absolute;top:55%;left:0;right:0;bottom:40px;z-index:3;display:flex;flex-direction:column;align-items:center;padding:0 56px;}
+  .t-headline{font-family:'Poppins',sans-serif;font-weight:900;font-size:42px;line-height:1.15;color:#fff;text-transform:uppercase;text-align:center;margin-bottom:24px;max-width:920px;}
+  .t-headline mark{background:#FFD600;color:#1a1a1a;padding:2px 8px;border-radius:3px;box-decoration-break:clone;-webkit-box-decoration-break:clone;}
+  .t-description{font-family:'Inter',sans-serif;font-weight:700;font-size:22px;line-height:1.55;color:rgba(255,255,255,0.88);text-align:center;max-width:860px;}
+  .t-description mark{background:none;color:#FFD600;font-weight:700;}
+  .t-description .highlight-green{color:#4CAF50;}
+  .t-description .highlight-red{color:#E53935;}
+  .brand-footer{position:absolute;bottom:16px;left:0;right:0;text-align:center;z-index:3;font-family:'Inter',sans-serif;font-weight:700;font-size:14px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.18em;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <img class="t-photo" src="{{PHOTO}}" alt="">
+    <div class="scrim"></div>
+    <div class="inset-circle"><img src="{{INSET}}" alt=""></div>
+    <div class="arrow-graphic"></div>
+    <div class="brand-text">{{BRAND}}</div>
+    <div class="text-area">
+      <div class="t-headline">{{HEADLINE}}</div>
+      <div class="t-description">{{DESCRIPTION}}</div>
+    </div>
+    <div class="brand-footer">{{BRAND}}</div>
+  </div>
+</body>
+</html>

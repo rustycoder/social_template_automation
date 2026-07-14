@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Al Jazeera Location</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{width:1080px;height:1080px;overflow:hidden;font-family:'Inter',sans-serif;}
+  .card{position:relative;width:1080px;height:1080px;background:#0a0a1e;}
+  .t-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  .scrim{position:absolute;inset:0;background:linear-gradient(to top,rgba(10,10,30,0.95) 0%,rgba(10,10,30,0.7) 30%,rgba(0,0,0,0.1) 60%,rgba(0,0,0,0.05) 100%);}
+  .logo-slot{position:absolute;top:36px;left:44px;width:50px;height:50px;z-index:3;overflow:hidden;}
+  .logo-slot img{width:100%;height:100%;object-fit:contain;}
+  .location-badge{position:absolute;top:63%;left:50%;transform:translateX(-50%);z-index:3;display:inline-flex;align-items:center;gap:10px;background:#fff;padding:12px 28px 10px;border-radius:6px;font-family:'Inter',sans-serif;font-size:18px;font-weight:600;color:#1a1a2e;letter-spacing:.06em;text-transform:uppercase;box-shadow:0 4px 16px rgba(0,0,0,0.25);}
+  .location-badge .pin{font-size:22px;}
+  .dark-panel{position:absolute;bottom:0;left:0;right:0;height:35%;background:rgba(10,10,30,0.85);}
+  .headline-area{position:absolute;left:56px;right:56px;bottom:80px;z-index:3;}
+  .t-headline{font-family:'Inter',sans-serif;font-weight:700;font-size:46px;line-height:1.18;color:#fff;}
+  .t-headline mark{background:none;color:#E74C3C;font-style:normal;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <img class="t-photo" src="{{PHOTO}}" alt="">
+    <div class="scrim"></div>
+    <div class="logo-slot"><img src="{{LOGO}}" alt=""></div>
+    <div class="location-badge"><span class="pin">📍</span> {{LOCATION}}</div>
+    <div class="dark-panel"></div>
+    <div class="headline-area">
+      <div class="t-headline">{{HEADLINE}}</div>
+    </div>
+  </div>
+</body>
+</html>

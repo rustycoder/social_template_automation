@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>RONB Banner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700;800;900&family=Lora:wght@600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{width:1080px;height:1080px;overflow:hidden;font-family:'Inter',sans-serif;}
+  img[src=""],img:not([src]){display:none;}
+  .card{position:relative;width:1080px;height:1080px;background:#f0f0f0;}
+  .banner{position:absolute;top:0;left:0;right:0;height:14%;background:#8B1A1A;display:flex;align-items:center;justify-content:center;z-index:2;}
+  .t-banner-text{font-family:'Poppins',sans-serif;font-weight:900;font-size:42px;color:#fff;text-transform:uppercase;letter-spacing:.12em;}
+  .body-area{position:absolute;top:14%;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 72px;}
+  .t-headline{font-family:'Lora',serif;font-weight:700;font-size:42px;line-height:1.35;color:#2a2a2a;text-align:center;max-width:920px;z-index:2;}
+  .t-brand{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'Poppins',sans-serif;font-weight:900;font-size:180px;color:rgba(0,0,0,0.04);letter-spacing:.1em;text-transform:uppercase;pointer-events:none;z-index:1;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="banner">
+      <div class="t-banner-text">{{BANNER_TEXT}}</div>
+    </div>
+    <div class="body-area">
+      <div class="t-brand">{{BRAND}}</div>
+      <div class="t-headline">{{HEADLINE}}</div>
+    </div>
+  </div>
+</body>
+</html>

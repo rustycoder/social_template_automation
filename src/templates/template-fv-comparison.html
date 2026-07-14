@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Founders Vision Comparison</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{width:1080px;height:1080px;overflow:hidden;font-family:'Inter',sans-serif;}
+  .card{position:relative;width:1080px;height:1080px;background:#0a0a0a;display:flex;}
+  .brand-badge{position:absolute;top:24px;left:24px;z-index:3;background:#1565C0;padding:8px 20px 6px;border-radius:5px;font-family:'Inter',sans-serif;font-size:13px;font-weight:500;color:#fff;letter-spacing:.04em;}
+  .column{width:50%;display:flex;flex-direction:column;position:relative;}
+  .column-left{border-right:1px solid rgba(255,255,255,0.06);}
+  .col-photo{width:100%;height:35%;overflow:hidden;}
+  .col-photo img{width:100%;height:100%;object-fit:cover;}
+  .col-name{padding:14px 20px 12px;text-align:center;font-family:'Poppins',sans-serif;font-weight:800;font-size:22px;color:#fff;letter-spacing:.02em;}
+  .name-left{background:#00897B;}
+  .name-right{background:#F9A825;}
+  .stats{flex:1;display:flex;flex-direction:column;justify-content:center;padding:16px 28px;gap:8px;}
+  .stat-row{display:flex;flex-direction:column;gap:2px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);}
+  .stat-row:last-child{border-bottom:none;}
+  .stat-label{font-family:'Inter',sans-serif;font-weight:600;font-size:12px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.12em;}
+  .stat-value{font-family:'Poppins',sans-serif;font-weight:800;font-size:22px;color:#fff;line-height:1.3;}
+  .stat-value .cyan{color:#00BCD4;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="brand-badge">{{BRAND}}</div>
+    <div class="column column-left">
+      <div class="col-photo"><img src="{{PHOTO_LEFT}}" alt=""></div>
+      <div class="col-name name-left">{{LEFT_NAME}}</div>
+      <div class="stats">{{LEFT_STATS}}</div>
+    </div>
+    <div class="column">
+      <div class="col-photo"><img src="{{PHOTO_RIGHT}}" alt=""></div>
+      <div class="col-name name-right">{{RIGHT_NAME}}</div>
+      <div class="stats">{{RIGHT_STATS}}</div>
+    </div>
+  </div>
+</body>
+</html>

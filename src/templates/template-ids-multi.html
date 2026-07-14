@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>IDS Multi-Inset Editorial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{width:1080px;height:1080px;overflow:hidden;font-family:'Inter',sans-serif;}
+  img[src=""],img:not([src]){display:none;}
+  .card{position:relative;width:1080px;height:1080px;background:#fff;}
+  .brand-logo{position:absolute;top:32px;left:36px;width:40px;height:40px;border-radius:50%;overflow:hidden;z-index:5;background:#E53935;display:flex;align-items:center;justify-content:center;}
+  .brand-logo img{width:100%;height:100%;object-fit:cover;}
+  .photo-area{position:absolute;top:0;left:0;right:0;height:58%;overflow:hidden;}
+  .t-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  .inset-left{position:absolute;top:36px;left:100px;width:140px;height:140px;border-radius:50%;overflow:hidden;border:4px solid #fff;box-shadow:0 4px 20px rgba(0,0,0,0.25);z-index:4;background:#eee;}
+  .inset-left img{width:100%;height:100%;object-fit:cover;}
+  .inset-right{position:absolute;top:48px;right:80px;width:120px;height:120px;border-radius:50%;overflow:hidden;border:4px solid #fff;box-shadow:0 4px 20px rgba(0,0,0,0.25);z-index:4;background:#eee;}
+  .inset-right img{width:100%;height:100%;object-fit:cover;}
+  .headline-box{position:absolute;top:58%;left:0;right:0;height:12%;z-index:3;background:#00897B;display:flex;align-items:center;justify-content:center;padding:0 60px;}
+  .t-headline{font-family:'Noto Sans Devanagari','Inter',sans-serif;font-weight:700;font-size:36px;line-height:1.3;color:#fff;text-align:center;max-width:960px;}
+  .t-headline mark{background:rgba(255,255,255,0.2);color:#fff;padding:2px 8px;border-radius:3px;box-decoration-break:clone;-webkit-box-decoration-break:clone;}
+  .content-panel{position:absolute;top:70%;left:0;right:0;bottom:60px;background:#fff;display:flex;align-items:flex-start;justify-content:center;padding:32px 60px;z-index:2;}
+  .t-description{font-family:'Inter',sans-serif;font-size:22px;line-height:1.6;color:#333;text-align:center;max-width:900px;}
+  .footer-tag{position:absolute;bottom:20px;left:0;right:0;z-index:3;text-align:center;}
+  .footer-tag-inner{display:inline-block;font-family:'Inter',sans-serif;font-weight:700;font-size:14px;color:#fff;background:#E53935;padding:6px 24px;border-radius:3px;letter-spacing:.14em;text-transform:uppercase;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="brand-logo"><img src="{{LOGO}}" alt=""></div>
+    <div class="photo-area">
+      <img class="t-photo" src="{{PHOTO}}" alt="">
+    </div>
+    <div class="inset-left"><img src="{{INSET_LEFT}}" alt=""></div>
+    <div class="inset-right"><img src="{{INSET_RIGHT}}" alt=""></div>
+    <div class="headline-box">
+      <div class="t-headline">{{HEADLINE}}</div>
+    </div>
+    <div class="content-panel">
+      <div class="t-description">{{DESCRIPTION}}</div>
+    </div>
+    <div class="footer-tag"><span class="footer-tag-inner">{{FOOTER_TAG}}</span></div>
+  </div>
+</body>
+</html>
