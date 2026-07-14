@@ -86,6 +86,25 @@ function findCaption(rowData) {
   return key ? String(rowData[key] ?? '') : '';
 }
 
+/**
+ * Drop inline data-URL images from field payload — the rendered PNG is uploaded separately,
+ * and huge base64 strings blow past multer fieldSize limits.
+ * @param {object} rowData
+ * @returns {object}
+ */
+function sanitizeFieldDataForUpload(rowData) {
+  if (!rowData || typeof rowData !== 'object') return {};
+  const out = {};
+  for (const [key, value] of Object.entries(rowData)) {
+    if (typeof value === 'string' && /^data:image\//i.test(value)) {
+      out[key] = '';
+      continue;
+    }
+    out[key] = value;
+  }
+  return out;
+}
+
 function defaultScheduleIso() {
   const when = new Date();
   when.setMinutes(when.getMinutes() + 60);
@@ -320,7 +339,7 @@ export class ExportPage {
           formData.append('platforms', JSON.stringify([]));
           formData.append('scheduled_at', scheduledAt);
           formData.append('format_bucket', bucket);
-          formData.append('field_data', JSON.stringify(rowData));
+          formData.append('field_data', JSON.stringify(sanitizeFieldDataForUpload(rowData)));
           formData.append('status', 'preparing');
 
           await api.createPost(formData);

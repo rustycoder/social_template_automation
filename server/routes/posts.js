@@ -11,7 +11,11 @@ import {
 const router = Router();
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 15 * 1024 * 1024 },
+  limits: {
+    fileSize: 15 * 1024 * 1024,
+    // field_data may include image data URLs before server-side materialization
+    fieldSize: 25 * 1024 * 1024,
+  },
 });
 
 router.use(authenticate, requireActiveSubscription);

@@ -218,7 +218,7 @@ export async function listPostsForUser(userId) {
     `SELECT ${POST_SELECT}
      FROM saved_posts
      WHERE user_id = ?
-     ORDER BY scheduled_at DESC, id DESC`,
+     ORDER BY scheduled_at ASC, id ASC`,
     [userId]
   );
   return rows.map(mapPostRow);

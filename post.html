@@ -79,7 +79,11 @@
           <header class="posts-page__header">
             <div class="posts-page__intro">
               <h2 class="page-title">My Posts</h2>
-              <p class="page-desc">Edit caption, platform, and schedule for each saved post.</p>
+              <p class="page-desc">Posts are ordered by schedule date. Filter by date or switch to a weekly calendar.</p>
+            </div>
+            <div class="posts-view-toggle" role="group" aria-label="View mode">
+              <button type="button" class="btn btn-outline btn-sm active" id="posts-view-list" data-view="list">List</button>
+              <button type="button" class="btn btn-outline btn-sm" id="posts-view-week" data-view="week">Week</button>
             </div>
           </header>
 
@@ -97,9 +101,25 @@
               <option value="ready">Ready for Scheduling</option>
               <option value="completed">Completed</option>
             </select>
+            <div class="posts-date-range">
+              <label class="posts-date-filter__label" for="posts-date-range">Schedule dates</label>
+              <div class="posts-date-range__control">
+                <input
+                  type="text"
+                  id="posts-date-range"
+                  class="text-input posts-date-range__input"
+                  placeholder="Select date range"
+                  autocomplete="off"
+                  readonly
+                  aria-label="Filter by schedule date range"
+                />
+                <button type="button" class="btn btn-ghost btn-sm" id="posts-date-clear" aria-label="Clear date range">Clear</button>
+              </div>
+            </div>
           </div>
 
           <div id="posts-list" class="posts-page__grid"></div>
+          <div id="posts-week" class="posts-week hidden" aria-label="Weekly schedule"></div>
           <p class="posts-empty hidden" id="posts-empty">No saved posts yet. Save posts from the export step to see them here.</p>
         </div>
       </section>
