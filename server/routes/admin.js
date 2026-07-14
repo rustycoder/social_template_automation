@@ -9,16 +9,26 @@ import {
 } from '../services/categoryService.js';
 import {
   createTemplate,
+  getTemplateById,
+  hardDeleteTemplate,
   listTemplates,
-  softDeleteTemplate,
   updateTemplate,
 } from '../services/templateService.js';
 import { slugifyId } from '../services/jsonText.js';
+import {
+  deletePostAsAdmin,
+  getPostById,
+  listAllPosts,
+  updatePost,
+} from '../services/postService.js';
 
 const router = Router();
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 5 * 1024 * 1024 },
+  limits: {
+    fileSize: 5 * 1024 * 1024,
+    fieldSize: 25 * 1024 * 1024,
+  },
 });
 
 router.use(authenticate, requireAdmin);
@@ -100,11 +110,24 @@ router.delete('/categories/:id', async (req, res) => {
 
 router.get('/templates', async (_req, res) => {
   try {
-    const templates = await listTemplates({ activeOnly: false, includeHtml: false });
+    const templates = await listTemplates({ activeOnly: false, includeHtml: true });
     res.json({ templates });
   } catch (error) {
     console.error('Admin list templates error:', error);
     res.status(500).json({ error: 'Failed to list templates' });
+  }
+});
+
+router.get('/templates/:id', async (req, res) => {
+  try {
+    const template = await getTemplateById(req.params.id, { includeHtml: true });
+    if (!template) {
+      return res.status(404).json({ error: 'Template not found' });
+    }
+    res.json({ template });
+  } catch (error) {
+    console.error('Admin get template error:', error);
+    res.status(500).json({ error: 'Failed to load template' });
   }
 });
 
@@ -185,14 +208,69 @@ router.patch('/templates/:id', upload.single('html'), async (req, res) => {
 
 router.delete('/templates/:id', async (req, res) => {
   try {
-    const deleted = await softDeleteTemplate(req.params.id);
+    const deleted = await hardDeleteTemplate(req.params.id);
     if (!deleted) {
       return res.status(404).json({ error: 'Template not found' });
     }
     res.json({ ok: true });
   } catch (error) {
     console.error('Admin delete template error:', error);
-    res.status(500).json({ error: 'Failed to delete template' });
+    res.status(error.status || 500).json({ error: error.message || 'Failed to delete template' });
+  }
+});
+
+router.get('/posts', async (_req, res) => {
+  try {
+    const posts = await listAllPosts();
+    res.json({ posts });
+  } catch (error) {
+    console.error('Admin list posts error:', error);
+    res.status(500).json({ error: 'Failed to list posts' });
+  }
+});
+
+router.get('/posts/:id', async (req, res) => {
+  try {
+    const post = await getPostById(Number(req.params.id));
+    if (!post) {
+      return res.status(404).json({ error: 'Post not found' });
+    }
+    res.json({ post });
+  } catch (error) {
+    console.error('Admin get post error:', error);
+    res.status(500).json({ error: 'Failed to load post' });
+  }
+});
+
+router.patch('/posts/:id', async (req, res) => {
+  try {
+    const body = req.body || {};
+    const post = await updatePost(Number(req.params.id), {
+      caption: body.caption,
+      platform: body.platform,
+      scheduledAt: body.scheduled_at || body.scheduledAt,
+      status: body.status,
+    });
+    if (!post) {
+      return res.status(404).json({ error: 'Post not found' });
+    }
+    res.json({ post });
+  } catch (error) {
+    console.error('Admin update post error:', error);
+    res.status(error.status || 500).json({ error: error.message || 'Failed to update post' });
+  }
+});
+
+router.delete('/posts/:id', async (req, res) => {
+  try {
+    const deleted = await deletePostAsAdmin(Number(req.params.id));
+    if (!deleted) {
+      return res.status(404).json({ error: 'Post not found' });
+    }
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('Admin delete post error:', error);
+    res.status(500).json({ error: 'Failed to delete post' });
   }
 });
 

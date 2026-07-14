@@ -57,6 +57,22 @@ export class TemplatePage {
   }
 
   /**
+   * @description Re-syncs counts/filters after the template catalog is reloaded from the API.
+   * @returns {void}
+   */
+  refreshAfterCatalogChange() {
+    const keys = this.templateStore.getVisibleTemplateKeys();
+    if (!keys.includes(this.currentTemplateKey)) {
+      this.currentTemplateKey = this.templateStore.getDefaultTemplateId();
+    }
+    this.templateCategoryFilter = '';
+    this.templateGalleryLimit = DEFAULT_GALLERY_LIMIT;
+    this._populateCategoryFilter();
+    this._updateTemplateCount();
+    this.render();
+  }
+
+  /**
    * @description Updates the total template count shown beside the page subtitle.
    * @returns {void}
    * @private
@@ -79,6 +95,13 @@ export class TemplatePage {
     const total = this.templateStore.getTotalTemplateCount();
     const counts = this.templateStore.getCategoryCounts();
     const options = this.templateStore.getCategoryOptions();
+    const previous = this.templateCategorySelect.value;
+
+    this.templateCategorySelect.innerHTML = '';
+    const allOption = document.createElement('option');
+    allOption.value = '';
+    allOption.textContent = `All categories (${total})`;
+    this.templateCategorySelect.appendChild(allOption);
 
     for (const { id, label } of options) {
       const count = counts[id] ?? 0;
@@ -90,9 +113,12 @@ export class TemplatePage {
       this.templateCategorySelect.appendChild(option);
     }
 
-    const allOption = this.templateCategorySelect.querySelector('option[value=""]');
-    if (allOption) {
-      allOption.textContent = `All categories (${total})`;
+    if (previous && [...this.templateCategorySelect.options].some((o) => o.value === previous)) {
+      this.templateCategorySelect.value = previous;
+      this.templateCategoryFilter = previous;
+    } else {
+      this.templateCategorySelect.value = '';
+      this.templateCategoryFilter = '';
     }
   }
 

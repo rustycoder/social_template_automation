@@ -30,7 +30,10 @@ function mapPostRow(row) {
   return {
     id: row.id,
     userId: row.user_id,
+    userEmail: row.user_email || row.userEmail || null,
+    userName: row.user_name || row.userName || null,
     templateId: row.template_id,
+    templateName: row.template_name || row.templateName || null,
     caption: row.caption || '',
     platform: row.platform,
     scheduledAt: row.scheduled_at,
@@ -83,6 +86,23 @@ export async function listPostsForUser(userId) {
   return rows.map(mapPostRow);
 }
 
+/**
+ * Admin: all saved posts with user + template context.
+ */
+export async function listAllPosts() {
+  const rows = await query(
+    `SELECT p.id, p.user_id, p.template_id, p.caption, p.platform, p.scheduled_at,
+            p.image_path, p.field_data, p.format_bucket, p.status, p.created_at, p.updated_at,
+            u.email AS user_email, u.name AS user_name,
+            t.name AS template_name
+     FROM saved_posts p
+     LEFT JOIN users u ON u.id = p.user_id
+     LEFT JOIN templates t ON t.id = p.template_id
+     ORDER BY p.scheduled_at DESC, p.id DESC`
+  );
+  return rows.map(mapPostRow);
+}
+
 export async function getPostById(id, userId = null) {
   const rows = userId
     ? await query(
@@ -92,9 +112,15 @@ export async function getPostById(id, userId = null) {
         [id, userId]
       )
     : await query(
-        `SELECT id, user_id, template_id, caption, platform, scheduled_at, image_path,
-                field_data, format_bucket, status, created_at, updated_at
-         FROM saved_posts WHERE id = ? LIMIT 1`,
+        `SELECT p.id, p.user_id, p.template_id, p.caption, p.platform, p.scheduled_at,
+                p.image_path, p.field_data, p.format_bucket, p.status, p.created_at, p.updated_at,
+                u.email AS user_email, u.name AS user_name,
+                t.name AS template_name
+         FROM saved_posts p
+         LEFT JOIN users u ON u.id = p.user_id
+         LEFT JOIN templates t ON t.id = p.template_id
+         WHERE p.id = ?
+         LIMIT 1`,
         [id]
       );
   return mapPostRow(rows[0]);
@@ -168,5 +194,57 @@ export async function deletePost(id, userId) {
   }
 
   await query('DELETE FROM saved_posts WHERE id = ? AND user_id = ?', [id, userId]);
+  return true;
+}
+
+/**
+ * Admin update of post metadata (caption, platform, schedule, status).
+ */
+export async function updatePost(id, patch) {
+  const existing = await getPostById(id);
+  if (!existing) return null;
+
+  const caption = patch.caption != null ? String(patch.caption) : existing.caption;
+  const platform =
+    patch.platform != null ? normalizePlatform(patch.platform) : existing.platform;
+  const scheduledAt =
+    patch.scheduledAt != null
+      ? normalizeScheduledAt(patch.scheduledAt)
+      : existing.scheduledAt;
+  let status = existing.status;
+  if (patch.status != null) {
+    status = patch.status === 'saved' ? 'saved' : 'scheduled';
+  }
+
+  const now = nowDatetime();
+  await query(
+    `UPDATE saved_posts
+     SET caption = ?, platform = ?, scheduled_at = ?, status = ?, updated_at = ?
+     WHERE id = ?`,
+    [caption, platform, scheduledAt, status, now, id]
+  );
+
+  return getPostById(id);
+}
+
+/**
+ * Admin delete (any user's post).
+ */
+export async function deletePostAsAdmin(id) {
+  const post = await getPostById(id);
+  if (!post) return false;
+
+  if (post.imagePath) {
+    const absolutePath = path.join(getUploadsRoot(), post.imagePath);
+    try {
+      if (fs.existsSync(absolutePath)) {
+        fs.unlinkSync(absolutePath);
+      }
+    } catch (error) {
+      console.warn('Failed to delete post image:', error.message);
+    }
+  }
+
+  await query('DELETE FROM saved_posts WHERE id = ?', [id]);
   return true;
 }

@@ -159,7 +159,9 @@ html {
 
 #app[data-active-step="billing"] #main-content,
 #main-content[data-layout-mode="billing"],
-#app[data-billing="true"] #main-content {
+#app[data-billing="true"] #main-content,
+#main-content[data-layout-mode="admin"],
+#app[data-admin="true"] #main-content {
   bottom: var(--footer-height);
   display: block;
   overflow-x: hidden;
@@ -167,7 +169,8 @@ html {
   padding: var(--shell-padding);
 }
 
-#billing-page.step-panel.active {
+#billing-page.step-panel.active,
+#admin-page.step-panel.active {
   display: block;
   width: 100%;
 }
@@ -193,7 +196,8 @@ html {
   display: none;
 }
 
-#footer-billing.footer-panel--nav.active {
+#footer-billing.footer-panel--nav.active,
+#footer-admin.footer-panel--nav.active {
   justify-content: flex-start;
 }
 

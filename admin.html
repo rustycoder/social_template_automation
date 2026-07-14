@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Admin — manage templates, categories, and saved posts." />
+  <meta name="theme-color" content="#fcf8ff" />
+  <title>Admin — Content Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,1..1000&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/style.css" />
+  <script>
+    window.global = window;
+  </script>
+</head>
+<body class="admin-standalone">
+  <div id="app" data-admin="true">
+    <header id="app-header" class="admin-standalone__header">
+      <div class="header-brand">
+        <a href="/" class="logo admin-standalone__brand-link">
+          <svg class="logo-mark" width="36" height="36" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+            <rect width="32" height="32" rx="8" fill="url(#logo-grad-admin)" />
+            <path d="M8 10h16M8 16h12M8 22h14" stroke="#fff" stroke-width="2" stroke-linecap="round" />
+            <defs>
+              <linearGradient id="logo-grad-admin" x1="0" y1="0" x2="32" y2="32">
+                <stop stop-color="#4f46e5" />
+                <stop offset="1" stop-color="#6366f1" />
+              </linearGradient>
+            </defs>
+          </svg>
+          <h1>Content Studio</h1>
+        </a>
+        <span class="admin-standalone__badge">Admin</span>
+      </div>
+
+      <div class="header-auth" id="header-auth">
+        <button type="button" class="btn btn-ghost btn-sm" id="btn-login" aria-label="Sign in">
+          <span class="btn-text">Sign in</span>
+        </button>
+        <div class="user-menu hidden" id="user-menu">
+          <button
+            type="button"
+            class="profile-trigger"
+            id="profile-trigger"
+            aria-haspopup="menu"
+            aria-expanded="false"
+            aria-controls="profile-dropdown"
+          >
+            <span class="profile-avatar" id="profile-avatar" aria-hidden="true"></span>
+            <span class="user-name" id="user-name"></span>
+            <svg class="profile-chevron" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path d="M3.5 5.25L7 8.75L10.5 5.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div class="profile-dropdown hidden" id="profile-dropdown" role="menu">
+            <div class="profile-dropdown-header">
+              <span class="profile-dropdown-name" id="dropdown-user-name"></span>
+              <span class="profile-dropdown-email" id="dropdown-user-email"></span>
+            </div>
+            <div class="profile-dropdown-sub" id="dropdown-sub-section">
+              <span class="user-sub-badge inactive" id="dropdown-sub-badge">No subscription</span>
+            </div>
+            <button type="button" class="profile-dropdown-item hidden" id="btn-my-posts" role="menuitem">My Posts</button>
+            <button type="button" class="profile-dropdown-item hidden" id="btn-admin" role="menuitem">Admin</button>
+            <button type="button" class="profile-dropdown-item hidden" id="btn-my-billing" role="menuitem">My Billing</button>
+            <button type="button" class="profile-dropdown-item profile-dropdown-item-danger" id="btn-logout" role="menuitem">
+              Sign out
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main id="main-content" data-layout-mode="admin" class="admin-standalone__main">
+      <section class="step-panel active" id="admin-page">
+        <div class="admin-page">
+          <header class="admin-page__header">
+            <div class="admin-page__intro">
+              <div class="admin-page__title-row">
+                <button type="button" class="btn btn-outline btn-sm" id="btn-admin-back" aria-label="Back to app">
+                  ← Back
+                </button>
+                <h2 class="page-title">Admin</h2>
+              </div>
+              <p class="page-desc">Manage templates, categories, and saved posts.</p>
+            </div>
+            <div class="tab-switcher tab-switcher--underline" id="admin-tabs" role="tablist">
+              <button type="button" class="tab-switcher__btn active" role="tab" data-admin-tab="templates" aria-selected="true">Templates</button>
+              <button type="button" class="tab-switcher__btn" role="tab" data-admin-tab="categories" aria-selected="false">Categories</button>
+              <button type="button" class="tab-switcher__btn" role="tab" data-admin-tab="posts" aria-selected="false">Posts</button>
+            </div>
+          </header>
+
+          <p class="admin-error form-error hidden" id="admin-error"></p>
+          <div class="admin-loading hidden" id="admin-loading">Loading…</div>
+
+          <div id="admin-templates-panel">
+            <div class="admin-toolbar">
+              <input type="search" id="admin-template-search" class="text-input admin-search" placeholder="Search templates by name or id…" autocomplete="off" />
+              <select id="admin-template-status-filter" class="text-input admin-filter" aria-label="Filter by status">
+                <option value="all">All statuses</option>
+                <option value="active">Active</option>
+                <option value="inactive">Deactivated</option>
+              </select>
+              <select id="admin-template-category-filter" class="text-input admin-filter" aria-label="Filter by category">
+                <option value="">All categories</option>
+              </select>
+              <button type="button" class="btn btn-primary" id="btn-admin-new-template">Upload template</button>
+            </div>
+            <div class="admin-template-grid" id="admin-templates-grid"></div>
+            <div class="admin-pagination" id="admin-templates-pagination" hidden>
+              <button type="button" class="btn btn-outline btn-sm" data-admin-page-prev="templates">Previous</button>
+              <span class="admin-pagination__label" data-admin-page-label="templates"></span>
+              <button type="button" class="btn btn-outline btn-sm" data-admin-page-next="templates">Next</button>
+            </div>
+          </div>
+
+          <div id="admin-categories-panel" class="hidden">
+            <div class="admin-toolbar">
+              <input type="search" id="admin-category-search" class="text-input admin-search" placeholder="Search categories by name or id…" autocomplete="off" />
+              <button type="button" class="btn btn-primary" id="btn-admin-new-category">Add category</button>
+            </div>
+            <div class="admin-table-wrapper">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Category</th>
+                    <th>Sort</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-categories-body"></tbody>
+              </table>
+            </div>
+            <div class="admin-pagination" id="admin-categories-pagination" hidden>
+              <button type="button" class="btn btn-outline btn-sm" data-admin-page-prev="categories">Previous</button>
+              <span class="admin-pagination__label" data-admin-page-label="categories"></span>
+              <button type="button" class="btn btn-outline btn-sm" data-admin-page-next="categories">Next</button>
+            </div>
+          </div>
+
+          <div id="admin-posts-panel" class="hidden">
+            <div class="admin-toolbar">
+              <input type="search" id="admin-post-search" class="text-input admin-search" placeholder="Search posts…" autocomplete="off" />
+              <select id="admin-post-status-filter" class="text-input admin-filter" aria-label="Filter posts by status">
+                <option value="all">All statuses</option>
+                <option value="scheduled">Scheduled</option>
+                <option value="saved">Saved</option>
+              </select>
+            </div>
+            <div class="admin-table-wrapper">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Post</th>
+                    <th>User</th>
+                    <th>Platform</th>
+                    <th>Schedule</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-posts-body"></tbody>
+              </table>
+            </div>
+            <div class="admin-pagination" id="admin-posts-pagination" hidden>
+              <button type="button" class="btn btn-outline btn-sm" data-admin-page-prev="posts">Previous</button>
+              <span class="admin-pagination__label" data-admin-page-label="posts"></span>
+              <button type="button" class="btn btn-outline btn-sm" data-admin-page-next="posts">Next</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div class="toast-container" id="toast-container"></div>
+
+    <div class="modal-overlay hidden" id="auth-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
+      <div class="modal-card auth-modal" id="auth-modal">
+        <button type="button" class="modal-close" id="auth-modal-close" aria-label="Close">✕</button>
+        <h2 id="auth-modal-title">Sign in</h2>
+        <p class="modal-desc">Sign in with an admin account to manage templates.</p>
+        <form id="auth-form" class="auth-form">
+          <div class="form-group hidden" id="auth-name-group">
+            <label for="auth-name">Name</label>
+            <input type="text" id="auth-name" class="text-input" autocomplete="name" />
+          </div>
+          <div class="form-group">
+            <label for="auth-email">Email</label>
+            <input type="email" id="auth-email" class="text-input" required autocomplete="email" />
+          </div>
+          <div class="form-group">
+            <label for="auth-password">Password</label>
+            <input type="password" id="auth-password" class="text-input" required minlength="8" autocomplete="current-password" />
+          </div>
+          <p class="form-error hidden" id="auth-error"></p>
+          <button type="submit" class="btn btn-primary btn-block" id="auth-submit-btn">Sign in</button>
+        </form>
+        <p class="modal-footer-text">
+          <button type="button" class="link-btn" id="auth-toggle-mode">Create an account</button>
+        </p>
+      </div>
+    </div>
+
+    <div class="modal-overlay hidden" id="admin-template-form-overlay" role="dialog" aria-modal="true" aria-labelledby="admin-template-form-title">
+      <div class="modal-card admin-form-modal admin-template-editor-modal">
+        <button type="button" class="modal-close" id="admin-template-form-close" aria-label="Close">✕</button>
+        <h2 id="admin-template-form-title">Upload template</h2>
+        <form id="admin-template-form" class="admin-form admin-template-editor">
+          <div class="admin-template-editor__columns">
+            <section class="admin-template-editor__col admin-template-editor__col--fields" aria-label="Template fields">
+              <div class="admin-template-editor__meta">
+                <div class="form-group">
+                  <label for="admin-template-name">Name</label>
+                  <input type="text" id="admin-template-name" class="text-input" required autocomplete="off" />
+                </div>
+                <div class="form-group">
+                  <label for="admin-template-id">Slug</label>
+                  <input type="text" id="admin-template-id" class="text-input" placeholder="my-template-card" autocomplete="off" />
+                </div>
+                <div class="form-group">
+                  <label for="admin-template-category">Category</label>
+                  <select id="admin-template-category" class="text-input" required></select>
+                </div>
+              </div>
+              <div class="admin-fields-header">
+                <label>Fields</label>
+                <button type="button" class="btn btn-outline btn-sm" id="btn-admin-add-field">Add field</button>
+              </div>
+              <p class="field-hint">One name per field (used as {{KEY}} in HTML and on the Data form). Set sample text / images / logos below each.</p>
+              <div id="admin-fields-list" class="admin-fields-list"></div>
+            </section>
+
+            <section class="admin-template-editor__col admin-template-editor__col--html" aria-label="HTML source">
+              <div class="admin-fields-header">
+                <label for="admin-template-html-source">HTML</label>
+                <label class="btn btn-outline btn-sm admin-html-file-label">
+                  Load from file
+                  <input type="file" id="admin-template-html" accept=".html,text/html" hidden />
+                </label>
+              </div>
+              <textarea id="admin-template-html-source" class="text-input admin-html-editor" rows="16" spellcheck="false" placeholder="<!DOCTYPE html>…"></textarea>
+              <p class="field-hint" id="admin-template-html-hint">Formatted HTML with {{FIELD}} placeholders.</p>
+            </section>
+
+            <section class="admin-template-editor__col admin-template-editor__col--preview" aria-label="Live preview">
+              <div class="admin-fields-header">
+                <label>Preview</label>
+              </div>
+              <div class="admin-sample-preview" data-gallery-bucket="square">
+                <div class="admin-sample-preview__frame template-preview-container">
+                  <div id="admin-template-sample-mount" class="template-preview-mount"></div>
+                </div>
+                <p class="admin-sample-preview__label field-hint">Updates as you edit samples</p>
+              </div>
+            </section>
+          </div>
+
+          <p class="form-error hidden" id="admin-template-form-error"></p>
+          <div class="admin-form-actions">
+            <button type="button" class="btn btn-outline" id="admin-template-form-cancel">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="admin-template-form-submit">Upload template</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal-overlay hidden" id="admin-category-form-overlay" role="dialog" aria-modal="true" aria-labelledby="admin-category-form-title">
+      <div class="modal-card">
+        <button type="button" class="modal-close" id="admin-category-form-close" aria-label="Close">✕</button>
+        <h2 id="admin-category-form-title">Add category</h2>
+        <form id="admin-category-form" class="admin-form">
+          <div class="form-group">
+            <label for="admin-category-label">Label</label>
+            <input type="text" id="admin-category-label" class="text-input" required autocomplete="off" />
+          </div>
+          <div class="form-group">
+            <label for="admin-category-id">ID (optional)</label>
+            <input type="text" id="admin-category-id" class="text-input" placeholder="my-niche" autocomplete="off" />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="admin-category-sort">Sort order</label>
+              <input type="number" id="admin-category-sort" class="text-input" value="0" />
+            </div>
+            <div class="form-group admin-form-check">
+              <label class="admin-check"><input type="checkbox" id="admin-category-active" checked /> Active</label>
+            </div>
+          </div>
+          <p class="form-error hidden" id="admin-category-form-error"></p>
+          <div class="admin-form-actions">
+            <button type="button" class="btn btn-outline" id="admin-category-form-cancel">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save category</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal-overlay hidden" id="admin-post-form-overlay" role="dialog" aria-modal="true" aria-labelledby="admin-post-form-title">
+      <div class="modal-card admin-form-modal">
+        <button type="button" class="modal-close" id="admin-post-form-close" aria-label="Close">✕</button>
+        <h2 id="admin-post-form-title">Edit post</h2>
+        <div class="admin-post-preview">
+          <img id="admin-post-image" alt="" class="admin-post-preview__img hidden" />
+          <p class="admin-mono" id="admin-post-meta"></p>
+        </div>
+        <form id="admin-post-form" class="admin-form">
+          <div class="form-group">
+            <label for="admin-post-caption">Caption</label>
+            <textarea id="admin-post-caption" class="text-input" rows="4"></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="admin-post-platform">Platform</label>
+              <select id="admin-post-platform" class="text-input" required>
+                <option value="facebook">Facebook</option>
+                <option value="instagram">Instagram</option>
+                <option value="linkedin">LinkedIn</option>
+                <option value="youtube">YouTube</option>
+                <option value="tiktok">TikTok</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="admin-post-status">Status</label>
+              <select id="admin-post-status" class="text-input">
+                <option value="scheduled">Scheduled</option>
+                <option value="saved">Saved</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="admin-post-date">Date</label>
+              <input type="date" id="admin-post-date" class="text-input" required />
+            </div>
+            <div class="form-group">
+              <label for="admin-post-time">Time</label>
+              <input type="time" id="admin-post-time" class="text-input" required />
+            </div>
+          </div>
+          <p class="form-error hidden" id="admin-post-form-error"></p>
+          <div class="admin-form-actions">
+            <button type="button" class="btn btn-outline" id="admin-post-form-cancel">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="admin-post-form-submit">Save post</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/adminMain.js"></script>
+</body>
+</html>

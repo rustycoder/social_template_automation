@@ -46,3 +46,4 @@ export { AuthUI } from './auth/authUI.js';
 export { SubscriptionUI } from './auth/subscriptionUI.js';
 export { BillingUI } from './auth/billingUI.js';
 export { PostsUI } from './auth/postsUI.js';
+export { AdminUI } from './auth/adminUI.js';

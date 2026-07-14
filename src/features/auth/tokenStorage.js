@@ -1,11 +1,21 @@
 const TOKEN_KEY = 'auth_token';
 
+/**
+ * @param {string} segment Base64url JWT segment
+ * @returns {string}
+ */
+function decodeBase64Url(segment) {
+  const normalized = segment.replace(/-/g, '+').replace(/_/g, '/');
+  const pad = normalized.length % 4;
+  const padded = pad ? normalized + '='.repeat(4 - pad) : normalized;
+  return atob(padded);
+}
+
 function decodeJwtPayload(token) {
   try {
     const segment = token.split('.')[1];
     if (!segment) return null;
-    const json = atob(segment.replace(/-/g, '+').replace(/_/g, '/'));
-    return JSON.parse(json);
+    return JSON.parse(decodeBase64Url(segment));
   } catch {
     return null;
   }
@@ -13,8 +23,9 @@ function decodeJwtPayload(token) {
 
 function isTokenExpired(token) {
   const payload = decodeJwtPayload(token);
-  if (!payload?.exp) return true;
-  return Date.now() >= payload.exp * 1000;
+  // If we cannot read exp, keep the token and let the server decide.
+  if (!payload || payload.exp == null) return false;
+  return Date.now() >= Number(payload.exp) * 1000;
 }
 
 export const tokenStorage = {

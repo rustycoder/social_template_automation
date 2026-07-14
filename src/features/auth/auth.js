@@ -25,9 +25,12 @@ class AuthService {
     try {
       const { user } = await api.getMe();
       this.user = user;
-    } catch {
-      tokenStorage.clear();
-      this.user = null;
+    } catch (error) {
+      // Only drop the session on auth failures — keep the token on network/server errors.
+      if (error?.status === 401) {
+        tokenStorage.clear();
+        this.user = null;
+      }
     }
   }
 
@@ -61,8 +64,10 @@ class AuthService {
     try {
       await this.refreshUser();
       return this.isLoggedIn();
-    } catch {
-      this.logout();
+    } catch (error) {
+      if (error?.status === 401) {
+        await this.logout();
+      }
       return false;
     }
   }

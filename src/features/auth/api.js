@@ -43,7 +43,9 @@ async function request(path, options = {}) {
   }
 
   if (!response.ok) {
-    if (response.status === 401 && token) {
+    // Only expire the session if this request's token is still the one in storage.
+    // Avoids wiping a newer login when a stale in-flight request gets 401.
+    if (response.status === 401 && token && tokenStorage.get() === token) {
       tokenStorage.clear();
       window.dispatchEvent(
         new CustomEvent('auth:expired', {
@@ -141,6 +143,93 @@ export const api = {
 
   deletePost(id) {
     return request(`/posts/${encodeURIComponent(id)}`, { method: 'DELETE' });
+  },
+
+  // —— Admin ——
+  adminListCategories() {
+    return request('/admin/categories');
+  },
+
+  adminCreateCategory(body) {
+    return request('/admin/categories', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+  },
+
+  adminUpdateCategory(id, body) {
+    return request(`/admin/categories/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      body: JSON.stringify(body),
+    });
+  },
+
+  adminDeleteCategory(id) {
+    return request(`/admin/categories/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+    });
+  },
+
+  adminListTemplates() {
+    return request('/admin/templates');
+  },
+
+  adminGetTemplate(id) {
+    return request(`/admin/templates/${encodeURIComponent(id)}`);
+  },
+
+  /**
+   * @param {FormData} formData
+   */
+  adminCreateTemplate(formData) {
+    return request('/admin/templates', {
+      method: 'POST',
+      body: formData,
+    });
+  },
+
+  /**
+   * @param {string} id
+   * @param {FormData|object} body
+   */
+  adminUpdateTemplate(id, body) {
+    if (body instanceof FormData) {
+      return request(`/admin/templates/${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        body,
+      });
+    }
+    return request(`/admin/templates/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      body: JSON.stringify(body),
+    });
+  },
+
+  adminDeleteTemplate(id) {
+    return request(`/admin/templates/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+    });
+  },
+
+  adminListPosts() {
+    return request('/admin/posts');
+  },
+
+  adminGetPost(id) {
+    return request(`/admin/posts/${encodeURIComponent(id)}`);
+  },
+
+  adminUpdatePost(id, body) {
+    return request(`/admin/posts/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      body: JSON.stringify(body),
+    });
+  },
+
+  adminDeletePost(id) {
+    return request(`/admin/posts/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+    });
   },
 };
 

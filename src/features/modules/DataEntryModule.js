@@ -10,6 +10,14 @@ import { getTemplateFields, validateExcelHeaders, validateManualFields } from '.
 import { downloadSampleExcel } from '../domain/sampleExcelExport.js';
 import { POST_CAPTION_KEY } from '../shared/postMeta.js';
 
+function escapeAttr(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
 export class DataEntryModule {
   /**
    * @description Initializes Data Page form controls and tab state machine.
@@ -162,13 +170,19 @@ export class DataEntryModule {
       const row = document.createElement('div');
       row.className = 'field-row';
       row.dataset.fieldKey = field.key;
+      const sampleHint =
+        typeof field.sample === 'string' && field.sample.trim()
+          ? field.sample.trim()
+          : '';
+      const sampleAttr = escapeAttr(sampleHint);
+      const defaultTextPlaceholder = escapeAttr(`Enter ${field.label.toLowerCase()}…`);
 
       if (field.type === 'image') {
         row.innerHTML = `
           <div class="field-grid">
             <div class="setting-group">
               <label for="field-file-${field.key}">${field.label}${field.required ? ' <span class="required-badge">*</span>' : ''}</label>
-              <input type="text" id="field-url-${field.key}" class="text-input field-url" data-key="${field.key}" placeholder="Paste image URL…" autocomplete="off" />
+              <input type="text" id="field-url-${field.key}" class="text-input field-url" data-key="${field.key}" placeholder="${sampleAttr || 'Paste image URL…'}" autocomplete="off" />
               <input type="file" id="field-file-${field.key}" class="text-input field-file" accept="image/*" data-key="${field.key}" style="margin-top:6px" />
               <input type="hidden" class="field-value" data-key="${field.key}" value="" />
             </div>
@@ -179,7 +193,7 @@ export class DataEntryModule {
           <div class="field-grid">
             <div class="setting-group">
               <label for="field-${field.key}">${field.label}${field.required ? ' <span class="required-badge">*</span>' : ''}</label>
-              <textarea id="field-${field.key}" class="text-input field-textarea field-value" data-key="${field.key}" rows="2" placeholder="Enter ${field.label.toLowerCase()}…" name="${field.key}" autocomplete="off"></textarea>
+              <textarea id="field-${field.key}" class="text-input field-textarea field-value" data-key="${field.key}" rows="2" placeholder="${sampleAttr || defaultTextPlaceholder}" name="${field.key}" autocomplete="off"></textarea>
             </div>
           </div>
         `;
@@ -188,7 +202,7 @@ export class DataEntryModule {
           <div class="field-grid">
             <div class="setting-group">
               <label for="field-${field.key}">${field.label}${field.required ? ' <span class="required-badge">*</span>' : ''}</label>
-              <input type="text" id="field-${field.key}" class="text-input field-value" data-key="${field.key}" placeholder="Enter ${field.label.toLowerCase()}…" name="${field.key}" autocomplete="off" />
+              <input type="text" id="field-${field.key}" class="text-input field-value" data-key="${field.key}" placeholder="${sampleAttr || defaultTextPlaceholder}" name="${field.key}" autocomplete="off" />
             </div>
           </div>
         `;

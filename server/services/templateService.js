@@ -1,5 +1,56 @@
+import fs from 'fs';
+import path from 'path';
 import { query } from '../db.js';
 import { nowDatetime, parseJsonText, stringifyJsonText, slugifyId } from './jsonText.js';
+import { getUploadsRoot } from './postService.js';
+
+const DATA_URL_RE = /^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/;
+
+/**
+ * Persist data-URL sample images to disk and replace with /uploads/… URLs.
+ * Keeps fields_json small enough for the DB.
+ * @param {string} templateId
+ * @param {Array<object>} fields
+ * @returns {Array<object>}
+ */
+export function materializeFieldSampleImages(templateId, fields) {
+  if (!Array.isArray(fields) || fields.length === 0) return fields || [];
+
+  const safeId = String(templateId || 'template')
+    .replace(/[^a-zA-Z0-9_-]/g, '_')
+    .slice(0, 80);
+  const dir = path.join(getUploadsRoot(), 'templates', safeId);
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+
+  return fields.map((field) => {
+    const sample = typeof field?.sample === 'string' ? field.sample : '';
+    const match = DATA_URL_RE.exec(sample);
+    if (!match) return field;
+
+    const mime = match[1].toLowerCase();
+    const ext =
+      mime === 'image/png'
+        ? 'png'
+        : mime === 'image/webp'
+          ? 'webp'
+          : mime === 'image/gif'
+            ? 'gif'
+            : mime === 'image/svg+xml'
+              ? 'svg'
+              : 'jpg';
+    const key = String(field.key || 'image')
+      .replace(/[^a-zA-Z0-9_-]/g, '_')
+      .toUpperCase()
+      .slice(0, 64);
+    const filename = `${key}.${ext}`;
+    const absolute = path.join(dir, filename);
+    fs.writeFileSync(absolute, Buffer.from(match[2], 'base64'));
+    const publicPath = `/uploads/templates/${safeId}/${filename}`;
+    return { ...field, sample: publicPath };
+  });
+}
 
 function mapTemplateRow(row, { includeHtml = false } = {}) {
   if (!row) return null;
@@ -124,6 +175,7 @@ export async function createTemplate({
   }
 
   const now = nowDatetime();
+  const storedFields = materializeFieldSampleImages(templateId, fields);
   await query(
     `INSERT INTO templates
       (id, name, category_id, html_source, fields_json, preview_bucket, is_active, created_at, updated_at)
@@ -133,7 +185,7 @@ export async function createTemplate({
       name,
       categoryId,
       htmlSource,
-      stringifyJsonText(fields),
+      stringifyJsonText(storedFields),
       previewBucket || 'square',
       isActive ? 1 : 0,
       now,
@@ -169,6 +221,7 @@ export async function updateTemplate(id, patch) {
   validateFieldsAgainstHtml(htmlSource, fields);
 
   const now = nowDatetime();
+  const storedFields = materializeFieldSampleImages(id, fields);
   await query(
     `UPDATE templates
      SET name = ?, category_id = ?, html_source = ?, fields_json = ?,
@@ -178,7 +231,7 @@ export async function updateTemplate(id, patch) {
       name,
       categoryId,
       htmlSource,
-      stringifyJsonText(fields),
+      stringifyJsonText(storedFields),
       previewBucket,
       isActive,
       now,
@@ -194,6 +247,32 @@ export async function softDeleteTemplate(id) {
   if (!existing) return false;
   const now = nowDatetime();
   await query('UPDATE templates SET is_active = 0, updated_at = ? WHERE id = ?', [now, id]);
+  return true;
+}
+
+/**
+ * Permanently remove a template. Fails if saved posts still reference it.
+ * @param {string} id
+ * @returns {Promise<boolean>}
+ */
+export async function hardDeleteTemplate(id) {
+  const existing = await getTemplateById(id, { includeHtml: false });
+  if (!existing) return false;
+
+  const posts = await query(
+    'SELECT COUNT(*) AS cnt FROM saved_posts WHERE template_id = ?',
+    [id]
+  );
+  const count = Number(posts[0]?.cnt || 0);
+  if (count > 0) {
+    const error = new Error(
+      `Cannot delete template while ${count} saved post(s) reference it. Deactivate instead.`
+    );
+    error.status = 409;
+    throw error;
+  }
+
+  await query('DELETE FROM templates WHERE id = ?', [id]);
   return true;
 }
 

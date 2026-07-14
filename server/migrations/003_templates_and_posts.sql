@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS templates (
   name VARCHAR(160) NOT NULL,
   category_id VARCHAR(64) NOT NULL,
   html_source MEDIUMTEXT NOT NULL,
-  fields_json TEXT NOT NULL,
+  fields_json MEDIUMTEXT NOT NULL,
   preview_bucket VARCHAR(32) NOT NULL DEFAULT 'square',
   is_active TINYINT(1) NOT NULL DEFAULT 1,
   created_at DATETIME NOT NULL,

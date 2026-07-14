@@ -24,8 +24,10 @@
     "vite": "^6.0.0"
   },
   "dependencies": {
+    "@codemirror/lang-html": "^6.4.11",
     "axios": "^1.18.1",
     "bcryptjs": "^3.0.2",
+    "codemirror": "^6.0.2",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "exceljs": "^3.4.0",

@@ -20,6 +20,11 @@ export function getSampleRowForTemplate(template) {
   const base = id && BUILTIN_SAMPLES[id] ? { ...BUILTIN_SAMPLES[id] } : {};
 
   for (const field of fields) {
+    if (typeof field.sample === 'string' && field.sample.trim() !== '') {
+      base[field.key] = field.sample;
+      continue;
+    }
+
     if (base[field.key] !== undefined) continue;
 
     if (field.type === 'image') {

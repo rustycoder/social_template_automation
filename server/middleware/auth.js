@@ -1,9 +1,20 @@
 import jwt from 'jsonwebtoken';
 import { config } from '../config.js';
+import { query } from '../db.js';
 import { validateSessionVersion } from '../services/sessionService.js';
 import { getActiveSubscription } from '../services/subscriptionService.js';
 
 const SESSION_INVALID_MESSAGE = 'Session expired. You were logged in on another device.';
+
+/**
+ * @description Loads the current role from the database (source of truth).
+ * @param {number|string} userId
+ * @returns {Promise<'admin'|'user'>}
+ */
+async function getUserRole(userId) {
+  const rows = await query('SELECT role FROM users WHERE id = ? LIMIT 1', [userId]);
+  return rows[0]?.role === 'admin' ? 'admin' : 'user';
+}
 
 /**
  * @description Verifies JWT and ensures it matches the user's current session version.
@@ -24,10 +35,12 @@ export async function authenticate(req, res, next) {
       return res.status(401).json({ error: SESSION_INVALID_MESSAGE });
     }
 
+    const role = await getUserRole(userId);
+
     req.user = {
       id: userId,
       email: payload.email,
-      role: payload.role === 'admin' ? 'admin' : 'user',
+      role,
     };
     next();
   } catch {
@@ -35,7 +48,7 @@ export async function authenticate(req, res, next) {
   }
 }
 
-export function optionalAuthenticate(req, _res, next) {
+export async function optionalAuthenticate(req, _res, next) {
   const header = req.headers.authorization;
   if (!header?.startsWith('Bearer ')) {
     return next();
@@ -44,10 +57,11 @@ export function optionalAuthenticate(req, _res, next) {
   const token = header.slice(7);
   try {
     const payload = jwt.verify(token, config.jwtSecret);
+    const role = await getUserRole(payload.sub);
     req.user = {
       id: payload.sub,
       email: payload.email,
-      role: payload.role === 'admin' ? 'admin' : 'user',
+      role,
     };
   } catch {
     /* ignore invalid token for optional auth */

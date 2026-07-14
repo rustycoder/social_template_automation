@@ -23,6 +23,7 @@ export class AuthUI {
     this.logoutBtn = document.getElementById('btn-logout');
     this.billingBtn = document.getElementById('btn-my-billing');
     this.postsBtn = document.getElementById('btn-my-posts');
+    this.adminBtn = document.getElementById('btn-admin');
     this.userNameEl = document.getElementById('user-name');
     this.dropdownUserName = document.getElementById('dropdown-user-name');
     this.dropdownUserEmail = document.getElementById('dropdown-user-email');
@@ -33,6 +34,8 @@ export class AuthUI {
     this._dropdownOpen = false;
     this.onBillingClick = null;
     this.onPostsClick = null;
+    this.onAdminClick = null;
+    this.onLogout = null;
 
     this._bindEvents();
     authService.onChange((user) => this._renderHeader(user));
@@ -41,9 +44,10 @@ export class AuthUI {
 
   _bindEvents() {
     this.loginBtn?.addEventListener('click', () => this.open('login'));
-    this.logoutBtn?.addEventListener('click', () => {
+    this.logoutBtn?.addEventListener('click', async () => {
       this._closeDropdown();
-      authService.logout();
+      await authService.logout();
+      this.onLogout?.();
     });
     this.billingBtn?.addEventListener('click', () => {
       this._closeDropdown();
@@ -52,6 +56,10 @@ export class AuthUI {
     this.postsBtn?.addEventListener('click', () => {
       this._closeDropdown();
       this.onPostsClick?.();
+    });
+    this.adminBtn?.addEventListener('click', () => {
+      this._closeDropdown();
+      this.onAdminClick?.();
     });
     this.profileTrigger?.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -220,10 +228,12 @@ export class AuthUI {
       if (this.dropdownUserEmail) this.dropdownUserEmail.textContent = user.email;
       if (this.profileAvatar) this.profileAvatar.textContent = this._getInitials(user.name);
       this._renderSubscription(user);
+      this.adminBtn?.classList.toggle('hidden', user.role !== 'admin');
     } else {
       this._closeDropdown();
       this.loginBtn?.classList.remove('hidden');
       this.userMenu?.classList.add('hidden');
+      this.adminBtn?.classList.add('hidden');
     }
   }
 }

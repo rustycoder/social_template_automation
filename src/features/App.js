@@ -77,6 +77,14 @@ export class App {
     this.postsUI = new PostsUI(this.authUI);
     this.authUI.onBillingClick = () => this.billingUI.show();
     this.authUI.onPostsClick = () => this.postsUI.show();
+    this.authUI.onAdminClick = () => {
+      window.location.assign('/admin.html');
+    };
+    this.authUI.onLogout = () => {
+      this.billingUI?.hide();
+      this.postsUI?.hide();
+      this.layout.goToStep(1);
+    };
 
     this.layout = new LayoutModule({
       initialStep: 1,

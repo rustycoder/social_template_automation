@@ -11,7 +11,7 @@
 
 import { POST_CAPTION_KEY } from '../shared/postMeta.js';
 
-/** @typedef {{ key: string, label: string, type: 'text'|'textarea'|'image', required?: boolean }} TemplateField */
+/** @typedef {{ key: string, label: string, type: 'text'|'textarea'|'image', required?: boolean, sample?: string }} TemplateField */
 
 const PLACEHOLDER_RE = /\{\{\s*([^#/}][^}]*?)\s*\}\}/g;
 
@@ -21,12 +21,21 @@ const PLACEHOLDER_RE = /\{\{\s*([^#/}][^}]*?)\s*\}\}/g;
  */
 export function getTemplateFields(template) {
   if (Array.isArray(template?.fields) && template.fields.length > 0) {
-    return template.fields.map((field) => ({
-      key: field.key,
-      label: field.label || field.key,
-      type: field.type || 'text',
-      required: field.required !== false && field.type !== 'image' ? !!field.required : !!field.required,
-    }));
+    return template.fields.map((field) => {
+      const sample =
+        typeof field.sample === 'string'
+          ? field.sample
+          : typeof field.placeholder === 'string'
+            ? field.placeholder
+            : undefined;
+      return {
+        key: field.key,
+        label: field.label || field.key,
+        type: field.type || 'text',
+        required: field.required !== false && field.type !== 'image' ? !!field.required : !!field.required,
+        ...(sample != null && sample !== '' ? { sample } : {}),
+      };
+    });
   }
 
   const html = template?.content?.html ?? '';
