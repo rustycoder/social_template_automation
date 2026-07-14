@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sky Sports Scorecard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{width:1080px;height:1080px;overflow:hidden;font-family:'Inter',sans-serif;}
+  .card{position:relative;width:1080px;height:1080px;background:#0B1354;border:4px solid #C4A53A;}
+  .score-strip{position:absolute;top:0;left:0;width:35%;height:100%;background:#8B0000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;z-index:2;}
+  .team-block{display:flex;flex-direction:column;align-items:center;gap:12px;}
+  .team-badge{width:80px;height:80px;object-fit:contain;}
+  .team-score{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:72px;color:#fff;line-height:1;}
+  .status-text{font-family:'Inter',sans-serif;font-weight:600;font-size:22px;color:rgba(255,255,255,0.85);text-transform:uppercase;letter-spacing:.15em;padding:12px 0;border-top:2px solid rgba(255,255,255,0.25);border-bottom:2px solid rgba(255,255,255,0.25);width:80%;text-align:center;}
+  .photo-area{position:absolute;top:0;right:0;width:65%;height:100%;overflow:hidden;}
+  .t-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  .photo-scrim{position:absolute;inset:0;background:linear-gradient(to right,rgba(11,19,84,0.4) 0%,rgba(11,19,84,0) 30%);}
+  .brand-text{position:absolute;bottom:28px;left:0;width:35%;text-align:center;font-family:'Inter',sans-serif;font-weight:700;font-size:16px;letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,0.6);z-index:3;}
+  .gold-accent{position:absolute;top:0;left:35%;width:4px;height:100%;background:#C4A53A;z-index:3;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="score-strip">
+      <div class="team-block">
+        <img class="team-badge" src="{{TEAM1_BADGE}}" alt="">
+        <div class="team-score">{{TEAM1_SCORE}}</div>
+      </div>
+      <div class="status-text">{{STATUS}}</div>
+      <div class="team-block">
+        <div class="team-score">{{TEAM2_SCORE}}</div>
+        <img class="team-badge" src="{{TEAM2_BADGE}}" alt="">
+      </div>
+    </div>
+    <div class="gold-accent"></div>
+    <div class="photo-area">
+      <img class="t-photo" src="{{PHOTO}}" alt="">
+      <div class="photo-scrim"></div>
+    </div>
+    <div class="brand-text">sky sports</div>
+  </div>
+</body>
+</html>

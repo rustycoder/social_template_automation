@@ -1,4 +1,4 @@
-import { query } from '../db.js';
+import { query } from '../database/db.js';
 
 const PLAN_INTERVAL_MONTHS = {
   month: 1,

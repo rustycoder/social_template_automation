@@ -1,6 +1,6 @@
 import cron from 'node-cron';
 import { config } from './config.js';
-import { testConnection, getPool } from './db.js';
+import { testConnection, getPool } from './database/db.js';
 import { runExpireSubscriptionsJob } from './jobs/expireSubscriptions.js';
 
 let isRunning = false;

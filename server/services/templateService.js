@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { query } from '../db.js';
+import { query } from '../database/db.js';
 import { nowDatetime, parseJsonText, stringifyJsonText, slugifyId } from './jsonText.js';
 import { getUploadsRoot } from './postService.js';
 

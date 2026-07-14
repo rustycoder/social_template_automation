@@ -1,6 +1,6 @@
 -- Social Media Template Automation — MySQL schema (legacy SQL setup)
 -- Prefer: npm run db:migrate
--- Or run manually: mysql -u root -p < server/schema.sql
+-- Or run manually: mysql -u root -p < server/database/schema.sql
 
 CREATE DATABASE IF NOT EXISTS social_template_automation
   CHARACTER SET utf8mb4

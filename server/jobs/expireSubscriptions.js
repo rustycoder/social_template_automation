@@ -1,5 +1,5 @@
 import { expireSubscriptions } from '../services/subscriptionService.js';
-import { testConnection, getPool } from '../db.js';
+import { testConnection, getPool } from '../database/db.js';
 
 /**
  * Run the subscription expiry job once.

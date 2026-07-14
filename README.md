@@ -74,11 +74,19 @@ A web app for creating social media posts from templates — pick a design, fill
    npm run db:migrate
    ```
 
-   This creates the database, tables, and seeds subscription plans. To reset everything:
+   This creates the database and tables (including default subscription plans). To reset everything:
 
    ```bash
    npm run db:reset
    ```
+
+   Seed plans, categories, templates, and the admin user:
+
+   ```bash
+   npm run db:seed
+   ```
+
+   Requires `ADMIN_EMAIL` and `ADMIN_PASSWORD` in `.env` for the admin account.
 
 5. **Start the app:**
 
@@ -303,12 +311,14 @@ social-media-template-automation/
 │   ├── index.js              # API server entry
 │   ├── cron.js               # Subscription expiry cron daemon
 │   ├── config.js
-│   ├── db.js
-│   ├── migrate.js
-│   ├── schema.sql
+│   ├── database/
+│   │   ├── db.js
+│   │   ├── migrate.js
+│   │   ├── schema.sql
+│   │   ├── migrations/
+│   │   └── seeder/
 │   ├── jobs/
 │   │   └── expireSubscriptions.js
-│   ├── migrations/
 │   ├── payment-gateway/        # MPGS payment gateway client
 │   ├── middleware/
 │   ├── routes/

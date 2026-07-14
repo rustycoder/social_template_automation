@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import { config } from "../config.js";
-import { query } from "../db.js";
+import { query } from "../database/db.js";
 import { PaymentGateway, getCheckoutScriptUrl } from "../payment-gateway/index.js";
 import { createSubscription, getPlanById } from "./subscriptionService.js";
 

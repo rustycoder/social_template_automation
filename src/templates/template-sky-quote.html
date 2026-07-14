@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sky Sports Quote</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Playfair+Display:ital,wght@1,400;1,700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{width:1080px;height:1080px;overflow:hidden;font-family:'Inter',sans-serif;}
+  .card{position:relative;width:1080px;height:1080px;background:#1a1a2e;}
+  .photo-area{position:absolute;top:0;left:0;right:0;height:60%;overflow:hidden;}
+  .t-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  .photo-scrim{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(26,26,46,0) 40%,rgba(26,26,46,0.85) 90%,rgba(26,26,46,1) 100%);}
+  .brand-text{position:absolute;top:62%;left:0;right:0;text-align:center;font-family:'Inter',sans-serif;font-weight:800;font-size:22px;letter-spacing:.35em;text-transform:uppercase;color:rgba(255,255,255,0.7);}
+  .quote-area{position:absolute;top:68%;left:80px;right:80px;bottom:160px;display:flex;align-items:center;justify-content:center;}
+  .t-headline{font-family:'Playfair Display',serif;font-style:italic;font-weight:400;font-size:44px;line-height:1.35;color:#fff;text-align:center;}
+  .t-headline mark{background:transparent;color:#D32F2F;font-weight:700;}
+  .cta-bar{position:absolute;bottom:48px;left:50%;transform:translateX(-50%);background:#D32F2F;color:#fff;font-family:'Inter',sans-serif;font-weight:700;font-size:20px;letter-spacing:.12em;text-transform:uppercase;padding:16px 48px;border-radius:6px;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="photo-area">
+      <img class="t-photo" src="{{PHOTO}}" alt="">
+      <div class="photo-scrim"></div>
+    </div>
+    <div class="brand-text">{{BRAND}}</div>
+    <div class="quote-area">
+      <div class="t-headline">"{{QUOTE}}"</div>
+    </div>
+    <div class="cta-bar">{{CTA_TEXT}}</div>
+  </div>
+</body>
+</html>

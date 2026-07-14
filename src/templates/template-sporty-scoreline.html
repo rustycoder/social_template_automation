@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SportyTV Scoreline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{width:1080px;height:1080px;overflow:hidden;font-family:'Inter',sans-serif;}
+  img[src=""],img:not([src]){display:none;}
+  .card{position:relative;width:1080px;height:1080px;background:#0a0a0a;}
+  .t-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  .scrim{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.92) 0%,rgba(0,0,0,0.65) 40%,rgba(0,0,0,0.15) 65%,rgba(0,0,0,0.05) 100%);}
+  .logos{position:absolute;top:40px;right:44px;display:flex;align-items:center;gap:16px;z-index:3;}
+  .logos img{height:56px;width:auto;object-fit:contain;}
+  .score-area{position:absolute;top:50%;left:0;right:0;z-index:3;display:flex;flex-direction:column;align-items:center;padding:0 40px;}
+  .t-status{font-family:'Inter',sans-serif;font-weight:700;font-size:20px;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:.18em;margin-bottom:4px;}
+  .t-match-type{font-family:'Inter',sans-serif;font-weight:600;font-size:16px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:.14em;margin-bottom:20px;}
+  .scoreboard{display:flex;align-items:center;justify-content:center;gap:0;width:100%;}
+  .team{display:flex;flex-direction:column;align-items:center;gap:12px;width:200px;}
+  .team-flag{width:100px;height:100px;object-fit:contain;}
+  .team-name{font-family:'Inter',sans-serif;font-weight:700;font-size:20px;color:#fff;text-transform:uppercase;letter-spacing:.08em;text-align:center;}
+  .score-center{display:flex;align-items:center;justify-content:center;gap:24px;min-width:280px;}
+  .team-score{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:120px;color:#fff;line-height:1;}
+  .score-divider{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:48px;color:rgba(255,255,255,0.4);line-height:1;}
+  .t-scorers{font-family:'Inter',sans-serif;font-weight:500;font-size:18px;line-height:1.65;color:rgba(255,255,255,0.75);text-align:center;margin-top:24px;max-width:780px;}
+  .gradient-bar{position:absolute;bottom:0;left:0;right:0;height:8px;background:linear-gradient(90deg,#e40303,#ff8c00,#ffed00,#008026,#004dff,#750787);z-index:3;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <img class="t-photo" src="{{PHOTO}}" alt="">
+    <div class="scrim"></div>
+    <div class="logos"><img src="{{LOGO}}" alt=""></div>
+    <div class="score-area">
+      <div class="t-status">{{STATUS}}</div>
+      <div class="t-match-type">{{MATCH_TYPE}}</div>
+      <div class="scoreboard">
+        <div class="team">
+          <img class="team-flag" src="{{TEAM1_FLAG}}" alt="">
+          <div class="team-name">{{TEAM1_NAME}}</div>
+        </div>
+        <div class="score-center">
+          <div class="team-score">{{TEAM1_SCORE}}</div>
+          <div class="score-divider">–</div>
+          <div class="team-score">{{TEAM2_SCORE}}</div>
+        </div>
+        <div class="team">
+          <img class="team-flag" src="{{TEAM2_FLAG}}" alt="">
+          <div class="team-name">{{TEAM2_NAME}}</div>
+        </div>
+      </div>
+      <div class="t-scorers">{{SCORERS}}</div>
+    </div>
+    <div class="gradient-bar"></div>
+  </div>
+</body>
+</html>

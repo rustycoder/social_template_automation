@@ -1,4 +1,4 @@
-import { query } from '../db.js';
+import { query } from '../database/db.js';
 
 /**
  * @description Increments the user's session version, invalidating all prior JWTs.

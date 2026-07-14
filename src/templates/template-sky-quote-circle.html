@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sky Sports Quote Circle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Playfair+Display:ital,wght@1,400;1,700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{width:1080px;height:1080px;overflow:hidden;font-family:'Inter',sans-serif;}
+  .card{position:relative;width:1080px;height:1080px;background:#0a0f2e;}
+  .photo-area{position:absolute;top:0;left:0;right:0;height:55%;overflow:hidden;}
+  .t-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.35;}
+  .quote-marks{position:absolute;top:48px;left:50%;transform:translateX(-50%);font-size:88px;color:#D32F2F;font-family:'Playfair Display',serif;line-height:1;z-index:2;}
+  .quote-area{position:absolute;top:15%;left:80px;right:240px;height:45%;display:flex;align-items:center;z-index:2;}
+  .t-headline{font-family:'Playfair Display',serif;font-style:italic;font-weight:700;font-size:42px;line-height:1.35;color:#fff;}
+  .t-headline mark{background:transparent;color:#fff;font-weight:700;text-decoration:underline;text-decoration-color:#D32F2F;}
+  .circle-inset{position:absolute;top:35%;right:60px;width:150px;height:150px;border-radius:50%;overflow:hidden;border:4px solid #D32F2F;z-index:3;}
+  .circle-inset img{width:100%;height:100%;object-fit:cover;}
+  .attribution{position:absolute;top:65%;left:80px;font-family:'Inter',sans-serif;font-style:italic;font-weight:400;font-size:24px;color:rgba(255,255,255,0.7);z-index:2;}
+  .brand-text{position:absolute;bottom:48px;left:0;right:0;text-align:center;font-family:'Inter',sans-serif;font-weight:800;font-size:22px;letter-spacing:.35em;text-transform:uppercase;color:rgba(255,255,255,0.7);}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="photo-area">
+      <img class="t-photo" src="{{PHOTO}}" alt="">
+    </div>
+    <div class="quote-marks">&#10077;</div>
+    <div class="quote-area">
+      <div class="t-headline">{{QUOTE}}</div>
+    </div>
+    <div class="circle-inset">
+      <img src="{{INSET}}" alt="">
+    </div>
+    <div class="attribution">— {{ATTRIBUTION}}</div>
+    <div class="brand-text">{{BRAND}}</div>
+  </div>
+</body>
+</html>

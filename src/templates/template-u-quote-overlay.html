@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Quote Overlay</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{width:1080px;height:1080px;overflow:hidden;font-family:'Inter',sans-serif;}
+  .card{position:relative;width:1080px;height:1080px;background:#111;}
+  .t-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  .scrim{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.92) 0%,rgba(0,0,0,0.70) 35%,rgba(0,0,0,0.20) 65%,rgba(0,0,0,0.10) 100%);}
+  .quote-mark{position:absolute;top:42%;left:56px;font-size:180px;line-height:1;color:rgba(255,255,255,0.12);font-family:Georgia,serif;z-index:2;pointer-events:none;}
+  .quote-area{position:absolute;left:60px;right:60px;bottom:110px;z-index:3;}
+  .t-quote{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:44px;line-height:1.18;color:#fff;text-transform:uppercase;margin-bottom:24px;max-width:960px;}
+  .t-quote mark{background:#FFD600;color:#0a0a0b;padding:2px 8px;border-radius:2px;}
+  .t-quote .highlight-red{background:#D6293E;color:#fff;padding:2px 8px;border-radius:2px;}
+  .attribution{font-family:'Inter',sans-serif;font-size:18px;font-weight:500;color:rgba(255,255,255,0.65);letter-spacing:.04em;margin-bottom:28px;}
+  .brand-watermark{font-family:'Inter',sans-serif;font-size:14px;font-weight:600;color:rgba(255,255,255,0.35);letter-spacing:.12em;text-transform:uppercase;text-align:center;position:absolute;bottom:40px;left:0;right:0;z-index:3;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <img class="t-photo" src="{{PHOTO}}" alt="">
+    <div class="scrim"></div>
+    <div class="quote-mark">&ldquo;</div>
+    <div class="quote-area">
+      <div class="t-quote">{{QUOTE}}</div>
+      <div class="attribution">— {{ATTRIBUTION}}</div>
+    </div>
+    <div class="brand-watermark">{{BRAND}}</div>
+  </div>
+</body>
+</html>

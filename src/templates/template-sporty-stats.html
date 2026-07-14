@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SportyTV Stats</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{width:1080px;height:1080px;overflow:hidden;font-family:'Inter',sans-serif;}
+  img[src=""],img:not([src]){display:none;}
+  .card{position:relative;width:1080px;height:1080px;background:#0a0a0a;}
+  .photo-area{position:absolute;top:0;left:0;right:0;height:40%;overflow:hidden;}
+  .t-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  .photo-scrim{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0) 30%,rgba(10,10,10,1) 100%);}
+  .logos{position:absolute;top:40px;right:44px;display:flex;align-items:center;gap:16px;z-index:3;}
+  .logos img{height:56px;width:auto;object-fit:contain;}
+  .t-headline-big{position:absolute;top:42%;left:0;right:0;z-index:3;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:72px;line-height:1.05;color:#fff;text-transform:uppercase;letter-spacing:.03em;text-align:center;padding:0 56px;}
+  .t-headline-big mark{background:#FFD600;color:#0a0a0b;padding:2px 12px;border-radius:3px;box-decoration-break:clone;-webkit-box-decoration-break:clone;}
+  .t-subtitle{position:absolute;top:52%;left:0;right:0;z-index:3;font-family:'Inter',sans-serif;font-weight:600;font-size:20px;line-height:1.4;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:.06em;text-align:center;padding:0 80px;}
+  .t-subtitle mark{background:none;color:#00BCD4;font-weight:700;}
+  .stats-table{position:absolute;top:58%;left:56px;right:56px;bottom:48px;z-index:3;display:flex;flex-direction:column;gap:0;}
+  .stat-row{display:flex;align-items:center;padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.08);font-family:'Inter',sans-serif;font-weight:500;font-size:20px;color:rgba(255,255,255,0.85);}
+  .stat-row:nth-child(even){background:rgba(255,255,255,0.04);}
+  .stat-row.highlight{background:#FFD600;color:#0a0a0a;border-radius:6px;border-bottom:none;font-weight:700;}
+  .stat-rank{width:50px;font-weight:700;text-align:center;}
+  .stat-flag{width:40px;height:28px;object-fit:contain;margin-right:16px;}
+  .stat-name{flex:1;font-weight:600;}
+  .stat-val{width:70px;text-align:center;font-weight:700;}
+  .stat-row.header{font-weight:700;font-size:16px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:.1em;border-bottom:2px solid rgba(255,255,255,0.15);padding-bottom:12px;}
+  .gradient-bar{position:absolute;bottom:0;left:0;right:0;height:8px;background:linear-gradient(90deg,#e40303,#ff8c00,#ffed00,#008026,#004dff,#750787);z-index:3;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="photo-area">
+      <img class="t-photo" src="{{PHOTO}}" alt="">
+      <div class="photo-scrim"></div>
+    </div>
+    <div class="logos"><img src="{{LOGO}}" alt=""></div>
+    <div class="t-headline-big">{{HEADLINE_BIG}}</div>
+    <div class="t-subtitle">{{SUBTITLE}}</div>
+    <div class="stats-table">{{STAT_ROWS}}</div>
+    <div class="gradient-bar"></div>
+  </div>
+</body>
+</html>

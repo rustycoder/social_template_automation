@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Al Jazeera Economy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{width:1080px;height:1080px;overflow:hidden;font-family:'Inter',sans-serif;}
+  .card{position:relative;width:1080px;height:1080px;background:#0a0a1a;}
+  .t-photo{position:absolute;top:0;left:0;width:100%;height:65%;object-fit:cover;}
+  .photo-scrim{position:absolute;top:0;left:0;width:100%;height:65%;background:linear-gradient(to bottom,rgba(0,0,0,0) 40%,rgba(44,27,110,0.6) 85%,rgba(44,27,110,1) 100%);}
+  .yellow-corner{position:absolute;top:0;left:0;width:110px;height:110px;z-index:2;overflow:hidden;}
+  .yellow-corner::before{content:'';position:absolute;top:-20px;left:-20px;width:140px;height:140px;background:#FFD700;clip-path:polygon(0 0,100% 0,0 100%);}
+  .logo-slot{position:absolute;top:36px;left:44px;width:56px;height:56px;z-index:3;overflow:hidden;}
+  .logo-slot img{width:100%;height:100%;object-fit:contain;}
+  .panel{position:absolute;bottom:0;left:0;right:0;height:40%;background:#2C1B6E;display:flex;flex-direction:column;justify-content:center;padding:0 56px;}
+  .tag{position:absolute;top:calc(60% - 22px);left:56px;z-index:3;display:inline-block;background:#1A3A8F;padding:10px 24px 8px;font-family:'Inter',sans-serif;font-size:17px;font-weight:500;color:#fff;letter-spacing:.1em;text-transform:uppercase;border-radius:3px;}
+  .t-headline{font-family:'Inter',sans-serif;font-weight:900;font-size:50px;line-height:1.16;color:#fff;text-transform:uppercase;}
+  .t-headline mark{background:none;color:#6DB3F2;font-style:normal;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <img class="t-photo" src="{{PHOTO}}" alt="">
+    <div class="photo-scrim"></div>
+    <div class="yellow-corner"></div>
+    <div class="logo-slot"><img src="{{LOGO}}" alt=""></div>
+    <div class="tag">{{TAG}}</div>
+    <div class="panel">
+      <div class="t-headline">{{HEADLINE}}</div>
+    </div>
+  </div>
+</body>
+</html>

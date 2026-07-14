@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { config } from '../config.js';
-import { query } from '../db.js';
+import { query } from '../database/db.js';
 import { validateSessionVersion } from '../services/sessionService.js';
 import { getActiveSubscription } from '../services/subscriptionService.js';
 

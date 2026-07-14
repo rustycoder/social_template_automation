@@ -3,7 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import cors from 'cors';
 import { config } from './config.js';
-import { testConnection } from './db.js';
+import { testConnection } from './database/db.js';
 import authRoutes from './routes/auth.js';
 import subscriptionRoutes from './routes/subscriptions.js';
 import templateRoutes from './routes/templates.js';

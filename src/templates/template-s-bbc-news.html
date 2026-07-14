@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BBC News</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{width:1080px;height:1080px;overflow:hidden;font-family:'Inter',sans-serif;}
+  .card{position:relative;width:1080px;height:1080px;background:#1a1a1a;}
+  .photo-area{position:absolute;top:0;left:0;right:0;height:65%;overflow:hidden;}
+  .t-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  .photo-scrim{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.25) 0%,rgba(0,0,0,0.05) 40%,rgba(0,0,0,0.15) 100%);}
+  .brand{position:absolute;top:44px;left:48px;display:flex;gap:6px;z-index:2;}
+  .brand-letter{display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;background:#fff;color:#000;font-family:'Inter',sans-serif;font-weight:900;font-size:28px;letter-spacing:0;}
+  .brand-word{display:inline-flex;align-items:center;padding:0 14px;height:48px;font-family:'Inter',sans-serif;font-weight:700;font-size:22px;color:#fff;letter-spacing:.08em;}
+  .tag-badge{position:absolute;bottom:0;left:48px;z-index:2;background:#BB1919;color:#fff;font-family:'Inter',sans-serif;font-weight:800;font-size:28px;letter-spacing:.1em;padding:10px 28px 8px;text-transform:uppercase;}
+  .bottom-panel{position:absolute;bottom:0;left:0;right:0;height:35%;background:#fff;display:flex;align-items:center;padding:48px 56px;}
+  .t-headline{font-family:'Libre Baskerville',serif;font-weight:700;font-size:46px;line-height:1.22;color:#1a1a1a;max-width:960px;}
+  .t-headline mark{background:#FFD600;color:#1a1a1a;padding:2px 6px;border-radius:2px;}
+  .t-headline .highlight-red{background:#BB1919;color:#fff;padding:2px 6px;border-radius:2px;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="photo-area">
+      <img class="t-photo" src="{{PHOTO}}" alt="">
+      <div class="photo-scrim"></div>
+      <div class="brand">
+        <span class="brand-letter">B</span>
+        <span class="brand-letter">B</span>
+        <span class="brand-letter">C</span>
+        <span class="brand-word">{{BRAND}}</span>
+      </div>
+      <div class="tag-badge">{{TAG}}</div>
+    </div>
+    <div class="bottom-panel">
+      <div class="t-headline">{{HEADLINE}}</div>
+    </div>
+  </div>
+</body>
+</html>

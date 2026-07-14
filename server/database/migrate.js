@@ -4,15 +4,15 @@
  *
  * Usage:
  *   npm run db:migrate
- *   node server/migrate.js
- *   node server/migrate.js --fresh   # drop all tables and re-run migrations
+ *   node server/database/migrate.js
+ *   node server/database/migrate.js --fresh   # drop all tables and re-run migrations
  */
 
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import mysql from 'mysql2/promise';
-import { config } from './config.js';
+import { config } from '../config.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const MIGRATIONS_DIR = path.join(__dirname, 'migrations');

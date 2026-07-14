@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PediaStan News</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{width:1080px;height:1080px;overflow:hidden;font-family:'Inter',sans-serif;}
+  img[src=""],img:not([src]){display:none;}
+  .card{position:relative;width:1080px;height:1080px;background:#0a0a0a;}
+  .t-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  .scrim{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.92) 0%,rgba(0,0,0,0.75) 40%,rgba(0,0,0,0.1) 70%,rgba(0,0,0,0) 100%);}
+  .brand-badge{position:absolute;top:36px;left:36px;z-index:3;background:#2E7D32;color:#fff;font-family:'Poppins',sans-serif;font-weight:800;font-size:22px;padding:10px 22px;border-radius:4px;letter-spacing:.04em;}
+  .headline-area{position:absolute;left:56px;right:56px;bottom:160px;z-index:3;}
+  .t-headline{font-family:'Poppins',sans-serif;font-weight:800;font-size:46px;line-height:1.18;color:#fff;}
+  .t-headline mark{background:none;color:#4CAF50;font-weight:800;}
+  .social-row{position:absolute;bottom:90px;left:56px;right:56px;z-index:3;display:flex;gap:16px;}
+  .social-icon{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;font-weight:700;font-size:16px;color:#fff;}
+  .footer{position:absolute;bottom:30px;left:56px;right:56px;z-index:3;}
+  .t-contact{font-family:'Inter',sans-serif;font-weight:500;font-size:16px;color:rgba(255,255,255,0.6);letter-spacing:.02em;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <img class="t-photo" src="{{PHOTO}}" alt="">
+    <div class="scrim"></div>
+    <div class="brand-badge">{{BRAND}}</div>
+    <div class="headline-area">
+      <div class="t-headline">{{HEADLINE}}</div>
+    </div>
+    <div class="social-row">
+      <span class="social-icon">f</span>
+      <span class="social-icon">in</span>
+      <span class="social-icon">X</span>
+      <span class="social-icon">yt</span>
+    </div>
+    <div class="footer">
+      <div class="t-contact">{{CONTACT}}</div>
+    </div>
+  </div>
+</body>
+</html>

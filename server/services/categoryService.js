@@ -1,4 +1,4 @@
-import { query } from '../db.js';
+import { query } from '../database/db.js';
 import { nowDatetime } from './jsonText.js';
 
 export async function listCategories({ activeOnly = true } = {}) {

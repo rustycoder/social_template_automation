@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { query } from '../db.js';
+import { query } from '../database/db.js';
 import { config } from '../config.js';
 import { nowDatetime, parseJsonText, stringifyJsonText } from './jsonText.js';
 
