@@ -1,6 +1,6 @@
 /**
- * @file templateMain.js
- * @description Bootstrap for the standalone Templates HTML page.
+ * @file categoriesMain.js
+ * @description Bootstrap for the standalone Categories HTML page.
  */
 
 import { authService } from './features/auth/auth.js';
@@ -27,8 +27,6 @@ function bindToasts() {
 
 async function boot() {
   bindToasts();
-
-  // Restore session from localStorage before gating on login — same as main app bootstrap.
   await authService.ready();
 
   document.querySelectorAll('#step-indicators .step-node').forEach((btn) => {
@@ -40,10 +38,10 @@ async function boot() {
   const authUI = new AuthUI();
   const adminUI = new AdminUI(authUI, { standalone: true });
 
-  authUI.onAdminClick = () => {};
-  authUI.onAdminCategoriesClick = () => {
-    window.location.href = '/categories.html';
+  authUI.onAdminClick = () => {
+    window.location.href = '/template.html';
   };
+  authUI.onAdminCategoriesClick = () => {};
   authUI.onBillingClick = () => {
     window.location.href = '/billing.html';
   };
@@ -57,14 +55,14 @@ async function boot() {
     window.location.href = '/';
   };
 
-  await adminUI.show({ tab: 'templates' });
+  await adminUI.show({ tab: 'categories' });
 }
 
 boot().catch((error) => {
-  console.error('Templates page failed to start:', error);
+  console.error('Categories page failed to start:', error);
   window.dispatchEvent(
     new CustomEvent('toast', {
-      detail: { message: 'Failed to start templates page', type: 'error' },
+      detail: { message: 'Failed to start categories page', type: 'error' },
     })
   );
 });

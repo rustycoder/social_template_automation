@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Templates — manage templates and categories." />
+  <meta name="description" content="My Billing — view your subscription and billing history." />
   <meta name="theme-color" content="#fcf8ff" />
-  <title>Templates — Content Studio</title>
+  <title>My Billing — Content Studio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,1..1000&display=swap" rel="stylesheet" />
@@ -15,16 +15,16 @@
     window.global = window;
   </script>
 </head>
-<body class="admin-standalone">
-  <div id="app" data-admin="true">
+<body class="billing-standalone">
+  <div id="app" data-billing="true">
     <header id="app-header">
       <div class="header-brand">
         <div class="logo">
           <svg class="logo-mark" width="36" height="36" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-            <rect width="32" height="32" rx="8" fill="url(#logo-grad-templates)" />
+            <rect width="32" height="32" rx="8" fill="url(#logo-grad-billing)" />
             <path d="M8 10h16M8 16h12M8 22h14" stroke="#fff" stroke-width="2" stroke-linecap="round" />
             <defs>
-              <linearGradient id="logo-grad-templates" x1="0" y1="0" x2="32" y2="32">
+              <linearGradient id="logo-grad-billing" x1="0" y1="0" x2="32" y2="32">
                 <stop stop-color="#4f46e5" />
                 <stop offset="1" stop-color="#6366f1" />
               </linearGradient>
@@ -127,68 +127,51 @@
       </div>
     </header>
 
-    <main id="main-content" data-layout-mode="admin" class="admin-standalone__main">
-      <section class="step-panel active" id="admin-page">
-        <div class="admin-page">
-          <header class="admin-page__header">
-            <div class="admin-page__intro">
-              <h2 class="page-title">Templates</h2>
-              <p class="page-desc">Manage your templates.</p>
+    <main id="main-content" class="billing-standalone__main">
+      <section class="step-panel active" id="billing-page">
+        <div class="billing-page">
+          <header class="billing-page__header">
+            <div class="billing-page__intro">
+              <h2 class="page-title">My Billing</h2>
+              <p class="page-desc">View your subscription and billing history.</p>
             </div>
           </header>
 
-          <p class="admin-error form-error hidden" id="admin-error"></p>
-          <div class="admin-loading hidden" id="admin-loading">Loading…</div>
+          <p class="billing-error form-error hidden" id="billing-error"></p>
+          <div class="billing-loading" id="billing-loading">Loading billing history…</div>
 
-          <div id="admin-templates-panel">
-            <div class="admin-toolbar">
-              <div class="posts-toolbar-field posts-toolbar-field--search">
-                <label class="posts-toolbar-label" for="admin-template-search">Search</label>
-                <input type="search" id="admin-template-search" class="text-input admin-search" placeholder="Search templates by name or id…" autocomplete="off" />
-              </div>
-              <div class="posts-toolbar-field">
-                <label class="posts-toolbar-label" for="admin-template-status-filter">Status</label>
-                <select id="admin-template-status-filter" class="text-input admin-filter" aria-label="Filter by status">
-                  <option value="all">All statuses</option>
-                  <option value="active" selected>Active</option>
-                  <option value="inactive">Deactivated</option>
-                </select>
-              </div>
-              <div class="posts-toolbar-field">
-                <label class="posts-toolbar-label" for="admin-template-category-filter">Category</label>
-                <select id="admin-template-category-filter" class="text-input admin-filter" aria-label="Filter by category">
-                  <option value="">All categories</option>
-                </select>
-              </div>
-              <button type="button" class="btn btn-primary" id="btn-admin-new-template">
-                <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                  <path d="M8 10.667V2.667M5.333 5.333 8 2.667l2.667 2.666M3.333 10.667v2A1.333 1.333 0 0 0 4.667 14h6.666A1.333 1.333 0 0 0 12.667 12.667v-2" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                <span class="btn-text">Upload template</span>
-              </button>
-            </div>
-            <div class="admin-template-grid" id="admin-templates-grid"></div>
-            <div class="admin-pagination" id="admin-templates-pagination" hidden>
-              <button type="button" class="btn btn-outline btn-sm" data-admin-page-prev="templates">
-                <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M10 12 6 8l4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                <span class="btn-text">Previous</span>
-              </button>
-              <span class="admin-pagination__label" data-admin-page-label="templates"></span>
-              <button type="button" class="btn btn-outline btn-sm" data-admin-page-next="templates">
-                <span class="btn-text">Next</span>
-                <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </button>
-            </div>
-          </div>
+          <div id="billing-summary" class="billing-summary"></div>
 
+          <section class="billing-history-card">
+            <header class="billing-history-card__header">
+              <h3 class="billing-history-card__title">Billing history</h3>
+            </header>
+            <p class="billing-empty hidden" id="billing-empty">No billing history yet.</p>
+            <div class="billing-table-wrapper" id="billing-table-wrapper">
+              <table class="billing-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Plan</th>
+                    <th>Amount</th>
+                    <th class="billing-table__col--hide-sm">Order ID</th>
+                    <th class="billing-table__col--hide-sm">Start</th>
+                    <th>End</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="billing-table-body"></tbody>
+              </table>
+            </div>
+          </section>
         </div>
       </section>
     </main>
 
-    <footer id="app-footer" class="admin-standalone__footer">
-      <div class="footer-panel footer-panel--nav active" id="footer-admin" data-footer-step="admin">
+    <footer id="app-footer" class="billing-standalone__footer">
+      <div class="footer-panel footer-panel--nav active" id="footer-billing" data-footer-step="billing">
         <div class="footer-slot footer-slot--left">
-          <button type="button" class="btn btn-outline" id="btn-admin-back" aria-label="Back to app">
+          <button type="button" class="btn btn-outline" id="btn-billing-back" aria-label="Back to app">
             <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
               <path d="M13 8H3M7 4L3 8L7 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
@@ -204,7 +187,7 @@
       <div class="modal-card auth-modal" id="auth-modal">
         <button type="button" class="modal-close" id="auth-modal-close" aria-label="Close">✕</button>
         <h2 id="auth-modal-title">Sign in</h2>
-        <p class="modal-desc">Sign in with an admin account to manage templates.</p>
+        <p class="modal-desc">Sign in to view your billing history.</p>
         <form id="auth-form" class="auth-form">
           <div class="form-group hidden" id="auth-name-group">
             <label for="auth-name">Name</label>
@@ -232,84 +215,8 @@
         </p>
       </div>
     </div>
-
-    <div class="modal-overlay hidden" id="admin-template-form-overlay" role="dialog" aria-modal="true" aria-labelledby="admin-template-form-title">
-      <div class="modal-card admin-form-modal admin-template-editor-modal">
-        <button type="button" class="modal-close" id="admin-template-form-close" aria-label="Close">✕</button>
-        <h2 id="admin-template-form-title">Upload template</h2>
-        <form id="admin-template-form" class="admin-form admin-template-editor">
-          <div class="admin-template-editor__columns">
-            <section class="admin-template-editor__col admin-template-editor__col--fields" aria-label="Template fields">
-              <div class="admin-template-editor__meta">
-                <div class="form-group">
-                  <label for="admin-template-name">Name</label>
-                  <input type="text" id="admin-template-name" class="text-input" required autocomplete="off" />
-                </div>
-                <div class="form-group">
-                  <label for="admin-template-id">Slug</label>
-                  <input type="text" id="admin-template-id" class="text-input" placeholder="my-template-card" autocomplete="off" />
-                </div>
-                <div class="form-group">
-                  <label for="admin-template-category">Category</label>
-                  <select id="admin-template-category" class="text-input" required></select>
-                </div>
-              </div>
-              <div class="admin-fields-header">
-                <label>Fields</label>
-                <button type="button" class="btn btn-outline btn-sm" id="btn-admin-add-field">
-                  <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 3.333v9.334M3.333 8h9.334" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-                  <span class="btn-text">Add field</span>
-                </button>
-              </div>
-              <p class="field-hint">One name per field (used as {{KEY}} in HTML and on the Data form). Set sample text / images / logos below each.</p>
-              <div id="admin-fields-list" class="admin-fields-list"></div>
-            </section>
-
-            <section class="admin-template-editor__col admin-template-editor__col--html" aria-label="HTML source">
-              <div class="admin-fields-header">
-                <label for="admin-template-html-source">HTML</label>
-                <label class="btn btn-outline btn-sm admin-html-file-label">
-                  <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                    <path d="M8 10.667V2.667M5.333 5.333 8 2.667l2.667 2.666M3.333 10.667v2A1.333 1.333 0 0 0 4.667 14h6.666A1.333 1.333 0 0 0 12.667 12.667v-2" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                  <span class="btn-text">Load from file</span>
-                  <input type="file" id="admin-template-html" accept=".html,text/html" hidden />
-                </label>
-              </div>
-              <textarea id="admin-template-html-source" class="text-input admin-html-editor" rows="16" spellcheck="false" placeholder="<!DOCTYPE html>…"></textarea>
-              <p class="field-hint" id="admin-template-html-hint">Formatted HTML with {{FIELD}} placeholders.</p>
-            </section>
-
-            <section class="admin-template-editor__col admin-template-editor__col--preview" aria-label="Live preview">
-              <div class="admin-fields-header">
-                <label>Preview</label>
-              </div>
-              <div class="admin-sample-preview" data-gallery-bucket="square">
-                <div class="admin-sample-preview__frame template-preview-container">
-                  <div id="admin-template-sample-mount" class="template-preview-mount"></div>
-                </div>
-                <p class="admin-sample-preview__label field-hint">Updates as you edit samples</p>
-              </div>
-            </section>
-          </div>
-
-          <p class="form-error hidden" id="admin-template-form-error"></p>
-          <div class="admin-form-actions">
-            <button type="button" class="btn btn-outline" id="admin-template-form-cancel">
-              <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-              <span class="btn-text">Cancel</span>
-            </button>
-            <button type="submit" class="btn btn-primary" id="admin-template-form-submit">
-              <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13.333 4.667 6 12 2.667 8.667" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              <span class="btn-text">Upload template</span>
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-
   </div>
 
-  <script type="module" src="/src/templateMain.js"></script>
+  <script type="module" src="/src/billingMain.js"></script>
 </body>
 </html>

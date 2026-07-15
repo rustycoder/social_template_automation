@@ -13,6 +13,8 @@ export default defineConfig({
         main: path.resolve(root, 'index.html'),
         templates: path.resolve(root, 'template.html'),
         posts: path.resolve(root, 'post.html'),
+        billing: path.resolve(root, 'billing.html'),
+        categories: path.resolve(root, 'categories.html'),
       },
     },
   },

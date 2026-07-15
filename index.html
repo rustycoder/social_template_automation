@@ -82,6 +82,13 @@
             <div class="profile-dropdown-sub" id="dropdown-sub-section">
               <span class="user-sub-badge inactive" id="dropdown-sub-badge">No subscription</span>
             </div>
+            <button type="button" class="profile-dropdown-item" id="btn-content-studio" role="menuitem">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <rect x="2.667" y="2.667" width="10.666" height="10.666" rx="2" stroke="currentColor" stroke-width="1.25"/>
+                <path d="M5.333 5.333h5.334M5.333 8h4M5.333 10.667h3.334" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/>
+              </svg>
+              Content Studio
+            </button>
             <button type="button" class="profile-dropdown-item" id="btn-my-posts" role="menuitem">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                 <path d="M3.333 2.667h9.334A1.333 1.333 0 0 1 14 4v8a1.333 1.333 0 0 1-1.333 1.333H3.333A1.333 1.333 0 0 1 2 12V4a1.333 1.333 0 0 1 1.333-1.333Z" stroke="currentColor" stroke-width="1.25"/>
@@ -95,6 +102,12 @@
                 <circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.25"/>
               </svg>
               Template
+            </button>
+            <button type="button" class="profile-dropdown-item hidden" id="btn-admin-categories" role="menuitem">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M2.667 4h4.2L8 5.333h5.333A1.333 1.333 0 0 1 14.667 6.667v5.666A1.333 1.333 0 0 1 13.333 13.667H2.667A1.333 1.333 0 0 1 1.333 12.333V5.333A1.333 1.333 0 0 1 2.667 4Z" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/>
+              </svg>
+              Categories
             </button>
             <button type="button" class="profile-dropdown-item" id="btn-my-billing" role="menuitem">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -255,45 +268,6 @@
         </div>
       </section>
 
-      <!-- Billing -->
-      <section class="step-panel" id="billing-page">
-        <div class="billing-page">
-          <header class="billing-page__header">
-            <div class="billing-page__intro">
-              <h2 class="page-title">My Billing</h2>
-              <p class="page-desc">View your subscription and billing history.</p>
-            </div>
-          </header>
-
-          <p class="billing-error form-error hidden" id="billing-error"></p>
-          <div class="billing-loading" id="billing-loading">Loading billing history…</div>
-
-          <div id="billing-summary" class="billing-summary"></div>
-
-          <section class="billing-history-card">
-            <header class="billing-history-card__header">
-              <h3 class="billing-history-card__title">Billing history</h3>
-            </header>
-            <p class="billing-empty hidden" id="billing-empty">No billing history yet.</p>
-            <div class="billing-table-wrapper" id="billing-table-wrapper">
-              <table class="billing-table">
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Plan</th>
-                    <th>Amount</th>
-                    <th class="billing-table__col--hide-sm">Order ID</th>
-                    <th class="billing-table__col--hide-sm">Start</th>
-                    <th>End</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody id="billing-table-body"></tbody>
-              </table>
-            </div>
-          </section>
-        </div>
-      </section>
     </main>
 
     <footer id="app-footer">
@@ -367,17 +341,6 @@
         </div>
       </div>
 
-      <!-- Billing: Back -->
-      <div class="footer-panel footer-panel--nav" id="footer-billing" data-footer-step="billing">
-        <div class="footer-slot footer-slot--left">
-          <button type="button" class="btn btn-outline" id="btn-billing-back" aria-label="Back">
-            <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-              <path d="M13 8H3M7 4L3 8L7 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            <span class="btn-text">Back</span>
-          </button>
-        </div>
-      </div>
     </footer>
 
     <div class="toast-container" id="toast-container"></div>

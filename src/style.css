@@ -2979,6 +2979,40 @@ html:has(body.posts-standalone) {
   display: block;
 }
 
+/* Standalone My Billing page */
+.billing-standalone {
+  min-height: 100vh;
+  height: auto;
+  overflow: auto;
+  background: var(--color-bg, #fafafa);
+}
+
+html:has(body.billing-standalone) {
+  overflow: auto;
+  height: auto;
+}
+
+.billing-standalone #app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.billing-standalone__main {
+  flex: 1;
+  width: 100%;
+  max-width: none;
+  padding: 20px 24px calc(var(--footer-height, 64px) + 24px);
+}
+
+.billing-standalone #app-footer.billing-standalone__footer {
+  display: flex;
+}
+
+.billing-standalone #billing-page.step-panel.active {
+  display: block;
+}
+
 .posts-page {
   width: 100%;
   max-width: none;
@@ -3050,9 +3084,29 @@ html:has(body.posts-standalone) {
 
 .posts-toolbar-field .text-input,
 .posts-toolbar-field .posts-search,
-.posts-toolbar-field .posts-filter {
+.posts-toolbar-field .posts-filter,
+.posts-toolbar-field .admin-search,
+.posts-toolbar-field .admin-filter {
   width: 100%;
+  height: 40px;
   min-height: 40px;
+  max-height: 40px;
+  box-sizing: border-box;
+  margin: 0;
+  line-height: 1.25;
+}
+
+.posts-toolbar-field select.text-input {
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 5L6 8L9 5' stroke='%2371717a' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-color: var(--color-bg-input);
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-right: 28px;
 }
 
 .posts-toolbar-field--select.hidden {
@@ -3087,6 +3141,15 @@ html:has(body.posts-standalone) {
   align-items: center;
   gap: 6px;
   min-height: 40px;
+}
+
+.posts-date-range__control .btn {
+  height: 40px;
+  min-height: 40px;
+  max-height: 40px;
+  box-sizing: border-box;
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
 .posts-date-range__input {
@@ -3284,6 +3347,15 @@ html:has(body.posts-standalone) {
   align-items: center;
   gap: 6px;
   min-height: 40px;
+}
+
+.posts-date-range__control .btn {
+  height: 40px;
+  min-height: 40px;
+  max-height: 40px;
+  box-sizing: border-box;
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
 .posts-date-range__input {
@@ -3784,29 +3856,41 @@ html:has(body.posts-standalone) {
   gap: 6px;
 }
 
-.admin-template-card__body .admin-mono {
-  font-size: 0.72rem;
+.admin-template-card__preview-controls {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
 }
 
-.admin-template-card__body .admin-status-badge {
-  align-self: flex-start;
-  margin-top: 2px;
+.admin-template-card__preview-controls .template-aspect-badge {
+  position: static;
+}
+
+.admin-template-card__preview-controls .ui-switch {
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  box-shadow: var(--shadow-sm);
+  min-height: 0;
 }
 
 .admin-template-card__actions {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   gap: 8px;
   padding: 0 12px 12px;
 }
 
 .admin-template-card__actions .btn {
-  flex: 0 1 auto;
-}
-
-.admin-template-card__actions .ui-switch {
-  margin-left: auto;
+  flex: 1 1 0;
+  justify-content: center;
 }
 
 .admin-actions {

@@ -1,11 +1,11 @@
 /**
- * @file templateMain.js
- * @description Bootstrap for the standalone Templates HTML page.
+ * @file billingMain.js
+ * @description Bootstrap for the standalone My Billing HTML page.
  */
 
 import { authService } from './features/auth/auth.js';
 import { AuthUI } from './features/auth/authUI.js';
-import { AdminUI } from './features/auth/adminUI.js';
+import { BillingUI } from './features/auth/billingUI.js';
 
 function bindToasts() {
   const toastContainer = document.getElementById('toast-container');
@@ -27,8 +27,6 @@ function bindToasts() {
 
 async function boot() {
   bindToasts();
-
-  // Restore session from localStorage before gating on login — same as main app bootstrap.
   await authService.ready();
 
   document.querySelectorAll('#step-indicators .step-node').forEach((btn) => {
@@ -38,33 +36,33 @@ async function boot() {
   });
 
   const authUI = new AuthUI();
-  const adminUI = new AdminUI(authUI, { standalone: true });
+  const billingUI = new BillingUI(authUI, { standalone: true });
 
-  authUI.onAdminClick = () => {};
-  authUI.onAdminCategoriesClick = () => {
-    window.location.href = '/categories.html';
-  };
-  authUI.onBillingClick = () => {
-    window.location.href = '/billing.html';
-  };
+  authUI.onBillingClick = () => {};
   authUI.onStudioClick = () => {
     window.location.href = '/';
   };
   authUI.onPostsClick = () => {
     window.location.href = '/post.html';
   };
+  authUI.onAdminClick = () => {
+    window.location.href = '/template.html';
+  };
+  authUI.onAdminCategoriesClick = () => {
+    window.location.href = '/categories.html';
+  };
   authUI.onLogout = () => {
     window.location.href = '/';
   };
 
-  await adminUI.show({ tab: 'templates' });
+  await billingUI.show();
 }
 
 boot().catch((error) => {
-  console.error('Templates page failed to start:', error);
+  console.error('Billing page failed to start:', error);
   window.dispatchEvent(
     new CustomEvent('toast', {
-      detail: { message: 'Failed to start templates page', type: 'error' },
+      detail: { message: 'Failed to start billing page', type: 'error' },
     })
   );
 });

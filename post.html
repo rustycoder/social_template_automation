@@ -17,23 +17,39 @@
 </head>
 <body class="posts-standalone">
   <div id="app" data-posts="true">
-    <header id="app-header" class="standalone-header">
+    <header id="app-header">
       <div class="header-brand">
-        <a href="/" class="logo standalone-header__brand-link">
+        <div class="logo">
           <svg class="logo-mark" width="36" height="36" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-            <rect width="32" height="32" rx="8" fill="url(#logo-grad-standalone)" />
+            <rect width="32" height="32" rx="8" fill="url(#logo-grad-posts)" />
             <path d="M8 10h16M8 16h12M8 22h14" stroke="#fff" stroke-width="2" stroke-linecap="round" />
             <defs>
-              <linearGradient id="logo-grad-standalone" x1="0" y1="0" x2="32" y2="32">
+              <linearGradient id="logo-grad-posts" x1="0" y1="0" x2="32" y2="32">
                 <stop stop-color="#4f46e5" />
                 <stop offset="1" stop-color="#6366f1" />
               </linearGradient>
             </defs>
           </svg>
           <h1>Content Studio</h1>
-        </a>
-        <span class="standalone-header__badge">My Posts</span>
+        </div>
       </div>
+
+      <nav class="header-nav step-track" id="step-indicators" aria-label="Workflow steps">
+        <button type="button" class="step-node" data-step="1">
+          <span class="step-node__num">1</span>
+          <span class="step-node__label">Template</span>
+        </button>
+        <span class="step-track__line" aria-hidden="true"></span>
+        <button type="button" class="step-node" data-step="2">
+          <span class="step-node__num">2</span>
+          <span class="step-node__label">Data</span>
+        </button>
+        <span class="step-track__line" aria-hidden="true"></span>
+        <button type="button" class="step-node" data-step="3">
+          <span class="step-node__num">3</span>
+          <span class="step-node__label">Export</span>
+        </button>
+      </nav>
 
       <div class="header-auth" id="header-auth">
         <button type="button" class="btn btn-ghost btn-sm" id="btn-login" aria-label="Sign in">
@@ -66,6 +82,13 @@
             <div class="profile-dropdown-sub" id="dropdown-sub-section">
               <span class="user-sub-badge inactive" id="dropdown-sub-badge">No subscription</span>
             </div>
+            <button type="button" class="profile-dropdown-item" id="btn-content-studio" role="menuitem">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <rect x="2.667" y="2.667" width="10.666" height="10.666" rx="2" stroke="currentColor" stroke-width="1.25"/>
+                <path d="M5.333 5.333h5.334M5.333 8h4M5.333 10.667h3.334" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/>
+              </svg>
+              Content Studio
+            </button>
             <button type="button" class="profile-dropdown-item" id="btn-my-posts" role="menuitem">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                 <path d="M3.333 2.667h9.334A1.333 1.333 0 0 1 14 4v8a1.333 1.333 0 0 1-1.333 1.333H3.333A1.333 1.333 0 0 1 2 12V4a1.333 1.333 0 0 1 1.333-1.333Z" stroke="currentColor" stroke-width="1.25"/>
@@ -79,6 +102,12 @@
                 <circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.25"/>
               </svg>
               Template
+            </button>
+            <button type="button" class="profile-dropdown-item hidden" id="btn-admin-categories" role="menuitem">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M2.667 4h4.2L8 5.333h5.333A1.333 1.333 0 0 1 14.667 6.667v5.666A1.333 1.333 0 0 1 13.333 13.667H2.667A1.333 1.333 0 0 1 1.333 12.333V5.333A1.333 1.333 0 0 1 2.667 4Z" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/>
+              </svg>
+              Categories
             </button>
             <button type="button" class="profile-dropdown-item" id="btn-my-billing" role="menuitem">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">

@@ -45,9 +45,10 @@ export class AdminUI {
     this.errorEl = document.getElementById('admin-error');
     this.loadingEl = document.getElementById('admin-loading');
 
-    this.tabBtns = document.querySelectorAll('#admin-tabs .tab-switcher__btn');
     this.templatesPanel = document.getElementById('admin-templates-panel');
     this.categoriesPanel = document.getElementById('admin-categories-panel');
+    this.pageTitleEl = document.querySelector('.admin-page__intro .page-title');
+    this.pageDescEl = document.querySelector('.admin-page__intro .page-desc');
 
     this.templatesGrid = document.getElementById('admin-templates-grid');
     this.categoriesBody = document.getElementById('admin-categories-body');
@@ -121,13 +122,6 @@ export class AdminUI {
   _bindEvents() {
     this.backBtn?.addEventListener('click', () => this.hide());
 
-    this.tabBtns.forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const tab = btn.dataset.adminTab;
-        if (tab) this._switchTab(tab);
-      });
-    });
-
     this.templateSearch?.addEventListener('input', () => {
       this._templatePage = 1;
       this._renderTemplates();
@@ -190,7 +184,10 @@ export class AdminUI {
     return authService.getUser()?.role === 'admin';
   }
 
-  async show() {
+  /**
+   * @param {{ tab?: 'templates' | 'categories' }} [options]
+   */
+  async show(options = {}) {
     // Prefer restoring an existing JWT over opening the login modal.
     if (!authService.isLoggedIn()) {
       const hasSession = await authService.ensureSession();
@@ -221,6 +218,10 @@ export class AdminUI {
 
     this.authUI._closeDropdown();
     this._visible = true;
+
+    if (options.tab) {
+      this._switchTab(options.tab);
+    }
 
     if (this.standalone) {
       this.page?.classList.add('active');
@@ -278,16 +279,33 @@ export class AdminUI {
     });
   }
 
+  /**
+   * Public entry for switching admin sections (legacy in-page; standalone pages navigate instead).
+   * @param {'templates' | 'categories'} tab
+   */
+  switchTab(tab) {
+    this._switchTab(tab);
+  }
+
+  /**
+   * @param {'templates' | 'categories'} tab
+   */
   _switchTab(tab) {
     this.activeTab = tab === 'categories' ? 'categories' : 'templates';
 
-    this.tabBtns.forEach((btn) => {
-      const active = btn.dataset.adminTab === this.activeTab;
-      btn.classList.toggle('active', active);
-      btn.setAttribute('aria-selected', active ? 'true' : 'false');
-    });
     this.templatesPanel?.classList.toggle('hidden', this.activeTab !== 'templates');
     this.categoriesPanel?.classList.toggle('hidden', this.activeTab !== 'categories');
+
+    if (this.pageTitleEl) {
+      this.pageTitleEl.textContent =
+        this.activeTab === 'categories' ? 'Categories' : 'Templates';
+    }
+    if (this.pageDescEl) {
+      this.pageDescEl.textContent =
+        this.activeTab === 'categories'
+          ? 'Create and manage template categories.'
+          : 'Manage your templates.';
+    }
   }
 
   _setLoading(loading) {
@@ -511,6 +529,17 @@ export class AdminUI {
         templateId: t.id,
         aspectLabel: BUCKET_RATIO_LABELS[bucket] ?? bucket,
       });
+
+      const badge = preview.querySelector('.template-aspect-badge');
+      const previewControls = document.createElement('div');
+      previewControls.className = 'admin-template-card__preview-controls';
+      if (badge) {
+        badge.replaceWith(previewControls);
+        previewControls.appendChild(badge);
+      } else {
+        preview.appendChild(previewControls);
+      }
+      previewControls.insertAdjacentHTML('beforeend', activeSwitchHtml(!!t.isActive));
       card.appendChild(preview);
 
       const body = document.createElement('div');
@@ -518,29 +547,24 @@ export class AdminUI {
       body.innerHTML = `
         <h4 class="template-card-heading post-card__heading">${escapeHtml(t.name)}</h4>
         <span class="template-card-category post-card__category">${escapeHtml(this._categoryLabel(t.categoryId))}</span>
-        <div class="admin-mono">${escapeHtml(t.id)}</div>
-        <span class="admin-status-badge ${t.isActive ? 'active' : 'inactive'}">
-          ${t.isActive ? 'Active' : 'Inactive'}
-        </span>
       `;
       card.appendChild(body);
 
       const actions = document.createElement('div');
       actions.className = 'admin-template-card__actions';
       actions.innerHTML = `
-        <button type="button" class="btn btn-primary btn-sm" data-action="edit">${buttonLabel('edit', 'Edit')}</button>
-        ${activeSwitchHtml(!!t.isActive)}
-        <button type="button" class="btn btn-danger btn-sm" data-action="delete">${buttonLabel('trash', 'Delete')}</button>
+        <button type="button" class="btn btn-primary" data-action="edit">${buttonLabel('edit', 'Edit')}</button>
+        <button type="button" class="btn btn-danger" data-action="delete">${buttonLabel('trash', 'Delete')}</button>
       `;
       actions.querySelector('[data-action="edit"]')?.addEventListener('click', (e) => {
         e.stopPropagation();
         this._openTemplateForm(t.id);
       });
-      actions.querySelector('[data-action="toggle"]')?.addEventListener('change', (e) => {
+      previewControls.querySelector('[data-action="toggle"]')?.addEventListener('change', (e) => {
         e.stopPropagation();
         this._toggleTemplate(t);
       });
-      actions.querySelector('[data-action="toggle"]')?.addEventListener('click', (e) => {
+      previewControls.querySelector('[data-action="toggle"]')?.addEventListener('click', (e) => {
         e.stopPropagation();
       });
       actions.querySelector('[data-action="delete"]')?.addEventListener('click', (e) => {

@@ -18,8 +18,13 @@ function formatStatus(status) {
 }
 
 export class BillingUI {
-  constructor(authUI) {
+  /**
+   * @param {import('./authUI.js').AuthUI} authUI
+   * @param {{ standalone?: boolean }} [deps]
+   */
+  constructor(authUI, deps = {}) {
     this.authUI = authUI;
+    this.standalone = !!deps.standalone;
     this.page = document.getElementById('billing-page');
     this.backBtn = document.getElementById('btn-billing-back');
     this.summaryEl = document.getElementById('billing-summary');
@@ -56,24 +61,38 @@ export class BillingUI {
 
   async show() {
     if (!authService.isLoggedIn()) {
-      const loggedIn = await this.authUI.requireLogin();
-      if (!loggedIn) return;
+      const hasSession = await authService.ensureSession();
+      if (!hasSession) {
+        const loggedIn = await this.authUI.requireLogin();
+        if (!loggedIn) {
+          if (this.standalone) {
+            window.location.href = '/';
+          }
+          return;
+        }
+      }
     }
 
     this.authUI._closeDropdown();
-    this._previousStep = document.querySelector('.step-panel.active')?.id?.replace('step-', '') || '1';
     this._visible = true;
     this._beginLoad();
 
-    const main = document.getElementById('main-content');
-    if (main) main.dataset.layoutMode = 'billing';
+    if (this.standalone) {
+      this.page?.classList.add('active');
+    } else {
+      this._previousStep =
+        document.querySelector('.step-panel.active')?.id?.replace('step-', '') || '1';
 
-    const app = document.getElementById('app');
-    if (app) app.dataset.billing = 'true';
+      const main = document.getElementById('main-content');
+      if (main) main.dataset.layoutMode = 'billing';
 
-    document.querySelectorAll('.step-panel').forEach((panel) => panel.classList.remove('active'));
-    this.page?.classList.add('active');
-    this._syncFooterPanel('billing');
+      const app = document.getElementById('app');
+      if (app) app.dataset.billing = 'true';
+
+      document.querySelectorAll('.step-panel').forEach((panel) => panel.classList.remove('active'));
+      this.page?.classList.add('active');
+      this._syncFooterPanel('billing');
+    }
 
     const loadId = ++this._loadId;
     try {
@@ -87,6 +106,11 @@ export class BillingUI {
   }
 
   hide() {
+    if (this.standalone) {
+      window.location.href = '/';
+      return;
+    }
+
     this._visible = false;
     this._loadId += 1;
     this.page?.classList.remove('active');

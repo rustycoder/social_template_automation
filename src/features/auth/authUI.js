@@ -23,8 +23,10 @@ export class AuthUI {
     this.profileAvatar = document.getElementById('profile-avatar');
     this.logoutBtn = document.getElementById('btn-logout');
     this.billingBtn = document.getElementById('btn-my-billing');
+    this.studioBtn = document.getElementById('btn-content-studio');
     this.postsBtn = document.getElementById('btn-my-posts');
     this.adminBtn = document.getElementById('btn-admin');
+    this.adminCategoriesBtn = document.getElementById('btn-admin-categories');
     this.userNameEl = document.getElementById('user-name');
     this.dropdownUserName = document.getElementById('dropdown-user-name');
     this.dropdownUserEmail = document.getElementById('dropdown-user-email');
@@ -34,8 +36,10 @@ export class AuthUI {
     this._resolveOpen = null;
     this._dropdownOpen = false;
     this.onBillingClick = null;
+    this.onStudioClick = null;
     this.onPostsClick = null;
     this.onAdminClick = null;
+    this.onAdminCategoriesClick = null;
     this.onLogout = null;
 
     this._bindEvents();
@@ -54,6 +58,10 @@ export class AuthUI {
       this._closeDropdown();
       this.onBillingClick?.();
     });
+    this.studioBtn?.addEventListener('click', () => {
+      this._closeDropdown();
+      this.onStudioClick?.();
+    });
     this.postsBtn?.addEventListener('click', () => {
       this._closeDropdown();
       this.onPostsClick?.();
@@ -61,6 +69,10 @@ export class AuthUI {
     this.adminBtn?.addEventListener('click', () => {
       this._closeDropdown();
       this.onAdminClick?.();
+    });
+    this.adminCategoriesBtn?.addEventListener('click', () => {
+      this._closeDropdown();
+      this.onAdminCategoriesClick?.();
     });
     this.profileTrigger?.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -229,12 +241,19 @@ export class AuthUI {
       if (this.dropdownUserEmail) this.dropdownUserEmail.textContent = user.email;
       if (this.profileAvatar) this.profileAvatar.textContent = this._getInitials(user.name);
       this._renderSubscription(user);
-      this.adminBtn?.classList.toggle('hidden', user.role !== 'admin');
+      const isAdmin = user.role === 'admin';
+      this.studioBtn?.classList.remove('hidden');
+      this.postsBtn?.classList.toggle('hidden', isAdmin);
+      this.adminBtn?.classList.toggle('hidden', !isAdmin);
+      this.adminCategoriesBtn?.classList.toggle('hidden', !isAdmin);
     } else {
       this._closeDropdown();
       this.loginBtn?.classList.remove('hidden');
       this.userMenu?.classList.add('hidden');
+      this.studioBtn?.classList.add('hidden');
+      this.postsBtn?.classList.add('hidden');
       this.adminBtn?.classList.add('hidden');
+      this.adminCategoriesBtn?.classList.add('hidden');
     }
   }
 }

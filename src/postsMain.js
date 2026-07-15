@@ -29,15 +29,27 @@ async function boot() {
   bindToasts();
   await authService.ready();
 
+  document.querySelectorAll('#step-indicators .step-node').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      window.location.href = '/';
+    });
+  });
+
   const authUI = new AuthUI();
   const postsUI = new PostsUI(authUI, { standalone: true });
 
   authUI.onPostsClick = () => {};
+  authUI.onStudioClick = () => {
+    window.location.href = '/';
+  };
   authUI.onAdminClick = () => {
     window.location.href = '/template.html';
   };
+  authUI.onAdminCategoriesClick = () => {
+    window.location.href = '/categories.html';
+  };
   authUI.onBillingClick = () => {
-    window.location.href = '/';
+    window.location.href = '/billing.html';
   };
   authUI.onLogout = () => {
     window.location.href = '/';
