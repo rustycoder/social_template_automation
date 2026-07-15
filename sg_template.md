@@ -1,324 +1,295 @@
-# Style Guide — Post Templates
+# Style Guide — Template Card (`sg_template.md`)
 
 **Project:** Content Studio  
-**Location:** `src/templates/`  
-**Loader:** `src/templates/htmlTemplateLoader.js`  
-**Rendering:** `src/features/rendering/socialRenderHost.js` → `server/renderApi.js` (Puppeteer PNG export)
+**UI component:** Gallery / Export / Admin template cards  
+**Factory:** `src/features/components/PostCard.js`  
+**Styles:** `src/style.css`, `src/shell.css`  
+**Note:** This guide covers the **UI card** in the app (select / manage templates), not HTML post-template authoring files under `src/templates/html/`.
 
-This guide defines how to author HTML post templates that work with the app’s preview and export pipeline.
-
----
-
-## Principles
-
-1. **One file = one visual design** — self-contained HTML with inline `<style>`; no external CSS or JavaScript.
-2. **Design for square first** — author at **1080×1080**; the loader auto-adapts to portrait, story, and landscape.
-3. **Explicit placeholders** — every user-editable value uses `{{FIELD_KEY}}` tokens registered in `htmlTemplateLoader.js`.
-4. **Fixed canvas** — `html, body` and `.card` must declare pixel `width` and `height`; content is positioned inside `.card`.
-5. **Export-safe** — fonts via Google Fonts `<link>` tags; images via `{{PHOTO}}` or URL placeholders; `overflow: hidden` on the root.
+Use bullets for dimensions and placement so values are easy to edit.
 
 ---
 
-## File naming & registration
+## 1. Card variants (class map)
 
-| Rule | Example |
-|------|---------|
-| File name | `template-{id-letter}-{slug}.html` |
-| Examples | `template-c-viral.html`, `template-f-stamp.html` |
-| Register import | Add `import … from './template-x-name.html?raw'` in `htmlTemplateLoader.js` |
-| Export object | `parseHtmlTemplate(rawHtml, { id, name, previewBucket, fields })` |
-| Gallery sample | Add row to `BUILTIN_SAMPLES` in `src/features/domain/templateSampleData.js` |
+| Variant | Root classes | Where |
+|---------|--------------|--------|
+| Gallery select | `.template-card` + `.post-card` | Step 1 template grid |
+| Export tile | `.post-card` + `.post-card--has-checkbox` + `.export-post-tile` | Step 3 export grid |
+| Admin manage | `.template-card` + `.admin-template-card` | `template.html` admin grid |
 
-**Template `id`** uses kebab-case (e.g. `viral-shock-card`). **`id` in filename** is a short letter prefix for sorting, not the runtime id.
+Factory helpers:
 
----
-
-## Required HTML skeleton
-
-Every template must follow this structure:
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Template Name</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=…&display=swap" rel="stylesheet">
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { width: 1080px; height: 1080px; overflow: hidden; font-family: 'Inter', sans-serif; }
-  .card { position: relative; width: 1080px; height: 1080px; background: #0a0a0b; }
-  /* … template-specific rules … */
-</style>
-</head>
-<body>
-  <div class="card">
-    <!-- All visible content inside .card -->
-  </div>
-</body>
-</html>
-```
-
-### Non-negotiable selectors
-
-The layout adapter in `htmlTemplateLoader.js` regex-replaces dimensions **only** on these selectors:
-
-```css
-html, body { width: 1080px; height: 1080px; … }
-.card       { width: 1080px; height: 1080px; … }
-```
-
-| Layout bucket | Width | Height | Use case |
-|---------------|-------|--------|----------|
-| `square`      | 1080  | 1080   | Instagram 1:1 (default / author size) |
-| `portrait`    | 1080  | 1350   | Instagram / Facebook 4:5 |
-| `story`       | 1080  | 1920   | Story / Reel 9:16 |
-| `landscape`   | 1200  | 628    | Facebook horizontal |
-
-Do **not** hard-code 1080×1080 on inner elements that should reflow — only `html, body` and `.card` are resized automatically. Use `%`, `calc()`, or `position: absolute` for inner layout.
+- `createPostCard()` / `createPostCardPreview()` / `createPlatformTags()` in `PostCard.js`
+- Admin builds the same preview + body, then appends `.admin-template-card__actions`
 
 ---
 
-## Placeholders
+## 2. Principles
 
-### Syntax
+- Card is a vertical stack: **preview → body → (optional actions)**.
+- Preview fills full card width; aspect ratio comes from the active format bucket.
+- Selection / hover chrome must not reflow the grid (overlays and outlines only).
+- Unavailable templates are visually dimmed and non-interactive.
+- Admin cards disable the gallery “Select” hover overlay.
+
+---
+
+## 3. Root card — `.template-card` / `.post-card`
+
+### 3.1 Layout
+
+- Display: `flex`
+- Direction: `column`
+- Width: `100%` of grid cell
+- Overflow: `hidden`
+- Cursor (gallery): `pointer`
+- Cursor (admin): `default` (`.admin-template-card`)
+
+### 3.2 Surface
+
+- Background: `--color-bg-card` (`#ffffff`)
+- Border: `1px solid --color-border` (`#e4e4e7`)
+- Border radius: `0` (`--radius-card` in shell; cards are square-cornered)
+- Box shadow: `--shadow-sm`
+- Transition: `--transition-base` (`250ms`) on transform / border / shadow
+
+### 3.3 Grid placement
+
+**Gallery / export (`#template-grid`, `#export-ratio-grid`):**
+
+- Display: CSS grid
+- Gap: `12px` (bucket columns vary — see shell/style grid rules)
+- Cell min widths by bucket (auto-fill), e.g. square ~`minmax(200px, 1fr)`
+
+**Admin (`.admin-template-grid`):**
+
+- Columns: `repeat(auto-fill, minmax(220px, 1fr))`
+- Gap: `16px`
+- Mobile `≤640px`: `minmax(160px, 1fr)`, gap `12px`
+
+---
+
+## 4. Entrance animation (gallery)
+
+- Animation: `cardReveal` `0.5s ease both`
+- Stagger: nth-child delays `0s … 0.54s` in `0.06s` steps (first 10 cards)
+
+---
+
+## 5. Preview block — `.template-preview-container` / `.post-card__preview`
+
+### 5.1 Layout
+
+- Width: `100%`
+- Default aspect-ratio: `1` (square)
+- Display: flex, center content
+- Overflow: `hidden`
+- Position: `relative`
+- Border bottom: `1px solid --color-border`
+- Background: `--color-surface-dim`
+
+### 5.2 Bucket aspect ratios
+
+| Bucket | Aspect ratio | Selector pattern |
+|--------|--------------|------------------|
+| Square | `1 / 1` | default |
+| Portrait | `4 / 5` | `[data-gallery-bucket="portrait"]` |
+| Story | `9 / 16` | `[data-gallery-bucket="story"]` |
+| Landscape | `1200 / 628` | `[data-gallery-bucket="landscape"]` |
+
+Admin cards also set `data-gallery-bucket` on the card root for the same ratios.
+
+### 5.3 Mount point
+
+- Class: `.template-preview-mount` / `.post-card__mount`
+- Role: live HTML preview host (`renderGalleryPreview`)
+
+### 5.4 Aspect badge — `.template-aspect-badge`
+
+- Position: `absolute`, `top: 10px`, `right: 10px`, `z-index: 1`
+- Padding: `4px 10px`
+- Font: `0.68rem`, weight `600`, letter-spacing `0.04em`
+- Background: `rgba(255,255,255,0.92)`
+- Border: `1px solid --color-border`
+- Radius: `999px` (pill)
+- Shadow: `--shadow-sm`
+- Content: ratio label from `BUCKET_RATIO_LABELS` (e.g. `1:1`)
+
+---
+
+## 6. Body — `.template-card-body` / `.post-card__body`
+
+### 6.1 Spacing
+
+- Padding: `10px 12px`
+- Admin body (`.admin-template-card__body`): column flex, gap `6px`
+
+### 6.2 Title — `.template-card-heading` / `.post-card__heading`
+
+- Margin: `0`
+- Font size: `0.9rem`
+- Font weight: `600`
+- Color: `--color-text`
+- Letter-spacing: `-0.01em`
+
+### 6.3 Category — `.template-card-category` / `.post-card__category`
+
+- Muted metadata under/beside title
+- Color: muted text token
+
+### 6.4 Platform row — `.template-card-platforms` / `.post-card__platforms`
+
+- Display: flex, wrap
+- Gap: `6px`
+- Margin top: `8px`
+- `aria-label`: “Supported social platforms for this aspect ratio”
+
+### 6.5 Platform icons — `.platform-tag--icon`
+
+- Size: `26 × 26px`
+- Radius: `50%` (circle)
+- Border: `1px solid --color-border`
+- Background: `--color-bg-hover`
+- SVG inside: `14 × 14px`
+- Hover tints per network (Instagram pink, Facebook blue, etc.)
+- Empty state: `.platform-tag--muted` / `--fallback` (same 26px circle, letter or `—`)
+
+### 6.6 Admin-only body extras
+
+- Mono id: `.admin-mono` at `0.72rem`
+- Status pill: `.admin-status-badge.active|inactive` (self-start)
+
+---
+
+## 7. Interactive states
+
+### 7.1 Gallery hover overlay — `::after` on `.template-card`
+
+- Content text: `Select`
+- Position: absolute inset `0`
+- Background: `rgba(79, 70, 229, 0.88)`
+- Text: white, `0.9rem`, weight `600`
+- Default opacity: `0`
+- Hover opacity: `1`
+- `pointer-events: none`, `z-index: 2`
+- **Admin:** `.admin-template-card::after { display: none }`
+
+### 7.2 Gallery hover lift
+
+- Transform: `translateY(-2px)`
+- Border color: `--color-primary`
+- Shadow: `--shadow-md`
+- **Admin / export checkbox hover:** lift disabled (`transform: none`)
+
+### 7.3 Selected
+
+Classes: `.template-card.selected`, `.post-card--selected`, `.export-post-tile.post-card--selected`
+
+- Border color: `--color-primary`
+- Box shadow: `0 0 0 2px --color-primary-glow`
+- Shell also adds outline: `2px solid --color-primary`, `outline-offset: 2px`
+- Opacity: `1`
+
+### 7.4 Unavailable — `.template-card--unavailable` / `.post-card--unavailable`
+
+- Opacity: `0.55`
+- Cursor: `not-allowed`
+- `pointer-events: none`
+- Hover `::after` hidden
+
+### 7.5 Export unchecked — `.post-card--unchecked`
+
+- Opacity: `0.65`
+- Preview filter: `grayscale(0.1)`
+
+### 7.6 Admin inactive — `.admin-template-card--inactive`
+
+- Opacity: `0.72`
+
+---
+
+## 8. Export checkbox tile extras
+
+- Root includes `.post-card--has-checkbox`
+- Checkbox: `.export-post-checkbox` / `.post-card__checkbox` (positioned on preview)
+- Unchecked styling as §7.5
+- No gallery “Select” overlay behavior for export tiles
+
+---
+
+## 9. Admin actions row — `.admin-template-card__actions`
+
+### 9.1 Placement
+
+- Below body
+- Padding: `0 12px 12px`
+- Display: flex, wrap, `align-items: center`
+- Gap: `8px`
+
+### 9.2 Controls (required pattern)
+
+1. **Edit** — `.btn.btn-primary.btn-sm` + edit icon + “Edit”
+2. **Active switch** — `.ui-switch` (`margin-left: auto`)
+3. **Delete** — `.btn.btn-danger.btn-sm` + trash icon + “Delete”
+
+See `sg_buttons.md` for button / switch specs.
+
+---
+
+## 10. Element tree (gallery card)
 
 ```
-{{FIELD_KEY}}
+article.template-card.post-card
+  ├── div.template-preview-container.post-card__preview
+  │     ├── span.template-aspect-badge          (optional)
+  │     └── div.template-preview-mount
+  └── div.template-card-body.post-card__body
+        ├── h4.template-card-heading
+        ├── span.template-card-category          (optional)
+        └── div.template-card-platforms
+              └── span.platform-tag.platform-tag--icon × N
 ```
 
-- Keys are **UPPERCASE_SNAKE_CASE** (e.g. `{{PHOTO}}`, `{{HEADLINE}}`, `{{BANNER_TEXT}}`).
-- Keys are case-insensitive at render time but must match the `fields` array in `htmlTemplateLoader.js`.
-- Missing values render as empty string; unresolved `{{…}}` in image `src` hides the image.
+Admin adds:
 
-### Field types (registration)
-
-| `type`     | Use for | Example key |
-|------------|---------|-------------|
-| `image`    | Photo URL | `PHOTO` |
-| `text`     | Short single-line copy | `BADGE`, `TAG`, `SOURCE` |
-| `textarea` | Headlines, descriptions | `HEADLINE`, `DESCRIPTION`, `SUBTEXT` |
-
-```js
-fields: [
-  { key: 'PHOTO',       label: 'Photo',       type: 'image',    required: true },
-  { key: 'HEADLINE',    label: 'Headline',     type: 'textarea', required: true },
-  { key: 'SOURCE',      label: 'Source',       type: 'text',     required: false },
-]
 ```
-
-### Conditional blocks (optional)
-
-Supported by the renderer but **not used** in current templates:
-
-```html
-{{#if SOURCE}}
-  <div class="source-pill">{{SOURCE}}</div>
-{{/if}}
-```
-
-The block is kept only when the field has a non-empty value.
-
-### Highlight syntax (text fields)
-
-Applied at render time in `socialRenderHost.js` (not in the HTML file):
-
-| User types | Rendered HTML | Typical CSS class |
-|------------|---------------|-------------------|
-| `[phrase]` | `<mark>phrase</mark>` | `mark { background: #FFD600; color: #0a0a0b; }` |
-| `[[phrase]]` | `<span class="highlight-red">phrase</span>` | `.highlight-red { background: #D6293E; color: #fff; }` |
-
-**Rules:**
-- Define styles for `mark` and `.highlight-red` in every template that uses highlights in headlines or body copy.
-- `[[…]]` is processed before `[…]` so double brackets are not partially consumed.
-- Highlight syntax is **skipped** when the value looks like a URL (`http://`, `https://`, `data:`, etc.) — important for `PHOTO` fields.
-- Banner template overrides `mark` to red text without background — pattern is allowed per template.
-
-```css
-/* Dark templates (viral, highlight, stamp) */
-.t-headline mark { background: #FFD600; color: #0a0a0b; padding: 2px 6px; border-radius: 2px; }
-.t-headline .highlight-red { background: #D6293E; color: #fff; padding: 2px 6px; border-radius: 2px; }
-
-/* Light template (banner) — different mark treatment */
-.t-headline mark { background: none; color: #D6293E; font-weight: 700; }
+└── div.admin-template-card__actions
+      ├── button[data-action=edit]
+      ├── label.ui-switch
+      └── button[data-action=delete]
 ```
 
 ---
 
-## Images
+## 11. Accessibility checklist
 
-### Standard photo slot
-
-```html
-<img class="t-photo" src="{{PHOTO}}" alt="">
-```
-
-```css
-.t-photo {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-```
-
-- **`PHOTO`** is required on all current templates.
-- Use `object-fit: cover` for full-bleed backgrounds.
-- Banner template places the photo below a fixed header — `top` / `height: calc(…)` instead of `inset: 0`.
-
-### Scrim overlay (photo templates)
-
-Dark templates use a gradient scrim between photo and text:
-
-```css
-.scrim {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to top,
-    rgba(2, 2, 3, 0.92) 0%,
-    rgba(2, 2, 3, 0.65) 40%,
-    rgba(2, 2, 3, 0.25) 70%,
-    rgba(2, 2, 3, 0.10) 100%
-  );
-}
-```
-
-Stack order: `.t-photo` → `.scrim` → text/UI layers.
+- [ ] Preview mount has meaningful empty state (“No preview”) when render fails
+- [ ] Platform row has `aria-label`
+- [ ] Unavailable cards are not focusable / clickable (`pointer-events: none`)
+- [ ] Export checkbox is keyboard operable
+- [ ] Admin Edit / Delete / switch are separate focusable controls
 
 ---
 
-## Typography
+## 12. Do / Don’t
 
-Templates use an **editorial / news** palette distinct from the app shell (Kinetic Logic).
-
-### Font families (current templates)
-
-| Role | Family | Used in |
-|------|--------|---------|
-| Body / UI | **Inter** | Descriptions, tags, subtext, some headlines |
-| Display / impact | **Barlow Condensed** | Badges, large headlines, banner strip |
-| Dateline / mono accent | **JetBrains Mono** | Stamp template badges and date pill |
-
-Load fonts in `<head>`:
-
-```html
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-```
-
-The loader extracts `fonts.googleapis.com` links and injects them as `@import` into exported CSS.
-
-### Editorial color tokens
-
-| Token | Hex | Usage |
-|-------|-----|-------|
-| Canvas dark | `#0a0a0b` | Card background (photo templates) |
-| Canvas light | `#fff` | Banner template |
-| Accent yellow | `#FFD600` | Badges, highlights, stamp accent headline |
-| Accent red | `#D6293E` | Breaking badges, red highlights, banner emphasis |
-| Text primary (on dark) | `#fff` | Headlines |
-| Text secondary (on dark) | `#b0b1b5` – `#d4d5d9` | Descriptions, metadata |
-| Text primary (on light) | `#1a1a1a` | Banner headline |
+| Do | Don’t |
+|----|-------|
+| Keep card radius at `0` (design system) | Round cards inconsistently with shell tokens |
+| Drive preview ratio from bucket data attrs | Hard-code only 1:1 for every card |
+| Use factory in `PostCard.js` for new cards | Duplicate preview/body markup ad hoc |
+| Put admin actions in `__actions` row | Overlay Edit/Delete on the preview |
+| Hide Select overlay on admin cards | Leave `::after` content “Select” on manage UI |
 
 ---
 
-## Layout patterns (from existing templates)
-
-### Pattern A — Centered viral card (`template-c-viral.html`)
-
-- Full-bleed photo + scrim
-- Flex column `.body` centered vertically
-- Large skewed `.badge`, centered `.t-headline`, `.t-desc`, `.source-pill`
-- **Fields:** `PHOTO`, `BADGE`, `HEADLINE`, `DESCRIPTION`, `SOURCE`
-
-### Pattern B — Lower-third wire (`template-d-highlight.html`)
-
-- Photo + scrim; content anchored to bottom third (`.lower`)
-- Top-left `.top-tag`; fixed `.cta-bar` at bottom with static “Follow …” wrapper around `{{SOURCE}}`
-- **Fields:** `PHOTO`, `TAG`, `HEADLINE`, `SUBTEXT`, `SOURCE`
-
-### Pattern C — Banner + panel (`template-e-banner.html`)
-
-- Light theme; no scrim
-- Fixed-height `.banner` strip at top (`{{BANNER_TEXT}}`)
-- Photo in middle band; `.bottom-panel` with headline + source
-- **Fields:** `PHOTO`, `BANNER_TEXT`, `HEADLINE`, `SOURCE`
-
-### Pattern D — Stamp / breaking (`template-f-stamp.html`)
-
-- Photo + scrim; asymmetric absolute positioning
-- Decorative `.stamp` circle (`{{STAMP_TEXT}}`), split headline (`.headline-big` + `.headline-accent`)
-- Mono `.breaking-badge` / `.date-pill`; `.bottom-bar` for source
-- **Fields:** `PHOTO`, `DATELINE`, `STAMP_TEXT`, `HEADLINE_BIG`, `HEADLINE_ACCENT`, `DESCRIPTION`, `SOURCE`
-
----
-
-## CSS conventions
-
-| Convention | Rule |
-|------------|------|
-| Reset | `* { box-sizing: border-box; margin: 0; padding: 0; }` |
-| Root overflow | `overflow: hidden` on `html, body` — prevents scrollbars in screenshots |
-| Card root | Single `.card` wrapper; `position: relative` |
-| Layering | Photo at z-index 0; scrim and text above (natural DOM order) |
-| Spacing | Edge insets typically **48–60px** from canvas edge |
-| Class prefix | `t-` for template text blocks (`.t-headline`, `.t-desc`, `.t-photo`) |
-| Positioning | `position: absolute` for overlays; flex for centered stacks |
-
-### What to avoid
-
-| Don't | Why |
-|-------|-----|
-| External `.css` files | Loader only reads inline `<style>` blocks |
-| JavaScript | Puppeteer renders static HTML only |
-| Viewport units (`vh`, `vw`) for canvas size | Breaks when bucket dimensions change |
-| Animations / `@keyframes` | `isAnimated: false` in pipeline; motion won’t export reliably |
-| Multiple `.card` roots | Breaks dimension adaptation |
-| Placeholders in CSS | Only body HTML is substituted; tokens in `<style>` are not replaced |
-
----
-
-## Checklist — new template
-
-- [ ] File added under `src/templates/html/template-*.html`
-- [ ] `html, body` and `.card` set to `1080px × 1080px`
-- [ ] `overflow: hidden` on root
-- [ ] Google Fonts loaded via `<link>` in `<head>`
-- [ ] All copy uses `{{FIELD_KEY}}` placeholders
-- [ ] `mark` / `.highlight-red` styled if headlines use `[…]` / `[[…]]`
-- [ ] `PHOTO` image uses `object-fit: cover` (or documented crop region)
-- [ ] Registered in `legacyTemplateRegistry.js` or `nicheTemplateRegistry.js` with `category` and `fields`
-- [ ] Sample row added to `templateSampleData.js`
-- [ ] Preview tested in all four buckets (square, portrait, story, landscape)
-- [ ] Export PNG verified via Step 3
-
----
-
-## File reference
+## 13. File map
 
 | File | Role |
 |------|------|
-| `src/templates/html/template-*.html` | Authoring source |
-| `src/templates/htmlTemplateLoader.js` | Parse, dimension adapt, export template objects |
-| `src/features/rendering/socialRenderHost.js` | Placeholder + highlight substitution |
-| `src/features/domain/templateSampleData.js` | Gallery / preview sample rows |
-| `src/features/rendering/socialFormats.js` | Bucket dimensions and platform presets |
-| `server/renderApi.js` | Puppeteer screenshot to PNG |
-
----
-
-## Quick reference
-
-```
-Author size     →  1080 × 1080 on html, body + .card
-Placeholder     →  {{FIELD_KEY}}  (UPPERCASE_SNAKE)
-Yellow highlight →  [text]  →  <mark>
-Red highlight    →  [[text]]  →  <span class="highlight-red">
-Photo field     →  {{PHOTO}} on <img class="t-photo">
-Register        →  htmlTemplateLoader.js → parseHtmlTemplate(...)
-Sample data     →  templateSampleData.js → BUILTIN_SAMPLES
-Buckets         →  square | portrait | story | landscape (auto)
-```
+| `src/features/components/PostCard.js` | DOM factory |
+| `src/style.css` | `.template-card`, preview, body, platforms, admin overrides |
+| `src/shell.css` | Shared `.post-card` selection / hover tokens |
+| `src/features/auth/adminUI.js` | Admin card assemble + actions |
+| `src/features/rendering/templateGalleryPreview.js` | Live thumbnail render |

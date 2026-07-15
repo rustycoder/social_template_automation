@@ -17,14 +17,14 @@
 </head>
 <body class="posts-standalone">
   <div id="app" data-posts="true">
-    <header id="app-header" class="posts-standalone__header">
+    <header id="app-header" class="standalone-header">
       <div class="header-brand">
-        <a href="/" class="logo posts-standalone__brand-link">
+        <a href="/" class="logo standalone-header__brand-link">
           <svg class="logo-mark" width="36" height="36" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-            <rect width="32" height="32" rx="8" fill="url(#logo-grad-posts)" />
+            <rect width="32" height="32" rx="8" fill="url(#logo-grad-standalone)" />
             <path d="M8 10h16M8 16h12M8 22h14" stroke="#fff" stroke-width="2" stroke-linecap="round" />
             <defs>
-              <linearGradient id="logo-grad-posts" x1="0" y1="0" x2="32" y2="32">
+              <linearGradient id="logo-grad-standalone" x1="0" y1="0" x2="32" y2="32">
                 <stop stop-color="#4f46e5" />
                 <stop offset="1" stop-color="#6366f1" />
               </linearGradient>
@@ -32,11 +32,15 @@
           </svg>
           <h1>Content Studio</h1>
         </a>
-        <span class="posts-standalone__badge">My Posts</span>
+        <span class="standalone-header__badge">My Posts</span>
       </div>
 
       <div class="header-auth" id="header-auth">
         <button type="button" class="btn btn-ghost btn-sm" id="btn-login" aria-label="Sign in">
+          <svg class="btn-icon" width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+            <circle cx="9" cy="5.5" r="3" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M3.5 15.5c0-3 2.5-5 5.5-5s5.5 2 5.5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
           <span class="btn-text">Sign in</span>
         </button>
         <div class="user-menu hidden" id="user-menu">
@@ -62,10 +66,31 @@
             <div class="profile-dropdown-sub" id="dropdown-sub-section">
               <span class="user-sub-badge inactive" id="dropdown-sub-badge">No subscription</span>
             </div>
-            <button type="button" class="profile-dropdown-item" id="btn-my-posts" role="menuitem">My Posts</button>
-            <button type="button" class="profile-dropdown-item hidden" id="btn-admin" role="menuitem">Template</button>
-            <button type="button" class="profile-dropdown-item" id="btn-my-billing" role="menuitem">My Billing</button>
+            <button type="button" class="profile-dropdown-item" id="btn-my-posts" role="menuitem">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M3.333 2.667h9.334A1.333 1.333 0 0 1 14 4v8a1.333 1.333 0 0 1-1.333 1.333H3.333A1.333 1.333 0 0 1 2 12V4a1.333 1.333 0 0 1 1.333-1.333Z" stroke="currentColor" stroke-width="1.25"/>
+                <path d="M5.333 6h5.334M5.333 8.667h3.334" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/>
+              </svg>
+              My Posts
+            </button>
+            <button type="button" class="profile-dropdown-item hidden" id="btn-admin" role="menuitem">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M8 2v2.5M8 11.5V14M2 8h2.5M11.5 8H14M4.05 4.05l1.77 1.77M10.18 10.18l1.77 1.77M4.05 11.95l1.77-1.77M10.18 5.82l1.77-1.77" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/>
+                <circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.25"/>
+              </svg>
+              Template
+            </button>
+            <button type="button" class="profile-dropdown-item" id="btn-my-billing" role="menuitem">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M2.667 4.667h10.666M4.667 2.667h6.666a1.333 1.333 0 0 1 1.334 1.333v9.334a1.333 1.333 0 0 1-1.334 1.333H4.667a1.333 1.333 0 0 1-1.334-1.333V4a1.333 1.333 0 0 1 1.334-1.333Z" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M6 6.667h4M6 9.333h2.667" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/>
+              </svg>
+              My Billing
+            </button>
             <button type="button" class="profile-dropdown-item profile-dropdown-item-danger" id="btn-logout" role="menuitem">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M6 14H3.667A1.667 1.667 0 0 1 2 12.333V3.667A1.667 1.667 0 0 1 3.667 2H6M10.667 11.333L14 8M14 8L10.667 4.667M14 8H6" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
               Sign out
             </button>
           </div>
@@ -82,9 +107,18 @@
               <p class="page-desc">Posts are ordered by schedule date. Filter by date or switch layout.</p>
             </div>
             <div class="posts-view-toggle" role="group" aria-label="View mode">
-              <button type="button" class="btn btn-outline btn-sm" id="posts-view-list" data-view="list">List</button>
-              <button type="button" class="btn btn-outline btn-sm active" id="posts-view-grid" data-view="grid">Grid</button>
-              <button type="button" class="btn btn-outline btn-sm" id="posts-view-week" data-view="week">Week</button>
+              <button type="button" class="btn btn-outline btn-sm" id="posts-view-list" data-view="list">
+                <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.667 4h10.666M2.667 8h10.666M2.667 12h10.666" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/></svg>
+                <span class="btn-text">List</span>
+              </button>
+              <button type="button" class="btn btn-outline btn-sm active" id="posts-view-grid" data-view="grid">
+                <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.667 2.667h4v4h-4v-4ZM9.333 2.667h4v4h-4v-4ZM2.667 9.333h4v4h-4v-4ZM9.333 9.333h4v4h-4v-4Z" stroke="currentColor" stroke-width="1.25"/></svg>
+                <span class="btn-text">Grid</span>
+              </button>
+              <button type="button" class="btn btn-outline btn-sm" id="posts-view-week" data-view="week">
+                <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M5.333 2.667V4M10.667 2.667V4M2.667 6.667h10.666M3.333 4h9.334A1.333 1.333 0 0 1 14 5.333v7.334A1.333 1.333 0 0 1 12.667 14H3.333A1.333 1.333 0 0 1 2 12.667V5.333A1.333 1.333 0 0 1 3.333 4Z" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span class="btn-text">Week</span>
+              </button>
             </div>
           </header>
 
@@ -138,7 +172,10 @@
                   readonly
                   aria-label="Filter by schedule date range"
                 />
-                <button type="button" class="btn btn-ghost btn-sm" id="posts-date-clear" aria-label="Clear date range">Clear</button>
+                <button type="button" class="btn btn-ghost btn-sm" id="posts-date-clear" aria-label="Clear date range">
+                  <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                  <span class="btn-text">Clear</span>
+                </button>
               </div>
             </div>
           </div>
@@ -162,9 +199,15 @@
         </div>
         <div class="footer-actions-group" id="posts-footer-actions">
           <button type="button" class="btn btn-outline" id="posts-bulk-schedule" disabled>
+            <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M5.333 2.667V4M10.667 2.667V4M2.667 6.667h10.666M3.333 4h9.334A1.333 1.333 0 0 1 14 5.333v7.334A1.333 1.333 0 0 1 12.667 14H3.333A1.333 1.333 0 0 1 2 12.667V5.333A1.333 1.333 0 0 1 3.333 4Z" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
             <span class="btn-text" id="posts-bulk-schedule-label">Schedule (0)</span>
           </button>
-          <button type="button" class="btn btn-outline posts-footer-delete" id="posts-bulk-delete" disabled>
+          <button type="button" class="btn btn-danger" id="posts-bulk-delete" disabled>
+            <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M2.667 4h10.666M6 4V2.667h4V4M5.333 4v8.667a1 1 0 0 0 1 1h3.334a1 1 0 0 0 1-1V4" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
             <span class="btn-text" id="posts-bulk-delete-label">Delete (0)</span>
           </button>
         </div>
@@ -192,7 +235,13 @@
             <input type="password" id="auth-password" class="text-input" required minlength="8" autocomplete="current-password" />
           </div>
           <p class="form-error hidden" id="auth-error"></p>
-          <button type="submit" class="btn btn-primary btn-block" id="auth-submit-btn">Sign in</button>
+          <button type="submit" class="btn btn-primary btn-block" id="auth-submit-btn">
+            <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <circle cx="8" cy="5.333" r="2.667" stroke="currentColor" stroke-width="1.35"/>
+              <path d="M2.667 13.333c0-2.4 2.4-4 5.333-4s5.333 1.6 5.333 4" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/>
+            </svg>
+            <span class="btn-text">Sign in</span>
+          </button>
         </form>
         <p class="modal-footer-text">
           <button type="button" class="link-btn" id="auth-toggle-mode">Create an account</button>
@@ -257,8 +306,14 @@
           </div>
           <p class="form-error hidden" id="post-edit-error"></p>
           <div class="admin-form-actions">
-            <button type="button" class="btn btn-outline" id="post-edit-cancel">Cancel</button>
-            <button type="submit" class="btn btn-primary" id="post-edit-submit">Save changes</button>
+            <button type="button" class="btn btn-outline" id="post-edit-cancel">
+              <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              <span class="btn-text">Cancel</span>
+            </button>
+            <button type="submit" class="btn btn-primary" id="post-edit-submit">
+              <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13.333 4.667 6 12 2.667 8.667" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span class="btn-text">Save changes</span>
+            </button>
           </div>
         </form>
       </div>
@@ -298,8 +353,14 @@
           <p class="schedule-all-preview" id="schedule-all-preview" aria-live="polite"></p>
           <p class="form-error hidden" id="schedule-all-error"></p>
           <div class="admin-form-actions">
-            <button type="button" class="btn btn-outline" id="schedule-all-cancel">Cancel</button>
-            <button type="submit" class="btn btn-primary" id="schedule-all-submit">Schedule posts</button>
+            <button type="button" class="btn btn-outline" id="schedule-all-cancel">
+              <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              <span class="btn-text">Cancel</span>
+            </button>
+            <button type="submit" class="btn btn-primary" id="schedule-all-submit">
+              <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M5.333 2.667V4M10.667 2.667V4M2.667 6.667h10.666M3.333 4h9.334A1.333 1.333 0 0 1 14 5.333v7.334A1.333 1.333 0 0 1 12.667 14H3.333A1.333 1.333 0 0 1 2 12.667V5.333A1.333 1.333 0 0 1 3.333 4Z" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span class="btn-text">Schedule posts</span>
+            </button>
           </div>
         </form>
       </div>

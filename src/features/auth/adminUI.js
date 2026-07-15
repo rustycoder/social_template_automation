@@ -12,6 +12,7 @@ import { parseHtmlTemplate } from '../../templates/htmlTemplateLoader.js';
 import { BUCKET_RATIO_LABELS } from '../shared/constants.js';
 import { formatHtmlSource } from '../shared/formatHtml.js';
 import { getSampleRowForTemplate } from '../domain/templateSampleData.js';
+import { activeSwitchHtml, buttonLabel, setButtonText, UI_ICONS } from '../shared/uiIcons.js';
 
 const PREVIEW_BUCKETS = ['square', 'portrait', 'story', 'landscape'];
 const FIELD_TYPES = ['text', 'textarea', 'image'];
@@ -79,6 +80,7 @@ export class AdminUI {
     this.categoryFormClose = document.getElementById('admin-category-form-close');
     this.categoryFormCancel = document.getElementById('admin-category-form-cancel');
     this.categoryFormError = document.getElementById('admin-category-form-error');
+    this.categoryFormSubmit = document.getElementById('admin-category-form-submit');
 
     /** @type {'templates' | 'categories'} */
     this.activeTab = 'templates';
@@ -526,19 +528,20 @@ export class AdminUI {
       const actions = document.createElement('div');
       actions.className = 'admin-template-card__actions';
       actions.innerHTML = `
-        <button type="button" class="btn btn-outline btn-sm" data-action="edit">Edit</button>
-        <button type="button" class="btn btn-outline btn-sm" data-action="toggle">
-          ${t.isActive ? 'Deactivate' : 'Activate'}
-        </button>
-        <button type="button" class="btn btn-outline btn-sm admin-template-card__delete" data-action="delete">Delete</button>
+        <button type="button" class="btn btn-primary btn-sm" data-action="edit">${buttonLabel('edit', 'Edit')}</button>
+        ${activeSwitchHtml(!!t.isActive)}
+        <button type="button" class="btn btn-danger btn-sm" data-action="delete">${buttonLabel('trash', 'Delete')}</button>
       `;
       actions.querySelector('[data-action="edit"]')?.addEventListener('click', (e) => {
         e.stopPropagation();
         this._openTemplateForm(t.id);
       });
-      actions.querySelector('[data-action="toggle"]')?.addEventListener('click', (e) => {
+      actions.querySelector('[data-action="toggle"]')?.addEventListener('change', (e) => {
         e.stopPropagation();
         this._toggleTemplate(t);
+      });
+      actions.querySelector('[data-action="toggle"]')?.addEventListener('click', (e) => {
+        e.stopPropagation();
       });
       actions.querySelector('[data-action="delete"]')?.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -587,16 +590,14 @@ export class AdminUI {
           </span>
         </td>
         <td class="admin-actions">
-          <button type="button" class="btn btn-outline btn-sm" data-action="edit">Edit</button>
-          <button type="button" class="btn btn-outline btn-sm" data-action="toggle">
-            ${c.isActive ? 'Deactivate' : 'Activate'}
-          </button>
+          <button type="button" class="btn btn-primary btn-sm" data-action="edit">${buttonLabel('edit', 'Edit')}</button>
+          ${activeSwitchHtml(!!c.isActive)}
         </td>
       `;
       tr.querySelector('[data-action="edit"]')?.addEventListener('click', () =>
         this._openCategoryForm(c)
       );
-      tr.querySelector('[data-action="toggle"]')?.addEventListener('click', () =>
+      tr.querySelector('[data-action="toggle"]')?.addEventListener('change', () =>
         this._toggleCategory(c)
       );
       this.categoriesBody.appendChild(tr);
@@ -646,7 +647,7 @@ export class AdminUI {
 
       const fileLabel = document.createElement('label');
       fileLabel.className = 'btn btn-outline btn-sm admin-field-sample-upload';
-      fileLabel.textContent = 'Upload';
+      fileLabel.innerHTML = `${UI_ICONS.upload}<span class="btn-text">Upload</span>`;
 
       const fileInput = document.createElement('input');
       fileInput.type = 'file';
@@ -908,7 +909,10 @@ export class AdminUI {
       this.templateFormTitle.textContent = templateId ? 'Edit template' : 'Upload template';
     }
     if (this.templateFormSubmit) {
-      this.templateFormSubmit.textContent = templateId ? 'Save changes' : 'Upload template';
+      setButtonText(
+        this.templateFormSubmit,
+        templateId ? 'Save changes' : 'Upload template'
+      );
     }
     if (htmlHint) {
       htmlHint.textContent = templateId
@@ -1050,10 +1054,11 @@ html, body { margin: 0; padding: 0; width: 1080px; height: 1080px; overflow: hid
     try {
       await api.adminUpdateTemplate(template.id, { isActive: !template.isActive });
       toast(template.isActive ? 'Template deactivated' : 'Template activated');
-      await this._load();
       await this.onCatalogChanged();
     } catch (error) {
       toast(error instanceof ApiError ? error.message : 'Update failed', 'error');
+    } finally {
+      await this._load();
     }
   }
 
@@ -1085,6 +1090,7 @@ html, body { margin: 0; padding: 0; width: 1080px; height: 1080px; overflow: hid
     if (this.categoryFormTitle) {
       this.categoryFormTitle.textContent = category ? 'Edit category' : 'Add category';
     }
+    setButtonText(this.categoryFormSubmit, category ? 'Save changes' : 'Save category');
     if (idInput) {
       idInput.disabled = !!category;
       idInput.value = category?.id || '';
@@ -1136,10 +1142,11 @@ html, body { margin: 0; padding: 0; width: 1080px; height: 1080px; overflow: hid
     try {
       await api.adminUpdateCategory(category.id, { isActive: !category.isActive });
       toast(category.isActive ? 'Category deactivated' : 'Category activated');
-      await this._load();
       await this.onCatalogChanged();
     } catch (error) {
       toast(error instanceof ApiError ? error.message : 'Update failed', 'error');
+    } finally {
+      await this._load();
     }
   }
 }

@@ -1,5 +1,6 @@
 import { authService } from './auth.js';
 import { ApiError } from './api.js';
+import { getButtonText, setButtonText } from '../shared/uiIcons.js';
 
 export class AuthUI {
   constructor() {
@@ -99,13 +100,13 @@ export class AuthUI {
 
     if (mode === 'login') {
       this.title.textContent = 'Sign in';
-      this.submitBtn.textContent = 'Sign in';
+      setButtonText(this.submitBtn, 'Sign in');
       this.toggleModeBtn.textContent = 'Create an account';
       this.nameGroup?.classList.add('hidden');
       this.nameInput.required = false;
     } else {
       this.title.textContent = 'Create account';
-      this.submitBtn.textContent = 'Create account';
+      setButtonText(this.submitBtn, 'Create account');
       this.toggleModeBtn.textContent = 'Already have an account? Sign in';
       this.nameGroup?.classList.remove('hidden');
       this.nameInput.required = true;
@@ -140,8 +141,8 @@ export class AuthUI {
   async _handleSubmit() {
     this.errorEl.classList.add('hidden');
     this.submitBtn.disabled = true;
-    const originalText = this.submitBtn.textContent;
-    this.submitBtn.textContent = 'Please wait…';
+    const originalText = getButtonText(this.submitBtn);
+    setButtonText(this.submitBtn, 'Please wait…');
 
     try {
       if (this.mode === 'login') {
@@ -164,7 +165,7 @@ export class AuthUI {
       this.errorEl.classList.remove('hidden');
     } finally {
       this.submitBtn.disabled = false;
-      this.submitBtn.textContent = originalText;
+      setButtonText(this.submitBtn, originalText);
     }
   }
 

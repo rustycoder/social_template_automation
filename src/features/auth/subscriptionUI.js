@@ -2,6 +2,7 @@ import { api } from './api.js';
 import { authService } from './auth.js';
 import { ApiError } from './api.js';
 import { launchMpgsCheckout } from './checkout.js';
+import { buttonLabel, getButtonText, setButtonText } from '../shared/uiIcons.js';
 
 export class SubscriptionUI {
   constructor(authUI) {
@@ -89,7 +90,7 @@ export class SubscriptionUI {
               <li>All platform export formats</li>
             </ul>
             <button type="button" class="btn btn-primary btn-subscribe-plan" data-plan-id="${plan.id}">
-              Subscribe — ${plan.priceLabel}
+              ${buttonLabel('check', `Subscribe — ${plan.priceLabel}`)}
             </button>
           </article>
         `;
@@ -157,8 +158,8 @@ export class SubscriptionUI {
 
     this.errorEl?.classList.add('hidden');
     button.disabled = true;
-    const originalText = button.textContent;
-    button.textContent = 'Redirecting to payment…';
+    const originalText = getButtonText(button);
+    setButtonText(button, 'Redirecting to payment…');
 
     try {
       await this._startCheckout(planId);
@@ -186,7 +187,7 @@ export class SubscriptionUI {
       }
     } finally {
       button.disabled = false;
-      button.textContent = originalText;
+      setButtonText(button, originalText);
     }
   }
 

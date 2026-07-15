@@ -11,6 +11,7 @@ import {
   summarizeSchedule,
   toLocalYmd,
 } from '../domain/schedulePlanner.js';
+import { setButtonText } from '../shared/uiIcons.js';
 
 const DEFAULT_WEEKDAYS = [1, 2, 3, 4, 5]; // Mon–Fri
 
@@ -275,8 +276,10 @@ export class ScheduleAllModal {
     }
 
     if (this.submitBtn) {
-      this.submitBtn.textContent =
-        this.postCount === 1 ? 'Schedule post' : `Schedule ${this.postCount} posts`;
+      setButtonText(
+        this.submitBtn,
+        this.postCount === 1 ? 'Schedule post' : `Schedule ${this.postCount} posts`
+      );
     }
 
     setHidden(this.overlay, false);

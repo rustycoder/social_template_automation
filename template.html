@@ -17,14 +17,14 @@
 </head>
 <body class="admin-standalone">
   <div id="app" data-admin="true">
-    <header id="app-header" class="admin-standalone__header">
+    <header id="app-header" class="standalone-header">
       <div class="header-brand">
-        <a href="/" class="logo admin-standalone__brand-link">
+        <a href="/" class="logo standalone-header__brand-link">
           <svg class="logo-mark" width="36" height="36" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-            <rect width="32" height="32" rx="8" fill="url(#logo-grad-admin)" />
+            <rect width="32" height="32" rx="8" fill="url(#logo-grad-standalone)" />
             <path d="M8 10h16M8 16h12M8 22h14" stroke="#fff" stroke-width="2" stroke-linecap="round" />
             <defs>
-              <linearGradient id="logo-grad-admin" x1="0" y1="0" x2="32" y2="32">
+              <linearGradient id="logo-grad-standalone" x1="0" y1="0" x2="32" y2="32">
                 <stop stop-color="#4f46e5" />
                 <stop offset="1" stop-color="#6366f1" />
               </linearGradient>
@@ -32,11 +32,15 @@
           </svg>
           <h1>Content Studio</h1>
         </a>
-        <span class="admin-standalone__badge">Templates</span>
+        <span class="standalone-header__badge">Templates</span>
       </div>
 
       <div class="header-auth" id="header-auth">
         <button type="button" class="btn btn-ghost btn-sm" id="btn-login" aria-label="Sign in">
+          <svg class="btn-icon" width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+            <circle cx="9" cy="5.5" r="3" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M3.5 15.5c0-3 2.5-5 5.5-5s5.5 2 5.5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
           <span class="btn-text">Sign in</span>
         </button>
         <div class="user-menu hidden" id="user-menu">
@@ -62,10 +66,31 @@
             <div class="profile-dropdown-sub" id="dropdown-sub-section">
               <span class="user-sub-badge inactive" id="dropdown-sub-badge">No subscription</span>
             </div>
-            <button type="button" class="profile-dropdown-item" id="btn-my-posts" role="menuitem">My Posts</button>
-            <button type="button" class="profile-dropdown-item hidden" id="btn-admin" role="menuitem">Template</button>
-            <button type="button" class="profile-dropdown-item hidden" id="btn-my-billing" role="menuitem">My Billing</button>
+            <button type="button" class="profile-dropdown-item" id="btn-my-posts" role="menuitem">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M3.333 2.667h9.334A1.333 1.333 0 0 1 14 4v8a1.333 1.333 0 0 1-1.333 1.333H3.333A1.333 1.333 0 0 1 2 12V4a1.333 1.333 0 0 1 1.333-1.333Z" stroke="currentColor" stroke-width="1.25"/>
+                <path d="M5.333 6h5.334M5.333 8.667h3.334" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/>
+              </svg>
+              My Posts
+            </button>
+            <button type="button" class="profile-dropdown-item hidden" id="btn-admin" role="menuitem">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M8 2v2.5M8 11.5V14M2 8h2.5M11.5 8H14M4.05 4.05l1.77 1.77M10.18 10.18l1.77 1.77M4.05 11.95l1.77-1.77M10.18 5.82l1.77-1.77" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/>
+                <circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.25"/>
+              </svg>
+              Template
+            </button>
+            <button type="button" class="profile-dropdown-item" id="btn-my-billing" role="menuitem">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M2.667 4.667h10.666M4.667 2.667h6.666a1.333 1.333 0 0 1 1.334 1.333v9.334a1.333 1.333 0 0 1-1.334 1.333H4.667a1.333 1.333 0 0 1-1.334-1.333V4a1.333 1.333 0 0 1 1.334-1.333Z" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M6 6.667h4M6 9.333h2.667" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/>
+              </svg>
+              My Billing
+            </button>
             <button type="button" class="profile-dropdown-item profile-dropdown-item-danger" id="btn-logout" role="menuitem">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M6 14H3.667A1.667 1.667 0 0 1 2 12.333V3.667A1.667 1.667 0 0 1 3.667 2H6M10.667 11.333L14 8M14 8L10.667 4.667M14 8H6" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
               Sign out
             </button>
           </div>
@@ -92,29 +117,55 @@
 
           <div id="admin-templates-panel">
             <div class="admin-toolbar">
-              <input type="search" id="admin-template-search" class="text-input admin-search" placeholder="Search templates by name or id…" autocomplete="off" />
-              <select id="admin-template-status-filter" class="text-input admin-filter" aria-label="Filter by status">
-                <option value="all">All statuses</option>
-                <option value="active" selected>Active</option>
-                <option value="inactive">Deactivated</option>
-              </select>
-              <select id="admin-template-category-filter" class="text-input admin-filter" aria-label="Filter by category">
-                <option value="">All categories</option>
-              </select>
-              <button type="button" class="btn btn-primary" id="btn-admin-new-template">Upload template</button>
+              <div class="posts-toolbar-field posts-toolbar-field--search">
+                <label class="posts-toolbar-label" for="admin-template-search">Search</label>
+                <input type="search" id="admin-template-search" class="text-input admin-search" placeholder="Search templates by name or id…" autocomplete="off" />
+              </div>
+              <div class="posts-toolbar-field">
+                <label class="posts-toolbar-label" for="admin-template-status-filter">Status</label>
+                <select id="admin-template-status-filter" class="text-input admin-filter" aria-label="Filter by status">
+                  <option value="all">All statuses</option>
+                  <option value="active" selected>Active</option>
+                  <option value="inactive">Deactivated</option>
+                </select>
+              </div>
+              <div class="posts-toolbar-field">
+                <label class="posts-toolbar-label" for="admin-template-category-filter">Category</label>
+                <select id="admin-template-category-filter" class="text-input admin-filter" aria-label="Filter by category">
+                  <option value="">All categories</option>
+                </select>
+              </div>
+              <button type="button" class="btn btn-primary" id="btn-admin-new-template">
+                <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M8 10.667V2.667M5.333 5.333 8 2.667l2.667 2.666M3.333 10.667v2A1.333 1.333 0 0 0 4.667 14h6.666A1.333 1.333 0 0 0 12.667 12.667v-2" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="btn-text">Upload template</span>
+              </button>
             </div>
             <div class="admin-template-grid" id="admin-templates-grid"></div>
             <div class="admin-pagination" id="admin-templates-pagination" hidden>
-              <button type="button" class="btn btn-outline btn-sm" data-admin-page-prev="templates">Previous</button>
+              <button type="button" class="btn btn-outline btn-sm" data-admin-page-prev="templates">
+                <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M10 12 6 8l4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span class="btn-text">Previous</span>
+              </button>
               <span class="admin-pagination__label" data-admin-page-label="templates"></span>
-              <button type="button" class="btn btn-outline btn-sm" data-admin-page-next="templates">Next</button>
+              <button type="button" class="btn btn-outline btn-sm" data-admin-page-next="templates">
+                <span class="btn-text">Next</span>
+                <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
             </div>
           </div>
 
           <div id="admin-categories-panel" class="hidden">
             <div class="admin-toolbar">
-              <input type="search" id="admin-category-search" class="text-input admin-search" placeholder="Search categories by name or id…" autocomplete="off" />
-              <button type="button" class="btn btn-primary" id="btn-admin-new-category">Add category</button>
+              <div class="posts-toolbar-field posts-toolbar-field--search">
+                <label class="posts-toolbar-label" for="admin-category-search">Search</label>
+                <input type="search" id="admin-category-search" class="text-input admin-search" placeholder="Search categories by name or id…" autocomplete="off" />
+              </div>
+              <button type="button" class="btn btn-primary" id="btn-admin-new-category">
+                <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 3.333v9.334M3.333 8h9.334" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                <span class="btn-text">Add category</span>
+              </button>
             </div>
             <div class="admin-table-wrapper">
               <table class="admin-table">
@@ -130,9 +181,15 @@
               </table>
             </div>
             <div class="admin-pagination" id="admin-categories-pagination" hidden>
-              <button type="button" class="btn btn-outline btn-sm" data-admin-page-prev="categories">Previous</button>
+              <button type="button" class="btn btn-outline btn-sm" data-admin-page-prev="categories">
+                <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M10 12 6 8l4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span class="btn-text">Previous</span>
+              </button>
               <span class="admin-pagination__label" data-admin-page-label="categories"></span>
-              <button type="button" class="btn btn-outline btn-sm" data-admin-page-next="categories">Next</button>
+              <button type="button" class="btn btn-outline btn-sm" data-admin-page-next="categories">
+                <span class="btn-text">Next</span>
+                <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
             </div>
           </div>
         </div>
@@ -173,7 +230,13 @@
             <input type="password" id="auth-password" class="text-input" required minlength="8" autocomplete="current-password" />
           </div>
           <p class="form-error hidden" id="auth-error"></p>
-          <button type="submit" class="btn btn-primary btn-block" id="auth-submit-btn">Sign in</button>
+          <button type="submit" class="btn btn-primary btn-block" id="auth-submit-btn">
+            <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <circle cx="8" cy="5.333" r="2.667" stroke="currentColor" stroke-width="1.35"/>
+              <path d="M2.667 13.333c0-2.4 2.4-4 5.333-4s5.333 1.6 5.333 4" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/>
+            </svg>
+            <span class="btn-text">Sign in</span>
+          </button>
         </form>
         <p class="modal-footer-text">
           <button type="button" class="link-btn" id="auth-toggle-mode">Create an account</button>
@@ -204,7 +267,10 @@
               </div>
               <div class="admin-fields-header">
                 <label>Fields</label>
-                <button type="button" class="btn btn-outline btn-sm" id="btn-admin-add-field">Add field</button>
+                <button type="button" class="btn btn-outline btn-sm" id="btn-admin-add-field">
+                  <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 3.333v9.334M3.333 8h9.334" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                  <span class="btn-text">Add field</span>
+                </button>
               </div>
               <p class="field-hint">One name per field (used as {{KEY}} in HTML and on the Data form). Set sample text / images / logos below each.</p>
               <div id="admin-fields-list" class="admin-fields-list"></div>
@@ -214,7 +280,10 @@
               <div class="admin-fields-header">
                 <label for="admin-template-html-source">HTML</label>
                 <label class="btn btn-outline btn-sm admin-html-file-label">
-                  Load from file
+                  <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <path d="M8 10.667V2.667M5.333 5.333 8 2.667l2.667 2.666M3.333 10.667v2A1.333 1.333 0 0 0 4.667 14h6.666A1.333 1.333 0 0 0 12.667 12.667v-2" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  <span class="btn-text">Load from file</span>
                   <input type="file" id="admin-template-html" accept=".html,text/html" hidden />
                 </label>
               </div>
@@ -237,15 +306,21 @@
 
           <p class="form-error hidden" id="admin-template-form-error"></p>
           <div class="admin-form-actions">
-            <button type="button" class="btn btn-outline" id="admin-template-form-cancel">Cancel</button>
-            <button type="submit" class="btn btn-primary" id="admin-template-form-submit">Upload template</button>
+            <button type="button" class="btn btn-outline" id="admin-template-form-cancel">
+              <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              <span class="btn-text">Cancel</span>
+            </button>
+            <button type="submit" class="btn btn-primary" id="admin-template-form-submit">
+              <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13.333 4.667 6 12 2.667 8.667" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span class="btn-text">Upload template</span>
+            </button>
           </div>
         </form>
       </div>
     </div>
 
     <div class="modal-overlay hidden" id="admin-category-form-overlay" role="dialog" aria-modal="true" aria-labelledby="admin-category-form-title">
-      <div class="modal-card">
+      <div class="modal-card admin-form-modal">
         <button type="button" class="modal-close" id="admin-category-form-close" aria-label="Close">✕</button>
         <h2 id="admin-category-form-title">Add category</h2>
         <form id="admin-category-form" class="admin-form">
@@ -268,8 +343,14 @@
           </div>
           <p class="form-error hidden" id="admin-category-form-error"></p>
           <div class="admin-form-actions">
-            <button type="button" class="btn btn-outline" id="admin-category-form-cancel">Cancel</button>
-            <button type="submit" class="btn btn-primary">Save category</button>
+            <button type="button" class="btn btn-outline" id="admin-category-form-cancel">
+              <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              <span class="btn-text">Cancel</span>
+            </button>
+            <button type="submit" class="btn btn-primary" id="admin-category-form-submit">
+              <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13.333 4.667 6 12 2.667 8.667" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span class="btn-text">Save category</span>
+            </button>
           </div>
         </form>
       </div>

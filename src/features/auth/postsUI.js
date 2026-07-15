@@ -12,6 +12,7 @@ import {
 import { platformIconsHtml } from '../shared/platformIcons.js';
 import { ScheduleAllModal } from '../modules/ScheduleAllModal.js';
 import { summarizeSchedule } from '../domain/schedulePlanner.js';
+import { buttonLabel } from '../shared/uiIcons.js';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 
@@ -513,8 +514,8 @@ export class PostsUI {
           <span class="post-status-badge post-status-badge--${escapeHtml(post.status || 'preparing')}">${escapeHtml(statusLabel)}</span>
         </p>
         <div class="${actionsClass}">
-          <button type="button" class="btn btn-outline btn-sm" data-action="edit">Edit</button>
-          <button type="button" class="btn btn-ghost btn-sm" data-action="delete">Delete</button>
+          <button type="button" class="btn btn-primary btn-sm" data-action="edit">${buttonLabel('edit', 'Edit')}</button>
+          <button type="button" class="btn btn-danger btn-sm" data-action="delete">${buttonLabel('trash', 'Delete')}</button>
         </div>
       </div>
     `;
@@ -792,12 +793,12 @@ export class PostsUI {
 
     this.weekEl.innerHTML = `
       <div class="posts-week__nav">
-        <button type="button" class="btn btn-outline btn-sm" data-week-prev aria-label="Previous week">← Prev</button>
+        <button type="button" class="btn btn-outline btn-sm" data-week-prev aria-label="Previous week">${buttonLabel('chevronLeft', 'Prev')}</button>
         <div class="posts-week__nav-center">
           <strong>${escapeHtml(rangeLabel)}</strong>
-          <button type="button" class="btn btn-ghost btn-sm" data-week-today>This week</button>
+          <button type="button" class="btn btn-ghost btn-sm" data-week-today>${buttonLabel('calendar', 'This week')}</button>
         </div>
-        <button type="button" class="btn btn-outline btn-sm" data-week-next aria-label="Next week">Next →</button>
+        <button type="button" class="btn btn-outline btn-sm" data-week-next aria-label="Next week">${buttonLabel('chevronRight', 'Next')}</button>
       </div>
       <div class="posts-week__grid">
         ${days
