@@ -16,6 +16,9 @@ export const BUCKET_RATIO_LABELS = {
 /** @type {string[]} Ordered bucket ids for gallery and export format tabs. */
 export const GALLERY_BUCKETS = ['square', 'portrait', 'story', 'landscape'];
 
+/** @type {number[]} Page size options for template gallery pagination. */
+export const GALLERY_PAGE_SIZE_OPTIONS = [12, 24, 48, 96];
+
 /** @type {number} Default number of template cards shown before "Load more". */
 export const DEFAULT_GALLERY_LIMIT = 12;
 

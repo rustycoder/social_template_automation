@@ -17,13 +17,13 @@ export async function listCategories({ activeOnly = true } = {}) {
                 created_at AS createdAt, updated_at AS updatedAt
          FROM categories
          WHERE is_active = 1
-         ORDER BY sort_order ASC, label ASC`
+         ORDER BY label ASC`
       )
     : await query(
         `SELECT id, label, sort_order AS sortOrder, is_active AS isActive,
                 created_at AS createdAt, updated_at AS updatedAt
          FROM categories
-         ORDER BY sort_order ASC, label ASC`
+         ORDER BY label ASC`
       );
 
   setCached(cacheKey, rows);
@@ -40,28 +40,27 @@ export async function getCategoryById(id) {
   return rows[0] || null;
 }
 
-export async function createCategory({ id, label, sortOrder = 0, isActive = 1 }) {
+export async function createCategory({ id, label, isActive = 1 }) {
   const now = nowDatetime();
   await query(
     `INSERT INTO categories (id, label, sort_order, is_active, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?)`,
-    [id, label, sortOrder, isActive ? 1 : 0, now, now]
+     VALUES (?, ?, 0, ?, ?, ?)`,
+    [id, label, isActive ? 1 : 0, now, now]
   );
   invalidateTemplateCatalogCache();
   return getCategoryById(id);
 }
 
-export async function upsertCategory({ id, label, sortOrder = 0, isActive = 1 }) {
+export async function upsertCategory({ id, label, isActive = 1 }) {
   const now = nowDatetime();
   await query(
     `INSERT INTO categories (id, label, sort_order, is_active, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?)
+     VALUES (?, ?, 0, ?, ?, ?)
      ON DUPLICATE KEY UPDATE
        label = VALUES(label),
-       sort_order = VALUES(sort_order),
        is_active = VALUES(is_active),
        updated_at = VALUES(updated_at)`,
-    [id, label, sortOrder, isActive ? 1 : 0, now, now]
+    [id, label, isActive ? 1 : 0, now, now]
   );
   invalidateTemplateCatalogCache();
   return getCategoryById(id);
@@ -72,16 +71,15 @@ export async function updateCategory(id, patch) {
   if (!existing) return null;
 
   const label = patch.label != null ? patch.label : existing.label;
-  const sortOrder = patch.sortOrder != null ? patch.sortOrder : existing.sortOrder;
   const isActive =
     patch.isActive != null ? (patch.isActive ? 1 : 0) : existing.isActive ? 1 : 0;
   const now = nowDatetime();
 
   await query(
     `UPDATE categories
-     SET label = ?, sort_order = ?, is_active = ?, updated_at = ?
+     SET label = ?, is_active = ?, updated_at = ?
      WHERE id = ?`,
-    [label, sortOrder, isActive, now, id]
+    [label, isActive, now, id]
   );
   invalidateTemplateCatalogCache();
   return getCategoryById(id);

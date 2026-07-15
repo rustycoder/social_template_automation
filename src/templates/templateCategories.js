@@ -31,7 +31,6 @@ export function getCategoryLabel(categoryId) {
   return TEMPLATE_CATEGORIES[categoryId] ?? TEMPLATE_CATEGORIES.general;
 }
 
-export const CATEGORY_OPTIONS = Object.entries(TEMPLATE_CATEGORIES).map(([id, label]) => ({
-  id,
-  label,
-}));
+export const CATEGORY_OPTIONS = Object.entries(TEMPLATE_CATEGORIES)
+  .map(([id, label]) => ({ id, label }))
+  .sort((a, b) => a.label.localeCompare(b.label, undefined, { sensitivity: 'base' }));

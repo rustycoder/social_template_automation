@@ -35,6 +35,11 @@ export class AuthUI {
     this.mode = 'login';
     this._resolveOpen = null;
     this._dropdownOpen = false;
+    /** @type {Comment | null} */
+    this._formPlaceholder = null;
+    /** @type {DocumentFragment | null} */
+    this._formHolder = null;
+    this._formParked = false;
     this.onBillingClick = null;
     this.onStudioClick = null;
     this.onPostsClick = null;
@@ -43,6 +48,8 @@ export class AuthUI {
     this.onLogout = null;
 
     this._bindEvents();
+    // Remove credential fields from the live DOM until Sign in is opened.
+    this._parkAuthForm();
     authService.onChange((user) => this._renderHeader(user));
     this._renderHeader(authService.getUser());
   }
@@ -55,24 +62,19 @@ export class AuthUI {
       this.onLogout?.();
     });
     this.billingBtn?.addEventListener('click', () => {
-      this._closeDropdown();
-      this.onBillingClick?.();
+      this._navigateAway(() => this.onBillingClick?.());
     });
     this.studioBtn?.addEventListener('click', () => {
-      this._closeDropdown();
-      this.onStudioClick?.();
+      this._navigateAway(() => this.onStudioClick?.());
     });
     this.postsBtn?.addEventListener('click', () => {
-      this._closeDropdown();
-      this.onPostsClick?.();
+      this._navigateAway(() => this.onPostsClick?.());
     });
     this.adminBtn?.addEventListener('click', () => {
-      this._closeDropdown();
-      this.onAdminClick?.();
+      this._navigateAway(() => this.onAdminClick?.());
     });
     this.adminCategoriesBtn?.addEventListener('click', () => {
-      this._closeDropdown();
-      this.onAdminCategoriesClick?.();
+      this._navigateAway(() => this.onAdminCategoriesClick?.());
     });
     this.profileTrigger?.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -99,35 +101,166 @@ export class AuthUI {
       this._setMode(this.mode === 'login' ? 'register' : 'login');
     });
 
+    // Prefer button click over form submit so browsers are less likely to
+    // treat auth as a native password-manager login completion.
+    this.submitBtn?.addEventListener('click', (e) => {
+      e.preventDefault();
+      this._handleSubmit();
+    });
     this.form?.addEventListener('submit', (e) => {
       e.preventDefault();
       this._handleSubmit();
     });
   }
 
+  /**
+   * Clears any leftover credential values from auth inputs.
+   * @returns {void}
+   * @private
+   */
+  _scrubCredentials() {
+    if (this.passwordInput) {
+      this.passwordInput.value = '';
+      this.passwordInput.removeAttribute('value');
+    }
+    if (this.emailInput) {
+      this.emailInput.value = '';
+      this.emailInput.removeAttribute('value');
+    }
+    if (this.nameInput) {
+      this.nameInput.value = '';
+      this.nameInput.removeAttribute('value');
+    }
+    try {
+      this.form?.reset();
+    } catch {
+      /* detached form */
+    }
+  }
+
+  /**
+   * Neutralizes password fields and removes the auth form from the document
+   * so Safari/Chrome stop treating later navigations as "remember password".
+   * @returns {void}
+   * @private
+   */
+  _parkAuthForm() {
+    if (!this.form || this._formParked) {
+      this._scrubCredentials();
+      return;
+    }
+
+    this._scrubCredentials();
+
+    if (this.passwordInput) {
+      this.passwordInput.type = 'text';
+      this.passwordInput.autocomplete = 'off';
+      this.passwordInput.removeAttribute('name');
+      this.passwordInput.setAttribute('data-lpignore', 'true');
+      this.passwordInput.setAttribute('data-1p-ignore', 'true');
+      this.passwordInput.setAttribute('data-form-type', 'other');
+    }
+    if (this.emailInput) {
+      this.emailInput.autocomplete = 'off';
+      this.emailInput.removeAttribute('name');
+      this.emailInput.setAttribute('data-lpignore', 'true');
+      this.emailInput.setAttribute('data-1p-ignore', 'true');
+      this.emailInput.setAttribute('data-form-type', 'other');
+    }
+
+    this.form.setAttribute('autocomplete', 'off');
+    this.form.setAttribute('data-lpignore', 'true');
+    this.form.setAttribute('data-1p-ignore', 'true');
+
+    const parent = this.form.parentNode;
+    if (parent) {
+      this._formPlaceholder = document.createComment('auth-form-parked');
+      parent.insertBefore(this._formPlaceholder, this.form);
+      this._formHolder = document.createDocumentFragment();
+      this._formHolder.appendChild(this.form);
+      this._formParked = true;
+    }
+  }
+
+  /**
+   * Restores the auth form into the modal when Sign in opens.
+   * @returns {void}
+   * @private
+   */
+  _unparkAuthForm() {
+    if (!this._formParked || !this.form || !this._formPlaceholder?.parentNode) return;
+
+    this._formPlaceholder.parentNode.insertBefore(this.form, this._formPlaceholder);
+    this._formPlaceholder.remove();
+    this._formPlaceholder = null;
+    this._formHolder = null;
+    this._formParked = false;
+
+    if (this.passwordInput) {
+      this.passwordInput.type = 'password';
+      this.passwordInput.name = 'password';
+      this.passwordInput.autocomplete =
+        this.mode === 'register' ? 'new-password' : 'current-password';
+      this.passwordInput.removeAttribute('data-form-type');
+    }
+    if (this.emailInput) {
+      this.emailInput.name = 'email';
+      this.emailInput.autocomplete = 'email';
+      this.emailInput.removeAttribute('data-form-type');
+    }
+    if (this.nameInput) {
+      this.nameInput.name = 'name';
+      this.nameInput.autocomplete = 'name';
+    }
+  }
+
+  /**
+   * Parks credentials, then runs navigation on the next frames so Safari
+   * sees no password field before changing pages.
+   * @param {() => void} navigate
+   * @returns {void}
+   * @private
+   */
+  _navigateAway(navigate) {
+    this._closeDropdown();
+    this._parkAuthForm();
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        navigate?.();
+      });
+    });
+  }
+
   _setMode(mode) {
     this.mode = mode;
-    this.errorEl.textContent = '';
-    this.errorEl.classList.add('hidden');
+    if (this.errorEl) {
+      this.errorEl.textContent = '';
+      this.errorEl.classList.add('hidden');
+    }
 
     if (mode === 'login') {
-      this.title.textContent = 'Sign in';
+      if (this.title) this.title.textContent = 'Sign in';
       setButtonText(this.submitBtn, 'Sign in');
-      this.toggleModeBtn.textContent = 'Create an account';
+      if (this.toggleModeBtn) this.toggleModeBtn.textContent = 'Create an account';
       this.nameGroup?.classList.add('hidden');
-      this.nameInput.required = false;
+      if (this.nameInput) this.nameInput.required = false;
+      this.passwordInput?.setAttribute('autocomplete', 'current-password');
     } else {
-      this.title.textContent = 'Create account';
+      if (this.title) this.title.textContent = 'Create account';
       setButtonText(this.submitBtn, 'Create account');
-      this.toggleModeBtn.textContent = 'Already have an account? Sign in';
+      if (this.toggleModeBtn) {
+        this.toggleModeBtn.textContent = 'Already have an account? Sign in';
+      }
       this.nameGroup?.classList.remove('hidden');
-      this.nameInput.required = true;
+      if (this.nameInput) this.nameInput.required = true;
+      this.passwordInput?.setAttribute('autocomplete', 'new-password');
     }
   }
 
   open(mode = 'login') {
+    this._unparkAuthForm();
     this._setMode(mode);
-    this.form.reset();
+    this._scrubCredentials();
     this.overlay?.classList.remove('hidden');
     this.emailInput?.focus();
 
@@ -138,6 +271,7 @@ export class AuthUI {
 
   close(result = null) {
     this.overlay?.classList.add('hidden');
+    this._parkAuthForm();
     if (this._resolveOpen) {
       this._resolveOpen(result);
       this._resolveOpen = null;
@@ -151,21 +285,25 @@ export class AuthUI {
   }
 
   async _handleSubmit() {
-    this.errorEl.classList.add('hidden');
-    this.submitBtn.disabled = true;
+    if (this._formParked || this.submitBtn?.disabled) return;
+
+    this.errorEl?.classList.add('hidden');
+    if (this.submitBtn) this.submitBtn.disabled = true;
     const originalText = getButtonText(this.submitBtn);
     setButtonText(this.submitBtn, 'Please wait…');
 
+    const email = this.emailInput?.value ?? '';
+    const password = this.passwordInput?.value ?? '';
+    const name = this.nameInput?.value ?? '';
+
     try {
       if (this.mode === 'login') {
-        await authService.login(this.emailInput.value, this.passwordInput.value);
+        await authService.login(email, password);
       } else {
-        await authService.register(
-          this.emailInput.value,
-          this.passwordInput.value,
-          this.nameInput.value
-        );
+        await authService.register(email, password, name);
       }
+      // Park immediately after success — before toast/navigation can race.
+      this._scrubCredentials();
       this.close(true);
       window.dispatchEvent(
         new CustomEvent('toast', { detail: { message: 'Welcome!', type: 'success' } })
@@ -173,10 +311,12 @@ export class AuthUI {
     } catch (error) {
       const message =
         error instanceof ApiError ? error.message : 'Something went wrong. Please try again.';
-      this.errorEl.textContent = message;
-      this.errorEl.classList.remove('hidden');
+      if (this.errorEl) {
+        this.errorEl.textContent = message;
+        this.errorEl.classList.remove('hidden');
+      }
     } finally {
-      this.submitBtn.disabled = false;
+      if (this.submitBtn) this.submitBtn.disabled = false;
       setButtonText(this.submitBtn, originalText);
     }
   }

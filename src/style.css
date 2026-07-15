@@ -3348,7 +3348,8 @@ html:has(body.billing-standalone) {
 .posts-toolbar-field .posts-search,
 .posts-toolbar-field .posts-filter,
 .posts-toolbar-field .admin-search,
-.posts-toolbar-field .admin-filter {
+.posts-toolbar-field .admin-filter,
+.posts-toolbar-field .search-field__input {
   width: 100%;
   height: 40px;
   min-height: 40px;
@@ -4162,6 +4163,34 @@ html:has(body.billing-standalone) {
   gap: 10px;
 }
 
+.admin-actions--start {
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.admin-col-actions {
+  text-align: left;
+  width: 1%;
+  white-space: nowrap;
+}
+
+.admin-status-cell {
+  vertical-align: middle;
+  width: 1%;
+  white-space: nowrap;
+}
+
+.admin-status-cell .ui-switch {
+  margin: 0;
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+.admin-categories-table th,
+.admin-categories-table td {
+  vertical-align: middle;
+}
+
 @media (max-width: 640px) {
   .admin-template-grid {
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -4172,7 +4201,7 @@ html:has(body.billing-standalone) {
 .admin-pagination {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
   gap: 12px;
   margin-top: 12px;
   flex-wrap: wrap;
@@ -4180,6 +4209,35 @@ html:has(body.billing-standalone) {
 
 .admin-pagination[hidden] {
   display: none !important;
+}
+
+.admin-pagination__size {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.admin-pagination__size-label {
+  font-size: 0.85rem;
+  color: var(--color-text-muted, #71717a);
+  white-space: nowrap;
+}
+
+.admin-pagination__size-select {
+  width: auto;
+  min-width: 72px;
+  height: 32px;
+  padding: 4px 28px 4px 10px;
+  font-size: 0.85rem;
+}
+
+.admin-pagination__nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-left: auto;
 }
 
 .admin-pagination__label {
@@ -4229,6 +4287,8 @@ html:has(body.billing-standalone) {
 .admin-actions {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
   gap: 8px;
 }
 

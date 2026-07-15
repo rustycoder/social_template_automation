@@ -57,7 +57,7 @@ router.get('/categories', async (_req, res) => {
 
 router.post('/categories', async (req, res) => {
   try {
-    const { id, label, sortOrder, isActive } = req.body || {};
+    const { id, label, isActive } = req.body || {};
     if (!label || !String(label).trim()) {
       return res.status(400).json({ error: 'label is required' });
     }
@@ -65,13 +65,12 @@ router.post('/categories', async (req, res) => {
     const category = await createCategory({
       id: categoryId,
       label: String(label).trim(),
-      sortOrder: sortOrder != null ? Number(sortOrder) : 0,
       isActive: isActive !== false && isActive !== 0 && isActive !== '0',
     });
     res.status(201).json({ category });
   } catch (error) {
     if (error.code === 'ER_DUP_ENTRY') {
-      return res.status(409).json({ error: 'Category id already exists' });
+      return res.status(409).json({ error: 'Category slug already exists' });
     }
     console.error('Admin create category error:', error);
     res.status(error.status || 500).json({ error: error.message || 'Failed to create category' });
@@ -82,7 +81,6 @@ router.patch('/categories/:id', async (req, res) => {
   try {
     const category = await updateCategory(req.params.id, {
       label: req.body?.label,
-      sortOrder: req.body?.sortOrder,
       isActive: req.body?.isActive,
     });
     if (!category) {

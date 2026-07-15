@@ -515,19 +515,31 @@ html {
 }
 
 /* ---------- Page 1: Template ---------- */
-.template-page__toolbar {
+.template-page__header {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 20px 32px;
-  margin-bottom: 24px;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.template-page__toolbar {
+  display: flex;
   flex-wrap: wrap;
+  gap: 12px 14px;
+  margin-bottom: 18px;
+  align-items: end;
 }
 
 .template-page__intro {
   flex: 1 1 240px;
   min-width: 0;
   margin-bottom: 0;
+}
+
+.template-page__intro .page-title {
+  margin: 0 0 6px;
 }
 
 .template-page__subtitle-row {
@@ -549,62 +561,15 @@ html {
   white-space: nowrap;
 }
 
-.template-page__toolbar .search-field {
-  position: relative;
-  flex: 1 1 240px;
-  width: 100%;
-  min-width: 180px;
-  max-width: 360px;
-  margin: 0;
+.template-page__toolbar .posts-toolbar-field--search {
+  flex: 1 1 auto;
+  min-width: 200px;
+  max-width: none;
 }
 
-.template-page__filters {
-  display: flex;
-  align-items: flex-end;
-  gap: 12px;
-  flex: 0 1 520px;
-  width: 100%;
-  max-width: 560px;
-}
-
-.category-field {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  flex: 1 1 200px;
+.template-page__toolbar .posts-toolbar-field:not(.posts-toolbar-field--search) {
+  flex: 0 0 220px;
   min-width: 160px;
-}
-
-.category-field__label {
-  font-size: 0.68rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--color-text-dim);
-}
-
-.category-field__select {
-  width: 100%;
-  height: 44px;
-  padding: 0 36px 0 14px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-bg-raised);
-  color: var(--color-text);
-  font-family: var(--font-sans);
-  font-size: 0.88rem;
-  outline: none;
-  cursor: pointer;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2.5 4.5L6 8L9.5 4.5' stroke='%2371717a' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
-}
-
-.category-field__select:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px var(--color-primary-glow);
 }
 
 .template-card-category,
@@ -680,8 +645,32 @@ html {
 
 .template-page__more {
   display: flex;
+  align-items: center;
   justify-content: center;
+  gap: 16px;
   margin-top: 24px;
+  flex-wrap: wrap;
+}
+
+.template-page__page-size {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.template-page__page-size-label {
+  font-size: 0.85rem;
+  color: var(--color-text-muted, #71717a);
+  white-space: nowrap;
+}
+
+.template-page__page-size-select {
+  width: auto;
+  min-width: 72px;
+  height: 32px;
+  padding: 4px 28px 4px 10px;
+  font-size: 0.85rem;
 }
 
 /* ---------- Unified post card (Template + Export pages) ---------- */
@@ -1252,27 +1241,21 @@ html {
     width: 12px;
   }
 
+  .template-page__header {
+    margin-bottom: 16px;
+  }
+
   .template-page__toolbar {
     align-items: stretch;
     gap: 12px;
     margin-bottom: 16px;
   }
 
-  .template-page__toolbar .search-field {
+  .template-page__toolbar .posts-toolbar-field--search,
+  .template-page__toolbar .posts-toolbar-field:not(.posts-toolbar-field--search) {
     flex: 1 1 100%;
     max-width: none;
-  }
-
-  .template-page__filters {
-    flex: 1 1 100%;
-    max-width: none;
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .category-field__select {
-    height: 36px;
-    font-size: 0.85rem;
+    min-width: 0;
   }
 
   .search-field__input {

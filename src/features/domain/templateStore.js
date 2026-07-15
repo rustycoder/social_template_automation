@@ -38,10 +38,16 @@ export class TemplateStore {
       ]);
 
       this._templates = buildTemplateCatalog(templates);
-      this._categoryOptions = (categories || []).map((c) => ({
-        id: c.id,
-        label: c.label,
-      }));
+      this._categoryOptions = (categories || [])
+        .map((c) => ({
+          id: c.id,
+          label: c.label,
+        }))
+        .sort((a, b) =>
+          String(a.label || a.id).localeCompare(String(b.label || b.id), undefined, {
+            sensitivity: 'base',
+          })
+        );
 
       if (this._categoryOptions.length === 0) {
         this._categoryOptions = [...FALLBACK_CATEGORIES];

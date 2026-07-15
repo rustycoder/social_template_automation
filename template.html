@@ -169,15 +169,30 @@
             </div>
             <div class="admin-template-grid" id="admin-templates-grid"></div>
             <div class="admin-pagination" id="admin-templates-pagination" hidden>
-              <button type="button" class="btn btn-outline btn-sm" data-admin-page-prev="templates">
-                <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M10 12 6 8l4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                <span class="btn-text">Previous</span>
-              </button>
-              <span class="admin-pagination__label" data-admin-page-label="templates"></span>
-              <button type="button" class="btn btn-outline btn-sm" data-admin-page-next="templates">
-                <span class="btn-text">Next</span>
-                <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </button>
+              <label class="admin-pagination__size">
+                <span class="admin-pagination__size-label">Per page</span>
+                <select
+                  class="text-input admin-pagination__size-select"
+                  data-admin-page-size="templates"
+                  aria-label="Templates per page"
+                >
+                  <option value="12" selected>12</option>
+                  <option value="24">24</option>
+                  <option value="48">48</option>
+                  <option value="96">96</option>
+                </select>
+              </label>
+              <div class="admin-pagination__nav">
+                <button type="button" class="btn btn-outline btn-sm" data-admin-page-prev="templates">
+                  <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M10 12 6 8l4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  <span class="btn-text">Previous</span>
+                </button>
+                <span class="admin-pagination__label" data-admin-page-label="templates"></span>
+                <button type="button" class="btn btn-outline btn-sm" data-admin-page-next="templates">
+                  <span class="btn-text">Next</span>
+                  <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -205,21 +220,21 @@
         <button type="button" class="modal-close" id="auth-modal-close" aria-label="Close">✕</button>
         <h2 id="auth-modal-title">Sign in</h2>
         <p class="modal-desc">Sign in with an admin account to manage templates.</p>
-        <form id="auth-form" class="auth-form">
+        <form id="auth-form" class="auth-form" autocomplete="off" data-lpignore="true" data-1p-ignore="true">
           <div class="form-group hidden" id="auth-name-group">
             <label for="auth-name">Name</label>
-            <input type="text" id="auth-name" class="text-input" autocomplete="name" />
+            <input type="text" id="auth-name" class="text-input" autocomplete="off" />
           </div>
           <div class="form-group">
             <label for="auth-email">Email</label>
-            <input type="email" id="auth-email" class="text-input" required autocomplete="email" />
+            <input type="email" id="auth-email" class="text-input" required autocomplete="off" />
           </div>
           <div class="form-group">
             <label for="auth-password">Password</label>
-            <input type="password" id="auth-password" class="text-input" required minlength="8" autocomplete="current-password" />
+            <input type="password" id="auth-password" class="text-input" required minlength="8" autocomplete="off" />
           </div>
           <p class="form-error hidden" id="auth-error"></p>
-          <button type="submit" class="btn btn-primary btn-block" id="auth-submit-btn">
+          <button type="button" class="btn btn-primary btn-block" id="auth-submit-btn">
             <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
               <circle cx="8" cy="5.333" r="2.667" stroke="currentColor" stroke-width="1.35"/>
               <path d="M2.667 13.333c0-2.4 2.4-4 5.333-4s5.333 1.6 5.333 4" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/>

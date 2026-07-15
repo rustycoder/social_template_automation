@@ -16,7 +16,8 @@ import { activeSwitchHtml, buttonLabel, setButtonText, UI_ICONS } from '../share
 
 const PREVIEW_BUCKETS = ['square', 'portrait', 'story', 'landscape'];
 const FIELD_TYPES = ['text', 'textarea', 'image'];
-const ADMIN_PAGE_SIZE = 12;
+const ADMIN_PAGE_SIZE_OPTIONS = [12, 24, 48, 96];
+const DEFAULT_ADMIN_PAGE_SIZE = 12;
 
 function escapeHtml(value) {
   return String(value ?? '')
@@ -91,6 +92,8 @@ export class AdminUI {
     this._categories = [];
     this._templatePage = 1;
     this._categoryPage = 1;
+    this._templatePageSize = DEFAULT_ADMIN_PAGE_SIZE;
+    this._categoryPageSize = DEFAULT_ADMIN_PAGE_SIZE;
     /** @type {string | null} */
     this._editingTemplateId = null;
     /** @type {string} */
@@ -147,6 +150,12 @@ export class AdminUI {
       } else if (next) {
         this._changePage(next.dataset.adminPageNext, 1);
       }
+    });
+
+    this.page?.addEventListener('change', (e) => {
+      const sizeSelect = e.target?.closest?.('[data-admin-page-size]');
+      if (!sizeSelect) return;
+      this._setPageSize(sizeSelect.dataset.adminPageSize, sizeSelect.value);
     });
 
     this.btnNewTemplate?.addEventListener('click', () => this._openTemplateForm(null));
@@ -349,11 +358,17 @@ export class AdminUI {
   }
 
   _fillCategorySelects() {
+    const sorted = [...this._categories].sort((a, b) =>
+      String(a.label || a.id).localeCompare(String(b.label || b.id), undefined, {
+        sensitivity: 'base',
+      })
+    );
+
     const formSelect = document.getElementById('admin-template-category');
     if (formSelect) {
       const current = formSelect.value;
       formSelect.innerHTML = '';
-      for (const cat of this._categories) {
+      for (const cat of sorted) {
         const opt = document.createElement('option');
         opt.value = cat.id;
         opt.textContent = `${cat.label}${cat.isActive ? '' : ' (inactive)'}`;
@@ -368,9 +383,6 @@ export class AdminUI {
     if (filterSelect) {
       const currentFilter = filterSelect.value;
       filterSelect.innerHTML = '<option value="">All categories</option>';
-      const sorted = [...this._categories].sort((a, b) =>
-        String(a.label || a.id).localeCompare(String(b.label || b.id))
-      );
       for (const cat of sorted) {
         const opt = document.createElement('option');
         opt.value = cat.id;
@@ -388,21 +400,34 @@ export class AdminUI {
   }
 
   /**
+   * @param {number|string} value
+   * @returns {number}
+   * @private
+   */
+  _normalizePageSize(value) {
+    const size = Number(value);
+    return ADMIN_PAGE_SIZE_OPTIONS.includes(size) ? size : DEFAULT_ADMIN_PAGE_SIZE;
+  }
+
+  /**
    * @param {object[]} rows
    * @param {number} page
+   * @param {number} pageSize
    */
-  _paginate(rows, page) {
+  _paginate(rows, page, pageSize) {
+    const size = this._normalizePageSize(pageSize);
     const total = rows.length;
-    const totalPages = Math.max(1, Math.ceil(total / ADMIN_PAGE_SIZE) || 1);
+    const totalPages = Math.max(1, Math.ceil(total / size) || 1);
     const current = Math.min(Math.max(1, page), totalPages);
-    const start = (current - 1) * ADMIN_PAGE_SIZE;
+    const start = (current - 1) * size;
     return {
       page: current,
+      pageSize: size,
       totalPages,
       total,
       start: total === 0 ? 0 : start + 1,
-      end: Math.min(start + ADMIN_PAGE_SIZE, total),
-      rows: rows.slice(start, start + ADMIN_PAGE_SIZE),
+      end: Math.min(start + size, total),
+      rows: rows.slice(start, start + size),
     };
   }
 
@@ -421,15 +446,34 @@ export class AdminUI {
   }
 
   /**
+   * @param {'templates'|'categories'} kind
+   * @param {number|string} value
+   * @private
+   */
+  _setPageSize(kind, value) {
+    const size = this._normalizePageSize(value);
+    if (kind === 'templates') {
+      this._templatePageSize = size;
+      this._templatePage = 1;
+      this._renderTemplates();
+    } else if (kind === 'categories') {
+      this._categoryPageSize = size;
+      this._categoryPage = 1;
+      this._renderCategories();
+    }
+  }
+
+  /**
    * @param {HTMLElement|null} el
    * @param {'templates'|'categories'} kind
-   * @param {{ page: number, totalPages: number, total: number, start: number, end: number }} info
+   * @param {{ page: number, pageSize: number, totalPages: number, total: number, start: number, end: number }} info
    */
   _updatePagination(el, kind, info) {
     if (!el) return;
     const label = el.querySelector(`[data-admin-page-label="${kind}"]`);
     const prev = el.querySelector(`[data-admin-page-prev="${kind}"]`);
     const next = el.querySelector(`[data-admin-page-next="${kind}"]`);
+    const sizeSelect = el.querySelector(`[data-admin-page-size="${kind}"]`);
 
     if (info.total === 0) {
       el.hidden = true;
@@ -437,6 +481,9 @@ export class AdminUI {
     }
 
     el.hidden = false;
+    if (sizeSelect && String(sizeSelect.value) !== String(info.pageSize)) {
+      sizeSelect.value = String(info.pageSize);
+    }
     if (label) {
       label.textContent = `Showing ${info.start}–${info.end} of ${info.total} · Page ${info.page} of ${info.totalPages}`;
     }
@@ -472,7 +519,11 @@ export class AdminUI {
 
   _filterCategories() {
     const q = (this.categorySearch?.value || '').trim().toLowerCase();
-    let rows = this._categories;
+    let rows = [...this._categories].sort((a, b) =>
+      String(a.label || a.id).localeCompare(String(b.label || b.id), undefined, {
+        sensitivity: 'base',
+      })
+    );
     if (!q) return rows;
     return rows.filter(
       (c) => c.label?.toLowerCase().includes(q) || c.id?.toLowerCase().includes(q)
@@ -503,8 +554,9 @@ export class AdminUI {
   _renderTemplates() {
     if (!this.templatesGrid) return;
     const filtered = this._filterTemplates();
-    const pageInfo = this._paginate(filtered, this._templatePage);
+    const pageInfo = this._paginate(filtered, this._templatePage, this._templatePageSize);
     this._templatePage = pageInfo.page;
+    this._templatePageSize = pageInfo.pageSize;
     this._updatePagination(this.templatesPagination, 'templates', pageInfo);
 
     this.templatesGrid.innerHTML = '';
@@ -588,15 +640,16 @@ export class AdminUI {
   _renderCategories() {
     if (!this.categoriesBody) return;
     const filtered = this._filterCategories();
-    const pageInfo = this._paginate(filtered, this._categoryPage);
+    const pageInfo = this._paginate(filtered, this._categoryPage, this._categoryPageSize);
     this._categoryPage = pageInfo.page;
+    this._categoryPageSize = pageInfo.pageSize;
     this._updatePagination(this.categoriesPagination, 'categories', pageInfo);
 
     this.categoriesBody.innerHTML = '';
 
     if (pageInfo.rows.length === 0) {
       this.categoriesBody.innerHTML =
-        '<tr><td colspan="4" class="admin-empty-cell">No categories found.</td></tr>';
+        '<tr><td colspan="3" class="admin-empty-cell">No categories found.</td></tr>';
       return;
     }
 
@@ -607,15 +660,13 @@ export class AdminUI {
           <strong>${escapeHtml(c.label)}</strong>
           <div class="admin-mono">${escapeHtml(c.id)}</div>
         </td>
-        <td>${escapeHtml(c.sortOrder)}</td>
-        <td>
-          <span class="admin-status-badge ${c.isActive ? 'active' : 'inactive'}">
-            ${c.isActive ? 'Active' : 'Inactive'}
-          </span>
-        </td>
-        <td class="admin-actions">
-          <button type="button" class="btn btn-primary btn-sm" data-action="edit">${buttonLabel('edit', 'Edit')}</button>
+        <td class="admin-status-cell">
           ${activeSwitchHtml(!!c.isActive)}
+        </td>
+        <td class="admin-col-actions">
+          <div class="admin-actions admin-actions--start">
+            <button type="button" class="btn btn-primary btn-sm" data-action="edit">${buttonLabel('edit', 'Edit')}</button>
+          </div>
         </td>
       `;
       tr.querySelector('[data-action="edit"]')?.addEventListener('click', () =>
@@ -1108,8 +1159,7 @@ html, body { margin: 0; padding: 0; width: 1080px; height: 1080px; overflow: hid
 
     const idInput = document.getElementById('admin-category-id');
     const labelInput = document.getElementById('admin-category-label');
-    const sortInput = document.getElementById('admin-category-sort');
-    const activeInput = document.getElementById('admin-category-active');
+    const idHint = document.getElementById('admin-category-id-hint');
 
     if (this.categoryFormTitle) {
       this.categoryFormTitle.textContent = category ? 'Edit category' : 'Add category';
@@ -1118,11 +1168,14 @@ html, body { margin: 0; padding: 0; width: 1080px; height: 1080px; overflow: hid
     if (idInput) {
       idInput.disabled = !!category;
       idInput.value = category?.id || '';
-      idInput.required = !category;
+      idInput.required = false;
+    }
+    if (idHint) {
+      idHint.textContent = category
+        ? 'Slug cannot be changed after create.'
+        : 'Optional. Auto-generated from the label if left blank.';
     }
     if (labelInput) labelInput.value = category?.label || '';
-    if (sortInput) sortInput.value = category?.sortOrder ?? 0;
-    if (activeInput) activeInput.checked = category ? !!category.isActive : true;
 
     this.categoryFormOverlay?.classList.remove('hidden');
   }
@@ -1135,8 +1188,6 @@ html, body { margin: 0; padding: 0; width: 1080px; height: 1080px; overflow: hid
   async _submitCategoryForm() {
     const label = document.getElementById('admin-category-label')?.value?.trim();
     const id = document.getElementById('admin-category-id')?.value?.trim();
-    const sortOrder = Number(document.getElementById('admin-category-sort')?.value || 0);
-    const isActive = !!document.getElementById('admin-category-active')?.checked;
 
     if (!label) {
       this._setFormError(this.categoryFormError, 'Label is required');
@@ -1145,10 +1196,10 @@ html, body { margin: 0; padding: 0; width: 1080px; height: 1080px; overflow: hid
 
     try {
       if (this._editingCategoryId) {
-        await api.adminUpdateCategory(this._editingCategoryId, { label, sortOrder, isActive });
+        await api.adminUpdateCategory(this._editingCategoryId, { label });
         toast('Category updated');
       } else {
-        await api.adminCreateCategory({ id: id || undefined, label, sortOrder, isActive });
+        await api.adminCreateCategory({ id: id || undefined, label });
         toast('Category created');
       }
       this._closeCategoryForm();

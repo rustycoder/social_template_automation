@@ -9,7 +9,7 @@ import { createTemplateCard } from '../components/PostCard.js';
 import {
   BUCKET_RATIO_LABELS,
   DEFAULT_GALLERY_LIMIT,
-  GALLERY_LIMIT_STEP,
+  GALLERY_PAGE_SIZE_OPTIONS,
 } from '../shared/constants.js';
 import { renderGalleryPreview } from '../rendering/templateGalleryPreview.js';
 import { getCategoryLabel } from '../../templates/templateCategories.js';
@@ -40,14 +40,22 @@ export class TemplatePage {
     this.templateCategoryFilter = '';
 
     /** @type {number} */
+    this.templatePageSize = DEFAULT_GALLERY_LIMIT;
+
+    /** @type {number} */
     this.templateGalleryLimit = DEFAULT_GALLERY_LIMIT;
 
     this.templateGrid = document.getElementById('template-grid');
     this.templateSearchInput = document.getElementById('template-search');
     this.templateCategorySelect = document.getElementById('template-category-filter');
     this.templatePageCount = document.getElementById('template-page-count');
+    this.templatePageSizeSelect = document.getElementById('template-page-size');
     this.loadMoreBtn = document.getElementById('btn-load-more-templates');
     this.galleryFormatTabBtns = document.querySelectorAll('#template-format-tabs [data-gallery-bucket]');
+
+    if (this.templatePageSizeSelect) {
+      this.templatePageSizeSelect.value = String(this.templatePageSize);
+    }
 
     this._updateTemplateCount();
     this._populateCategoryFilter();
@@ -65,10 +73,20 @@ export class TemplatePage {
       this.currentTemplateKey = '';
     }
     this.templateCategoryFilter = '';
-    this.templateGalleryLimit = DEFAULT_GALLERY_LIMIT;
+    this.templateGalleryLimit = this.templatePageSize;
     this._populateCategoryFilter();
     this._updateTemplateCount();
     this.render();
+  }
+
+  /**
+   * @param {number|string} value
+   * @returns {number}
+   * @private
+   */
+  _normalizePageSize(value) {
+    const size = Number(value);
+    return GALLERY_PAGE_SIZE_OPTIONS.includes(size) ? size : DEFAULT_GALLERY_LIMIT;
   }
 
   /**
@@ -129,18 +147,25 @@ export class TemplatePage {
   _bindEvents() {
     this.templateSearchInput?.addEventListener('input', () => {
       this.templateSearchQuery = this.templateSearchInput.value.trim().toLowerCase();
-      this.templateGalleryLimit = DEFAULT_GALLERY_LIMIT;
+      this.templateGalleryLimit = this.templatePageSize;
       this.render();
     });
 
     this.templateCategorySelect?.addEventListener('change', () => {
       this.templateCategoryFilter = this.templateCategorySelect.value;
-      this.templateGalleryLimit = DEFAULT_GALLERY_LIMIT;
+      this.templateGalleryLimit = this.templatePageSize;
+      this.render();
+    });
+
+    this.templatePageSizeSelect?.addEventListener('change', () => {
+      this.templatePageSize = this._normalizePageSize(this.templatePageSizeSelect.value);
+      this.templatePageSizeSelect.value = String(this.templatePageSize);
+      this.templateGalleryLimit = this.templatePageSize;
       this.render();
     });
 
     this.loadMoreBtn?.addEventListener('click', () => {
-      this.templateGalleryLimit += GALLERY_LIMIT_STEP;
+      this.templateGalleryLimit += this.templatePageSize;
       this.render();
     });
 
@@ -149,7 +174,7 @@ export class TemplatePage {
         const bucket = btn.dataset.galleryBucket;
         if (!bucket || bucket === this.galleryBucket) return;
         this.galleryBucket = bucket;
-        this.templateGalleryLimit = DEFAULT_GALLERY_LIMIT;
+        this.templateGalleryLimit = this.templatePageSize;
         this.syncGalleryFormatTabs();
         this.render();
         this.onBucketChange(bucket);
@@ -260,9 +285,11 @@ export class TemplatePage {
         : 'No templates available.';
       this.templateGrid.appendChild(empty);
       this.loadMoreBtn?.classList.add('hidden');
+      this.templatePageSizeSelect?.closest('.template-page__more')?.classList.add('hidden');
       return;
     }
 
+    this.templatePageSizeSelect?.closest('.template-page__more')?.classList.remove('hidden');
     const aspectLabel = BUCKET_RATIO_LABELS[this.galleryBucket] ?? '';
 
     for (const key of visibleKeys) {

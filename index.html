@@ -131,7 +131,7 @@
       <!-- Page 1: Template Discovery -->
       <section class="step-panel active" id="step-1">
         <div class="template-page">
-          <div class="template-page__toolbar">
+          <header class="template-page__header">
             <div class="template-page__intro">
               <h2 class="page-title">Pick a post style</h2>
               <div class="template-page__subtitle-row">
@@ -139,27 +139,33 @@
                 <span class="template-page__count" id="template-page-count" aria-live="polite"></span>
               </div>
             </div>
+          </header>
 
-            <div class="template-page__filters">
-              <div class="search-field">
-                <svg class="search-field__icon" width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-                  <circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.5"/>
-                  <path d="M12.5 12.5L16 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                </svg>
-                <input type="search" id="template-search" class="search-field__input" placeholder="Search templates…" autocomplete="off" />
-              </div>
-              <div class="category-field">
-                <label class="category-field__label" for="template-category-filter">Category</label>
-                <select id="template-category-filter" class="category-field__select" aria-label="Filter by category">
-                  <option value="">All categories</option>
-                </select>
-              </div>
+          <div class="template-page__toolbar">
+            <div class="posts-toolbar-field posts-toolbar-field--search">
+              <label class="posts-toolbar-label" for="template-search">Search</label>
+              <input type="search" id="template-search" class="text-input" placeholder="Search templates…" autocomplete="off" />
+            </div>
+            <div class="posts-toolbar-field">
+              <label class="posts-toolbar-label" for="template-category-filter">Category</label>
+              <select id="template-category-filter" class="text-input posts-filter" aria-label="Filter by category">
+                <option value="">All categories</option>
+              </select>
             </div>
           </div>
 
           <div class="template-masonry" id="template-grid"></div>
 
           <div class="template-page__more">
+            <label class="template-page__page-size">
+              <span class="template-page__page-size-label">Per page</span>
+              <select id="template-page-size" class="text-input template-page__page-size-select" aria-label="Templates per page">
+                <option value="12" selected>12</option>
+                <option value="24">24</option>
+                <option value="48">48</option>
+                <option value="96">96</option>
+              </select>
+            </label>
             <button type="button" class="btn btn-ghost hidden" id="btn-load-more-templates">
               <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                 <path d="M8 5.333V12M5.333 8.667 8 12l2.667-3.333" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -351,21 +357,21 @@
         <button type="button" class="modal-close" id="auth-modal-close" aria-label="Close">✕</button>
         <h2 id="auth-modal-title">Sign in</h2>
         <p class="modal-desc">Sign in to subscribe and download your posts.</p>
-        <form id="auth-form" class="auth-form">
+        <form id="auth-form" class="auth-form" autocomplete="off" data-lpignore="true" data-1p-ignore="true">
           <div class="form-group hidden" id="auth-name-group">
             <label for="auth-name">Name</label>
-            <input type="text" id="auth-name" class="text-input" autocomplete="name" />
+            <input type="text" id="auth-name" class="text-input" autocomplete="off" />
           </div>
           <div class="form-group">
             <label for="auth-email">Email</label>
-            <input type="email" id="auth-email" class="text-input" required autocomplete="email" />
+            <input type="email" id="auth-email" class="text-input" required autocomplete="off" />
           </div>
           <div class="form-group">
             <label for="auth-password">Password</label>
-            <input type="password" id="auth-password" class="text-input" required minlength="8" autocomplete="current-password" />
+            <input type="password" id="auth-password" class="text-input" required minlength="8" autocomplete="off" />
           </div>
           <p class="form-error hidden" id="auth-error"></p>
-          <button type="submit" class="btn btn-primary btn-block" id="auth-submit-btn">
+          <button type="button" class="btn btn-primary btn-block" id="auth-submit-btn">
             <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
               <circle cx="8" cy="5.333" r="2.667" stroke="currentColor" stroke-width="1.35"/>
               <path d="M2.667 13.333c0-2.4 2.4-4 5.333-4s5.333 1.6 5.333 4" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/>

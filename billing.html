@@ -198,21 +198,21 @@
         <button type="button" class="modal-close" id="auth-modal-close" aria-label="Close">✕</button>
         <h2 id="auth-modal-title">Sign in</h2>
         <p class="modal-desc">Sign in to view your billing history.</p>
-        <form id="auth-form" class="auth-form">
+        <form id="auth-form" class="auth-form" autocomplete="off" data-lpignore="true" data-1p-ignore="true">
           <div class="form-group hidden" id="auth-name-group">
             <label for="auth-name">Name</label>
-            <input type="text" id="auth-name" class="text-input" autocomplete="name" />
+            <input type="text" id="auth-name" class="text-input" autocomplete="off" />
           </div>
           <div class="form-group">
             <label for="auth-email">Email</label>
-            <input type="email" id="auth-email" class="text-input" required autocomplete="email" />
+            <input type="email" id="auth-email" class="text-input" required autocomplete="off" />
           </div>
           <div class="form-group">
             <label for="auth-password">Password</label>
-            <input type="password" id="auth-password" class="text-input" required minlength="8" autocomplete="current-password" />
+            <input type="password" id="auth-password" class="text-input" required minlength="8" autocomplete="off" />
           </div>
           <p class="form-error hidden" id="auth-error"></p>
-          <button type="submit" class="btn btn-primary btn-block" id="auth-submit-btn">
+          <button type="button" class="btn btn-primary btn-block" id="auth-submit-btn">
             <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
               <circle cx="8" cy="5.333" r="2.667" stroke="currentColor" stroke-width="1.35"/>
               <path d="M2.667 13.333c0-2.4 2.4-4 5.333-4s5.333 1.6 5.333 4" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/>
