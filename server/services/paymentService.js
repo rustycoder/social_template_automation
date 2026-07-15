@@ -2,7 +2,11 @@ import crypto from "crypto";
 import { config } from "../config.js";
 import { query } from "../database/db.js";
 import { PaymentGateway, getCheckoutScriptUrl } from "../payment-gateway/index.js";
-import { createSubscription, getPlanById } from "./subscriptionService.js";
+import {
+  createSubscription,
+  getActiveSubscription,
+  getPlanById,
+} from "./subscriptionService.js";
 
 let paymentGateway;
 
@@ -90,6 +94,9 @@ export async function createSubscriptionCheckout(userId, planId) {
     throw error;
   }
 
+  const current = await getActiveSubscription(userId);
+  const isExtension = !!current;
+
   const orderId = generateOrderId(userId);
   const amount = formatAmount(plan.priceCents);
   const currency = config.mpgs.currency;
@@ -108,7 +115,7 @@ export async function createSubscriptionCheckout(userId, planId) {
       id: orderId,
       amount,
       currency,
-      description: plan.name,
+      description: isExtension ? `${plan.name} (extension)` : plan.name,
     },
   });
 
@@ -198,7 +205,9 @@ export async function verifySubscriptionCheckout(userId, orderId, resultIndicato
   await markPaymentCompleted(payment.id, transactionId, subscription.id);
 
   return {
-    message: "Payment successful. Subscription activated.",
+    message: subscription.extended
+      ? "Payment successful. Your plan has been extended."
+      : "Payment successful. Subscription activated.",
     hasActiveSubscription: true,
     subscription,
     payment: {

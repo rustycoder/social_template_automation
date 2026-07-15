@@ -130,21 +130,31 @@
     <main id="main-content" class="billing-standalone__main">
       <section class="step-panel active" id="billing-page">
         <div class="billing-page">
-          <header class="billing-page__header">
-            <div class="billing-page__intro">
-              <h2 class="page-title">My Billing</h2>
-              <p class="page-desc">View your subscription and billing history.</p>
-            </div>
-          </header>
-
           <p class="billing-error form-error hidden" id="billing-error"></p>
           <div class="billing-loading" id="billing-loading">Loading billing history…</div>
 
-          <div id="billing-summary" class="billing-summary"></div>
+          <div class="billing-plans-row" id="billing-plans-row">
+            <section class="billing-current-section" aria-label="Current plan">
+              <header class="billing-plans-section__header">
+                <h3 class="billing-plans-section__title">Current plan</h3>
+                <p class="billing-plans-section__desc">Your active subscription details.</p>
+              </header>
+              <div id="billing-summary" class="billing-summary"></div>
+            </section>
+
+            <section class="billing-plans-section" id="billing-plans-section" aria-label="Available plans">
+              <header class="billing-plans-section__header">
+                <h3 class="billing-plans-section__title">Available plans</h3>
+                <p class="billing-plans-section__desc" id="billing-plans-desc">Choose a plan or upgrade your current subscription.</p>
+              </header>
+              <div class="subscribe-plans billing-plans" id="billing-plans"></div>
+            </section>
+          </div>
 
           <section class="billing-history-card">
             <header class="billing-history-card__header">
-              <h3 class="billing-history-card__title">Billing history</h3>
+              <h3 class="billing-history-card__title">Billing History</h3>
+              <p class="billing-history-card__desc">View your billing history</p>
             </header>
             <p class="billing-empty hidden" id="billing-empty">No billing history yet.</p>
             <div class="billing-table-wrapper" id="billing-table-wrapper">

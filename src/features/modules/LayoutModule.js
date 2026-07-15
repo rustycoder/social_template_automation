@@ -21,6 +21,7 @@ export class LayoutModule {
    * @param {number} [options.initialStep=1] Starting workflow step.
    * @param {() => number} [options.getMaxAccessibleStep] Resolver for gated step navigation.
    * @param {(step: number) => void} [options.onStepChange] Fired after a step transition completes.
+   * @param {(step: number) => void} [options.onStepBlocked] Fired when a locked step is clicked.
    */
   constructor(options = {}) {
     /** @type {number} */
@@ -31,6 +32,9 @@ export class LayoutModule {
 
     /** @type {(step: number) => void} */
     this.onStepChange = options.onStepChange ?? (() => {});
+
+    /** @type {(step: number) => void} */
+    this.onStepBlocked = options.onStepBlocked ?? (() => {});
 
     enhanceFooterSlots();
     this._bindNavigation();
@@ -43,7 +47,11 @@ export class LayoutModule {
    * @private
    */
   _bindNavigation() {
-    bindStepNavigation((step) => this.goToStep(step), () => this.getMaxAccessibleStep());
+    bindStepNavigation(
+      (step) => this.goToStep(step),
+      () => this.getMaxAccessibleStep(),
+      (step) => this.onStepBlocked(step)
+    );
 
     document.getElementById('btn-back-template')?.addEventListener('click', () => this.goToStep(1));
     document.getElementById('btn-back-data')?.addEventListener('click', () => this.goToStep(2));

@@ -32,8 +32,8 @@ export class App {
     this.templateStore = deps.templateStore;
     this.dataSource = new DataSource();
 
-    /** @type {string} */
-    this.currentTemplateKey = this.templateStore.getDefaultTemplateId();
+    /** @type {string} Empty until the user selects a template. */
+    this.currentTemplateKey = '';
 
     /** @type {string} */
     this.currentBucket = 'square';
@@ -94,6 +94,7 @@ export class App {
       initialStep: 1,
       getMaxAccessibleStep: () => this._getMaxAccessibleStep(),
       onStepChange: (step) => this._onStepChange(step),
+      onStepBlocked: (step) => this._onStepBlocked(step),
     });
 
     this.templatePage = new TemplatePage(this.templateStore, {
@@ -120,8 +121,11 @@ export class App {
     });
 
     this.currentTemplateKey = this.templatePage.getCurrentTemplateKey();
-    this.currentBucket = this.templatePage.selectInitialBucket(this.currentTemplateKey);
-    this.templatePage.selectTemplate(this.currentTemplateKey);
+    if (this.currentTemplateKey) {
+      this.currentBucket = this.templatePage.selectInitialBucket(this.currentTemplateKey);
+      this.templatePage.selectTemplate(this.currentTemplateKey);
+    }
+    this.layout.goToStep(1, { silent: true });
 
     this._bindToast();
   }
@@ -156,6 +160,30 @@ export class App {
     if (!this.currentTemplateKey) return 1;
     if (this.dataSource.getRowCount() === 0) return 2;
     return 3;
+  }
+
+  /**
+   * @description Explains why a locked workflow step cannot be opened yet.
+   * @param {number} step Target step the user tried to open.
+   * @returns {void}
+   * @private
+   */
+  _onStepBlocked(step) {
+    if (!this.currentTemplateKey && step >= 2) {
+      window.dispatchEvent(
+        new CustomEvent('toast', {
+          detail: { message: 'Please select a template first', type: 'error' },
+        })
+      );
+      return;
+    }
+    if (step === 3 && this.dataSource.getRowCount() === 0) {
+      window.dispatchEvent(
+        new CustomEvent('toast', {
+          detail: { message: 'Add data before continuing to Export', type: 'error' },
+        })
+      );
+    }
   }
 
   /**

@@ -68,7 +68,10 @@ export async function handleCheckoutReturn() {
 
     const message = result.alreadyCompleted
       ? 'Subscription is already active.'
-      : 'Payment successful! Your subscription is now active.';
+      : result.message ||
+        (result.subscription?.extended
+          ? 'Payment successful! Your plan has been extended.'
+          : 'Payment successful! Your subscription is now active.');
 
     window.dispatchEvent(
       new CustomEvent('toast', { detail: { message, type: 'success' } })

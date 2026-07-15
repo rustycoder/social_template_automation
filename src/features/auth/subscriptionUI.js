@@ -2,7 +2,12 @@ import { api } from './api.js';
 import { authService } from './auth.js';
 import { ApiError } from './api.js';
 import { launchMpgsCheckout } from './checkout.js';
-import { buttonLabel, getButtonText, setButtonText } from '../shared/uiIcons.js';
+import { getButtonText, setButtonText } from '../shared/uiIcons.js';
+import {
+  bindUnifiedPlanCard,
+  renderUnifiedPlanCardHtml,
+  splitPlansByInterval,
+} from './planCard.js';
 
 export class SubscriptionUI {
   constructor(authUI) {
@@ -14,6 +19,8 @@ export class SubscriptionUI {
     this.titleEl = document.getElementById('subscribe-modal-title');
     this.descEl = document.getElementById('subscribe-modal-desc');
     this.plans = [];
+    /** @type {'month' | 'year'} */
+    this._planInterval = 'year';
     this._resolveOpen = null;
 
     this._bindEvents();
@@ -49,6 +56,7 @@ export class SubscriptionUI {
         return;
       }
 
+      this._planInterval = 'year';
       this._renderPlans();
     } catch (error) {
       console.error('Failed to load plans:', error);
@@ -67,38 +75,31 @@ export class SubscriptionUI {
   _renderPlans() {
     if (!this.plansContainer) return;
 
-    this.plansContainer.innerHTML = this.plans
-      .map((plan) => {
-        const intervalLabel = plan.billingInterval === 'year' ? 'per year' : 'per month';
-        const savings =
-          plan.billingInterval === 'year'
-            ? '<span class="plan-savings">Billed once per year</span>'
-            : '';
-        const featured = plan.billingInterval === 'year' ? ' featured' : '';
+    const { monthly, yearly } = splitPlansByInterval(this.plans);
+    if (!monthly && !yearly) {
+      this.plansContainer.innerHTML =
+        '<p class="modal-desc plans-loading">No subscription plans are available right now.</p>';
+      return;
+    }
 
-        return `
-          <article class="subscribe-plan-card${featured}" data-plan-id="${plan.id}">
-            ${plan.billingInterval === 'year' ? '<span class="plan-badge">Best value</span>' : ''}
-            <h3>${plan.name}</h3>
-            <p class="plan-price">${plan.priceLabel}<span>/${plan.billingInterval === 'year' ? 'yr' : 'mo'}</span></p>
-            <p class="plan-interval">${intervalLabel}</p>
-            <p class="plan-desc">${plan.description}</p>
-            ${savings}
-            <ul class="plan-features">
-              <li>Full template library access</li>
-              <li>Unlimited image &amp; video downloads</li>
-              <li>All platform export formats</li>
-            </ul>
-            <button type="button" class="btn btn-primary btn-subscribe-plan" data-plan-id="${plan.id}">
-              ${buttonLabel('check', `Subscribe — ${plan.priceLabel}`)}
-            </button>
-          </article>
-        `;
-      })
-      .join('');
+    if (this._planInterval === 'year' && !yearly) this._planInterval = 'month';
+    if (this._planInterval === 'month' && !monthly) this._planInterval = 'year';
 
-    this.plansContainer.querySelectorAll('.btn-subscribe-plan').forEach((btn) => {
-      btn.addEventListener('click', () => this._handleSubscribe(btn.dataset.planId, btn));
+    this.plansContainer.classList.add('subscribe-plans--unified');
+    this.plansContainer.innerHTML = renderUnifiedPlanCardHtml({
+      monthly,
+      yearly,
+      interval: this._planInterval,
+      currentSubscription: null,
+    });
+
+    bindUnifiedPlanCard(this.plansContainer, {
+      getInterval: () => this._planInterval,
+      onIntervalChange: (interval) => {
+        this._planInterval = interval;
+        this._renderPlans();
+      },
+      onSubscribe: (planId, button) => this._handleSubscribe(planId, button),
     });
   }
 
@@ -150,11 +151,7 @@ export class SubscriptionUI {
   }
 
   async _handleSubscribe(planId, button) {
-    const hasSession = await authService.ensureSession();
-    if (!hasSession) {
-      const loggedIn = await this.authUI.requireLogin();
-      if (!loggedIn) return;
-    }
+    if (!planId) return;
 
     this.errorEl?.classList.add('hidden');
     button.disabled = true;

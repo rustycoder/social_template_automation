@@ -6,6 +6,7 @@
 import { authService } from './features/auth/auth.js';
 import { AuthUI } from './features/auth/authUI.js';
 import { BillingUI } from './features/auth/billingUI.js';
+import { handleCheckoutReturn } from './features/auth/checkout.js';
 
 function bindToasts() {
   const toastContainer = document.getElementById('toast-container');
@@ -28,6 +29,7 @@ function bindToasts() {
 async function boot() {
   bindToasts();
   await authService.ready();
+  await handleCheckoutReturn();
 
   document.querySelectorAll('#step-indicators .step-node').forEach((btn) => {
     btn.addEventListener('click', () => {

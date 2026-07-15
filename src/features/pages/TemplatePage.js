@@ -30,8 +30,8 @@ export class TemplatePage {
     /** @type {string} */
     this.galleryBucket = 'square';
 
-    /** @type {string} */
-    this.currentTemplateKey = this.templateStore.getDefaultTemplateId();
+    /** @type {string} Empty until the user picks a template card. */
+    this.currentTemplateKey = '';
 
     /** @type {string} */
     this.templateSearchQuery = '';
@@ -53,7 +53,6 @@ export class TemplatePage {
     this._populateCategoryFilter();
     this._bindEvents();
     this.render();
-    this.selectInitialBucket(this.currentTemplateKey);
   }
 
   /**
@@ -62,8 +61,8 @@ export class TemplatePage {
    */
   refreshAfterCatalogChange() {
     const keys = this.templateStore.getVisibleTemplateKeys();
-    if (!keys.includes(this.currentTemplateKey)) {
-      this.currentTemplateKey = this.templateStore.getDefaultTemplateId();
+    if (this.currentTemplateKey && !keys.includes(this.currentTemplateKey)) {
+      this.currentTemplateKey = '';
     }
     this.templateCategoryFilter = '';
     this.templateGalleryLimit = DEFAULT_GALLERY_LIMIT;

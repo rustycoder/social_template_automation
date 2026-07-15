@@ -51,7 +51,11 @@ export function syncStepIndicator(currentStep, maxAccessibleStep = 3) {
   document.querySelectorAll('.step-node').forEach((btn) => {
     const btnStep = parseInt(btn.dataset.step, 10);
     btn.classList.remove('active', 'completed');
-    btn.disabled = btnStep > maxAccessibleStep;
+    const locked = btnStep > maxAccessibleStep;
+    // Keep clickable when locked so we can show a guidance message.
+    btn.disabled = false;
+    btn.setAttribute('aria-disabled', locked ? 'true' : 'false');
+    btn.classList.toggle('step-node--locked', locked);
 
     if (btnStep === currentStep) btn.classList.add('active');
     else if (btnStep < currentStep) btn.classList.add('completed');
@@ -62,14 +66,17 @@ export function syncStepIndicator(currentStep, maxAccessibleStep = 3) {
  * @description Binds click handlers on header step nodes.
  * @param {(step: number) => void} onStepClick Called with the target step when navigation is allowed.
  * @param {() => number} getMaxAccessibleStep Returns the highest navigable step.
+ * @param {(step: number) => void} [onStepBlocked] Called when the user clicks a locked step.
  * @returns {void}
  */
-export function bindStepNavigation(onStepClick, getMaxAccessibleStep) {
+export function bindStepNavigation(onStepClick, getMaxAccessibleStep, onStepBlocked) {
   document.querySelectorAll('.step-node').forEach((btn) => {
     btn.addEventListener('click', () => {
       const step = parseInt(btn.dataset.step, 10);
       if (step <= getMaxAccessibleStep()) {
         onStepClick(step);
+      } else {
+        onStepBlocked?.(step);
       }
     });
   });

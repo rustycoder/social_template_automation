@@ -281,13 +281,15 @@ html {
   transition: color var(--transition-fast), background var(--transition-fast);
 }
 
-.step-node:hover:not(:disabled) {
+.step-node:hover:not(:disabled):not(.step-node--locked):not([aria-disabled='true']) {
   color: var(--color-text);
   background: var(--color-bg-hover);
 }
 
-.step-node:disabled {
-  cursor: default;
+.step-node:disabled,
+.step-node.step-node--locked,
+.step-node[aria-disabled='true'] {
+  cursor: not-allowed;
   opacity: 0.5;
 }
 
