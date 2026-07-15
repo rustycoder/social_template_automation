@@ -9,6 +9,9 @@ import {
   platformsLabel,
   postStatusLabel,
 } from '../shared/postMeta.js';
+import { platformIconsHtml } from '../shared/platformIcons.js';
+import { ScheduleAllModal } from '../modules/ScheduleAllModal.js';
+import { summarizeSchedule } from '../domain/schedulePlanner.js';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 
@@ -32,6 +35,21 @@ function escapeHtml(value) {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
+}
+
+/** Compact status copy for week-view cells (avoids two-line badges). */
+const WEEK_STATUS_LABELS = {
+  preparing: 'Preparing',
+  ready: 'Ready',
+  completed: 'Completed',
+};
+
+/**
+ * @param {string} status
+ * @returns {string}
+ */
+function weekStatusLabel(status) {
+  return WEEK_STATUS_LABELS[status] || postStatusLabel(status);
 }
 
 function pad(n) {
@@ -116,11 +134,20 @@ export class PostsUI {
     this.closeBtn = document.getElementById('posts-modal-close');
     this.backBtn = document.getElementById('btn-posts-back');
     this.searchInput = document.getElementById('posts-search');
+    this.platformFilter = document.getElementById('posts-platform-filter');
     this.statusFilter = document.getElementById('posts-status-filter');
     this.dateRangeInput = document.getElementById('posts-date-range');
     this.dateClear = document.getElementById('posts-date-clear');
     this.viewListBtn = document.getElementById('posts-view-list');
+    this.viewGridBtn = document.getElementById('posts-view-grid');
     this.viewWeekBtn = document.getElementById('posts-view-week');
+    this.selectAllWrap = document.getElementById('posts-select-all-wrap');
+    this.selectAllInput = document.getElementById('posts-select-all');
+    this.bulkScheduleBtn = document.getElementById('posts-bulk-schedule');
+    this.bulkDeleteBtn = document.getElementById('posts-bulk-delete');
+    this.bulkScheduleLabel = document.getElementById('posts-bulk-schedule-label');
+    this.bulkDeleteLabel = document.getElementById('posts-bulk-delete-label');
+    this.footerActions = document.getElementById('posts-footer-actions');
     this.loading = false;
 
     this.editOverlay = document.getElementById('post-edit-modal-overlay');
@@ -141,8 +168,8 @@ export class PostsUI {
     this._editingId = null;
     /** @type {Array<object>} */
     this._posts = [];
-    /** @type {'list' | 'week'} */
-    this._view = 'list';
+    /** @type {'list' | 'grid' | 'week'} */
+    this._view = 'grid';
     /** Monday of the visible week */
     this._weekStart = startOfWeek(new Date());
     /** @type {Date|null} */
@@ -151,6 +178,14 @@ export class PostsUI {
     this._filterTo = null;
     /** @type {import('flatpickr').Instance | null} */
     this._dateRangePicker = null;
+    /** @type {Set<number>} */
+    this._selectedIds = new Set();
+    /** @type {Array<object>} */
+    this._visiblePosts = [];
+
+    this.scheduleAllModal = new ScheduleAllModal({
+      onConfirm: (plan) => this._applyBulkSchedule(plan),
+    });
 
     this.closeBtn?.addEventListener('click', () => this.hide());
     this.backBtn?.addEventListener('click', () => this.hide());
@@ -159,6 +194,7 @@ export class PostsUI {
     });
 
     this.searchInput?.addEventListener('input', () => this._renderFiltered());
+    this.platformFilter?.addEventListener('change', () => this._renderFiltered());
     this.statusFilter?.addEventListener('change', () => this._renderFiltered());
     this.dateClear?.addEventListener('click', () => {
       this._dateRangePicker?.clear();
@@ -170,7 +206,14 @@ export class PostsUI {
     this._initDateRangePicker();
 
     this.viewListBtn?.addEventListener('click', () => this._setView('list'));
+    this.viewGridBtn?.addEventListener('click', () => this._setView('grid'));
     this.viewWeekBtn?.addEventListener('click', () => this._setView('week'));
+
+    this.selectAllInput?.addEventListener('change', () => {
+      this._selectAllVisible(!!this.selectAllInput.checked);
+    });
+    this.bulkScheduleBtn?.addEventListener('click', () => this._openBulkSchedule());
+    this.bulkDeleteBtn?.addEventListener('click', () => this._bulkDelete());
 
     this.weekEl?.addEventListener('click', (e) => {
       const target = e.target;
@@ -307,25 +350,42 @@ export class PostsUI {
   }
 
   _setView(view) {
-    this._view = view === 'week' ? 'week' : 'list';
+    if (view === 'week') this._view = 'week';
+    else if (view === 'list') this._view = 'list';
+    else this._view = 'grid';
+
     this.viewListBtn?.classList.toggle('active', this._view === 'list');
+    this.viewGridBtn?.classList.toggle('active', this._view === 'grid');
     this.viewWeekBtn?.classList.toggle('active', this._view === 'week');
-    this.listEl?.classList.toggle('hidden', this._view !== 'list');
+    this.listEl?.classList.toggle('hidden', this._view === 'week');
     this.weekEl?.classList.toggle('hidden', this._view !== 'week');
+    this._syncListLayoutClass();
     this._renderFiltered();
   }
 
+  _syncListLayoutClass() {
+    if (!this.listEl) return;
+    this.listEl.classList.toggle('posts-page__grid', this._view === 'grid');
+    this.listEl.classList.toggle('posts-page__list', this._view === 'list');
+  }
+
   /**
-   * @param {{ status?: string }} [overrides]
+   * @param {{ status?: string, platform?: string }} [overrides]
    */
   _filteredPosts(overrides = {}) {
     const q = (this.searchInput?.value || '').trim().toLowerCase();
     const status = overrides.status ?? (this.statusFilter?.value || 'all');
+    const platform = overrides.platform ?? (this.platformFilter?.value || 'all');
     const from = this._filterFrom;
     const to = this._filterTo;
 
     const filtered = this._posts.filter((post) => {
       if (status !== 'all' && post.status !== status) return false;
+
+      if (platform !== 'all') {
+        const platforms = postPlatforms(post);
+        if (!platforms.includes(platform)) return false;
+      }
 
       const ms = scheduledMs(post);
       if (from && ms < from.getTime()) return false;
@@ -351,23 +411,46 @@ export class PostsUI {
 
   _renderFiltered() {
     if (this._view === 'week') {
+      this._setBrowseSelectionUi(false);
       // Week view is a scheduling calendar — only Ready for Scheduling posts.
       this._renderWeek(this._filteredPosts({ status: 'ready' }));
     } else {
-      this._renderList(this._filteredPosts());
+      this._syncListLayoutClass();
+      this._renderBrowse(this._filteredPosts());
+    }
+  }
+
+  /**
+   * @param {boolean} visible
+   */
+  _setBrowseSelectionUi(visible) {
+    this.selectAllWrap?.classList.toggle('hidden', !visible);
+    this.footerActions?.classList.toggle('hidden', !visible);
+    if (!visible) {
+      if (this.bulkScheduleBtn) this.bulkScheduleBtn.disabled = true;
+      if (this.bulkDeleteBtn) this.bulkDeleteBtn.disabled = true;
+      if (this.bulkScheduleLabel) this.bulkScheduleLabel.textContent = 'Schedule (0)';
+      if (this.bulkDeleteLabel) this.bulkDeleteLabel.textContent = 'Delete (0)';
     }
   }
 
   /**
    * @param {Array<object>} posts
    */
-  _renderList(posts) {
+  _renderBrowse(posts) {
     if (!this.listEl) return;
     this.weekEl?.classList.add('hidden');
     this.listEl.classList.remove('hidden');
+    this._visiblePosts = posts;
+
+    const visibleIds = new Set(posts.map((p) => p.id));
+    for (const id of [...this._selectedIds]) {
+      if (!visibleIds.has(id)) this._selectedIds.delete(id);
+    }
 
     if (posts.length === 0) {
       this.listEl.innerHTML = '';
+      this._setBrowseSelectionUi(false);
       this.emptyEl?.classList.remove('hidden');
       if (this._posts.length > 0 && this.emptyEl) {
         this.emptyEl.textContent = 'No posts match your filters.';
@@ -375,15 +458,18 @@ export class PostsUI {
         this.emptyEl.textContent =
           'No saved posts yet. Save posts from the export step to see them here.';
       }
+      this._updateBulkBar();
       return;
     }
 
     this.emptyEl?.classList.add('hidden');
+    this._setBrowseSelectionUi(true);
     this.listEl.innerHTML = '';
 
     for (const post of posts) {
       this.listEl.appendChild(this._createCard(post));
     }
+    this._updateBulkBar();
   }
 
   /**
@@ -391,35 +477,53 @@ export class PostsUI {
    */
   _createCard(post) {
     const card = document.createElement('article');
-    card.className = this.standalone ? 'posts-page-card' : 'posts-card';
+    const baseClass = this.standalone ? 'posts-page-card' : 'posts-card';
+    const selected = this._selectedIds.has(post.id);
+    card.className = `${baseClass}${selected ? ' is-selected' : ''}`;
+    card.dataset.postId = String(post.id);
+
     const caption = (post.caption || '').trim() || '(No caption)';
     const platforms = postPlatforms(post);
     const statusLabel = postStatusLabel(post.status);
+    const thumbClass = this.standalone ? 'posts-page-card__thumb' : 'posts-card__thumb';
+    const bodyClass = this.standalone ? 'posts-page-card__body' : 'posts-card__body';
+    const captionClass = this.standalone ? 'posts-page-card__caption' : 'posts-card__caption';
+    const metaClass = this.standalone ? 'posts-page-card__meta' : 'posts-card__meta';
+    const statusClass = this.standalone ? 'posts-page-card__status' : 'posts-card__meta';
+    const actionsClass = this.standalone ? 'posts-page-card__actions' : 'posts-card__actions';
+
     card.innerHTML = `
-      <div class="${this.standalone ? 'posts-page-card__thumb' : 'posts-card__thumb'}">
+      <label class="posts-page-card__select">
+        <input type="checkbox" data-select-post="${post.id}" ${selected ? 'checked' : ''} aria-label="Select post ${post.id}" />
+      </label>
+      <div class="${thumbClass}">
         ${
           post.imageUrl
             ? `<img src="${escapeHtml(post.imageUrl)}" alt="" loading="lazy" />`
             : `<div class="${this.standalone ? 'posts-page-card__thumb-empty' : 'posts-card__thumb-empty'}"></div>`
         }
       </div>
-      <div class="${this.standalone ? 'posts-page-card__body' : 'posts-card__body'}">
-        <p class="${this.standalone ? 'posts-page-card__caption' : 'posts-card__caption'}">${escapeHtml(caption)}</p>
-        <p class="${this.standalone ? 'posts-page-card__meta' : 'posts-card__meta'}">
-          <span>${escapeHtml(platformsLabel(platforms))}</span>
-          ·
-          <span>${escapeHtml(formatWhen(post.scheduledAt))}</span>
+      <div class="${bodyClass}">
+        <p class="${captionClass}">${escapeHtml(caption)}</p>
+        <p class="${metaClass}">
+          <span class="posts-page-card__platforms" aria-label="${escapeHtml(platformsLabel(platforms))}">${platformIconsHtml(platforms)}</span>
+          <span class="posts-page-card__when">${escapeHtml(formatWhen(post.scheduledAt))}</span>
         </p>
-        <p class="${this.standalone ? 'posts-page-card__status' : 'posts-card__meta'}">
+        <p class="${statusClass}">
           <span class="post-status-badge post-status-badge--${escapeHtml(post.status || 'preparing')}">${escapeHtml(statusLabel)}</span>
         </p>
-        <div class="${this.standalone ? 'posts-page-card__actions' : 'posts-card__actions'}">
+        <div class="${actionsClass}">
           <button type="button" class="btn btn-outline btn-sm" data-action="edit">Edit</button>
           <button type="button" class="btn btn-ghost btn-sm" data-action="delete">Delete</button>
         </div>
       </div>
     `;
 
+    card.querySelector('[data-select-post]')?.addEventListener('change', (e) => {
+      const input = e.target;
+      if (!(input instanceof HTMLInputElement)) return;
+      this._setSelected(post.id, input.checked);
+    });
     card.querySelector('[data-action="edit"]')?.addEventListener('click', () => {
       this._openEdit(post);
     });
@@ -427,6 +531,7 @@ export class PostsUI {
       if (!window.confirm('Delete this post?')) return;
       try {
         await api.deletePost(post.id);
+        this._selectedIds.delete(post.id);
         await this._load();
         window.dispatchEvent(
           new CustomEvent('toast', {
@@ -445,6 +550,206 @@ export class PostsUI {
       }
     });
     return card;
+  }
+
+  /**
+   * @param {number} id
+   * @param {boolean} selected
+   */
+  _setSelected(id, selected) {
+    if (selected) this._selectedIds.add(id);
+    else this._selectedIds.delete(id);
+
+    const card = this.listEl?.querySelector(`[data-post-id="${id}"]`);
+    card?.classList.toggle('is-selected', selected);
+    this._updateBulkBar();
+  }
+
+  /**
+   * @param {boolean} selected
+   */
+  _selectAllVisible(selected) {
+    for (const post of this._visiblePosts) {
+      if (selected) this._selectedIds.add(post.id);
+      else this._selectedIds.delete(post.id);
+    }
+    this.listEl?.querySelectorAll('[data-select-post]').forEach((input) => {
+      if (input instanceof HTMLInputElement) {
+        input.checked = selected;
+        input.closest('[data-post-id]')?.classList.toggle('is-selected', selected);
+      }
+    });
+    this._updateBulkBar();
+  }
+
+  _updateBulkBar() {
+    const count = this._selectedIds.size;
+    const visible = this._visiblePosts.length;
+    const allSelected = visible > 0 && this._visiblePosts.every((p) => this._selectedIds.has(p.id));
+
+    if (this.selectAllInput) {
+      this.selectAllInput.checked = allSelected;
+      this.selectAllInput.indeterminate = count > 0 && !allSelected;
+    }
+    if (this.bulkScheduleLabel) this.bulkScheduleLabel.textContent = `Schedule (${count})`;
+    if (this.bulkDeleteLabel) this.bulkDeleteLabel.textContent = `Delete (${count})`;
+    if (this.bulkScheduleBtn) {
+      this.bulkScheduleBtn.disabled = count === 0;
+      this.bulkScheduleBtn.setAttribute('aria-label', `Schedule ${count} selected posts`);
+    }
+    if (this.bulkDeleteBtn) {
+      this.bulkDeleteBtn.disabled = count === 0;
+      this.bulkDeleteBtn.setAttribute('aria-label', `Delete ${count} selected posts`);
+    }
+  }
+
+  /**
+   * Selected posts in current schedule order.
+   * @returns {Array<object>}
+   */
+  _selectedPostsOrdered() {
+    return this._visiblePosts.filter((p) => this._selectedIds.has(p.id));
+  }
+
+  _openBulkSchedule() {
+    const selected = this._selectedPostsOrdered();
+    if (selected.length === 0) {
+      window.dispatchEvent(
+        new CustomEvent('toast', {
+          detail: { message: 'Select at least one post to schedule', type: 'error' },
+        })
+      );
+      return;
+    }
+    this.scheduleAllModal.open({ postCount: selected.length });
+  }
+
+  /**
+   * @param {{ platforms: string[], scheduledDates: Date[] }} plan
+   */
+  async _applyBulkSchedule(plan) {
+    const selected = this._selectedPostsOrdered();
+    if (selected.length === 0) return;
+    if (!plan?.scheduledDates || plan.scheduledDates.length !== selected.length) {
+      window.dispatchEvent(
+        new CustomEvent('toast', {
+          detail: { message: 'Schedule length does not match selected posts', type: 'error' },
+        })
+      );
+      return;
+    }
+
+    let updated = 0;
+    let failed = 0;
+    let lastError = '';
+
+    for (let i = 0; i < selected.length; i += 1) {
+      const post = selected[i];
+      try {
+        await api.updatePost(post.id, {
+          platforms: plan.platforms,
+          scheduled_at: plan.scheduledDates[i].toISOString(),
+          status: 'ready',
+        });
+        updated += 1;
+      } catch (error) {
+        failed += 1;
+        lastError = error instanceof ApiError ? error.message : error.message || 'Update failed';
+      }
+    }
+
+    this._selectedIds.clear();
+    await this._load();
+
+    if (updated > 0 && failed === 0) {
+      const summary = summarizeSchedule(plan.scheduledDates);
+      window.dispatchEvent(
+        new CustomEvent('toast', {
+          detail: {
+            message:
+              updated === 1
+                ? `Post scheduled${summary ? ` for ${summary.firstLabel}` : ''}.`
+                : `${updated} posts scheduled${
+                    summary ? ` from ${summary.firstLabel} to ${summary.lastLabel}` : ''
+                  }.`,
+            type: 'success',
+          },
+        })
+      );
+    } else if (updated > 0) {
+      window.dispatchEvent(
+        new CustomEvent('toast', {
+          detail: {
+            message: `Scheduled ${updated} of ${selected.length}. ${failed} failed${
+              lastError ? `: ${lastError}` : ''
+            }`,
+            type: 'error',
+          },
+        })
+      );
+    } else {
+      window.dispatchEvent(
+        new CustomEvent('toast', {
+          detail: { message: lastError || 'Failed to schedule posts', type: 'error' },
+        })
+      );
+    }
+  }
+
+  async _bulkDelete() {
+    const selected = this._selectedPostsOrdered();
+    if (selected.length === 0) return;
+
+    const label =
+      selected.length === 1
+        ? 'Delete 1 selected post?'
+        : `Delete ${selected.length} selected posts?`;
+    if (!window.confirm(label)) return;
+
+    let deleted = 0;
+    let failed = 0;
+    let lastError = '';
+
+    for (const post of selected) {
+      try {
+        await api.deletePost(post.id);
+        deleted += 1;
+        this._selectedIds.delete(post.id);
+      } catch (error) {
+        failed += 1;
+        lastError = error instanceof ApiError ? error.message : error.message || 'Delete failed';
+      }
+    }
+
+    await this._load();
+
+    if (deleted > 0 && failed === 0) {
+      window.dispatchEvent(
+        new CustomEvent('toast', {
+          detail: {
+            message: deleted === 1 ? 'Post deleted' : `${deleted} posts deleted`,
+            type: 'success',
+          },
+        })
+      );
+    } else if (deleted > 0) {
+      window.dispatchEvent(
+        new CustomEvent('toast', {
+          detail: {
+            message: `Deleted ${deleted} of ${selected.length}. ${failed} failed${
+              lastError ? `: ${lastError}` : ''
+            }`,
+            type: 'error',
+          },
+        })
+      );
+    } else {
+      window.dispatchEvent(
+        new CustomEvent('toast', {
+          detail: { message: lastError || 'Failed to delete posts', type: 'error' },
+        })
+      );
+    }
   }
 
   /**
@@ -514,19 +819,17 @@ export class PostsUI {
                       ? '<p class="posts-week__empty">—</p>'
                       : items
                           .map((post) => {
-                            const caption = (post.caption || '').trim() || '(No caption)';
+                            const platforms = postPlatforms(post);
+                            const statusId = post.status || 'preparing';
+                            const thumb = post.imageUrl
+                              ? `<img class="posts-week__item-thumb" src="${escapeHtml(post.imageUrl)}" alt="" loading="lazy" />`
+                              : `<span class="posts-week__item-thumb posts-week__item-thumb--empty" aria-hidden="true"></span>`;
                             return `
                             <button type="button" class="posts-week__item" data-post-id="${post.id}">
+                              ${thumb}
                               <span class="posts-week__item-time">${escapeHtml(formatTime(post.scheduledAt))}</span>
-                              <span class="posts-week__item-title">${escapeHtml(caption.slice(0, 48))}${
-                                caption.length > 48 ? '…' : ''
-                              }</span>
-                              <span class="posts-week__item-meta">${escapeHtml(
-                                platformsLabel(postPlatforms(post))
-                              )}</span>
-                              <span class="post-status-badge post-status-badge--${escapeHtml(
-                                post.status || 'preparing'
-                              )}">${escapeHtml(postStatusLabel(post.status))}</span>
+                              <span class="posts-week__item-platforms" aria-label="${escapeHtml(platformsLabel(platforms))}">${platformIconsHtml(platforms)}</span>
+                              <span class="post-status-badge post-status-badge--${escapeHtml(statusId)} posts-week__item-status" title="${escapeHtml(postStatusLabel(statusId))}">${escapeHtml(weekStatusLabel(statusId))}</span>
                             </button>
                           `;
                           })

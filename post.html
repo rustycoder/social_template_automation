@@ -79,30 +79,55 @@
           <header class="posts-page__header">
             <div class="posts-page__intro">
               <h2 class="page-title">My Posts</h2>
-              <p class="page-desc">Posts are ordered by schedule date. Filter by date or switch to a weekly calendar.</p>
+              <p class="page-desc">Posts are ordered by schedule date. Filter by date or switch layout.</p>
             </div>
             <div class="posts-view-toggle" role="group" aria-label="View mode">
-              <button type="button" class="btn btn-outline btn-sm active" id="posts-view-list" data-view="list">List</button>
+              <button type="button" class="btn btn-outline btn-sm" id="posts-view-list" data-view="list">List</button>
+              <button type="button" class="btn btn-outline btn-sm active" id="posts-view-grid" data-view="grid">Grid</button>
               <button type="button" class="btn btn-outline btn-sm" id="posts-view-week" data-view="week">Week</button>
             </div>
           </header>
 
           <div class="posts-page__toolbar">
-            <input
-              type="search"
-              id="posts-search"
-              class="text-input posts-search"
-              placeholder="Search by caption or platform…"
-              autocomplete="off"
-            />
-            <select id="posts-status-filter" class="text-input posts-filter" aria-label="Filter by status">
-              <option value="all">All statuses</option>
-              <option value="preparing">Preparing for Scheduling</option>
-              <option value="ready">Ready for Scheduling</option>
-              <option value="completed">Completed</option>
-            </select>
-            <div class="posts-date-range">
-              <label class="posts-date-filter__label" for="posts-date-range">Schedule dates</label>
+            <div class="posts-toolbar-field posts-toolbar-field--select" id="posts-select-all-wrap">
+              <span class="posts-toolbar-label">Selection</span>
+              <label class="posts-select-all">
+                <input type="checkbox" id="posts-select-all" />
+                <span>Select all</span>
+              </label>
+            </div>
+            <div class="posts-toolbar-field posts-toolbar-field--search">
+              <label class="posts-toolbar-label" for="posts-search">Search</label>
+              <input
+                type="search"
+                id="posts-search"
+                class="text-input posts-search"
+                placeholder="Caption or platform…"
+                autocomplete="off"
+              />
+            </div>
+            <div class="posts-toolbar-field">
+              <label class="posts-toolbar-label" for="posts-platform-filter">Platform</label>
+              <select id="posts-platform-filter" class="text-input posts-filter" aria-label="Filter by platform">
+                <option value="all">All platforms</option>
+                <option value="facebook">Facebook</option>
+                <option value="instagram">Instagram</option>
+                <option value="linkedin">LinkedIn</option>
+                <option value="youtube">YouTube</option>
+                <option value="tiktok">TikTok</option>
+              </select>
+            </div>
+            <div class="posts-toolbar-field">
+              <label class="posts-toolbar-label" for="posts-status-filter">Status</label>
+              <select id="posts-status-filter" class="text-input posts-filter" aria-label="Filter by status">
+                <option value="all">All statuses</option>
+                <option value="preparing">Preparing for Scheduling</option>
+                <option value="ready">Ready for Scheduling</option>
+                <option value="completed">Completed</option>
+              </select>
+            </div>
+            <div class="posts-toolbar-field posts-toolbar-field--dates">
+              <label class="posts-toolbar-label" for="posts-date-range">Schedule dates</label>
               <div class="posts-date-range__control">
                 <input
                   type="text"
@@ -133,6 +158,14 @@
               <path d="M13 8H3M7 4L3 8L7 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
             <span class="btn-text">Back</span>
+          </button>
+        </div>
+        <div class="footer-actions-group" id="posts-footer-actions">
+          <button type="button" class="btn btn-outline" id="posts-bulk-schedule" disabled>
+            <span class="btn-text" id="posts-bulk-schedule-label">Schedule (0)</span>
+          </button>
+          <button type="button" class="btn btn-outline posts-footer-delete" id="posts-bulk-delete" disabled>
+            <span class="btn-text" id="posts-bulk-delete-label">Delete (0)</span>
           </button>
         </div>
       </div>
@@ -226,6 +259,47 @@
           <div class="admin-form-actions">
             <button type="button" class="btn btn-outline" id="post-edit-cancel">Cancel</button>
             <button type="submit" class="btn btn-primary" id="post-edit-submit">Save changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Schedule All modal (bulk reschedule) -->
+    <div class="modal-overlay hidden" id="schedule-all-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="schedule-all-modal-title">
+      <div class="modal-card schedule-all-modal">
+        <button type="button" class="modal-close" id="schedule-all-modal-close" aria-label="Close">✕</button>
+        <h2 id="schedule-all-modal-title">Schedule all posts</h2>
+        <p class="modal-desc" id="schedule-all-desc">Assign platforms and schedule times across selected posts.</p>
+        <form id="schedule-all-form" class="auth-form schedule-all-form">
+          <div class="form-group">
+            <span class="form-label">Platforms</span>
+            <p class="form-hint">Select one or more platforms for every post.</p>
+            <div class="platform-checkboxes" id="schedule-all-platforms" role="group" aria-label="Platforms"></div>
+          </div>
+          <div class="form-group">
+            <label for="schedule-all-frequency">Posts per day</label>
+            <p class="form-hint">How many posts to schedule on each selected day.</p>
+            <input type="number" id="schedule-all-frequency" class="text-input" min="1" max="24" value="1" required />
+          </div>
+          <div class="form-group">
+            <span class="form-label">Time slots</span>
+            <p class="form-hint">One time for each post of the day, in order.</p>
+            <div class="schedule-slots-grid" id="schedule-all-slots"></div>
+          </div>
+          <div class="form-group">
+            <span class="form-label">Days of the week</span>
+            <p class="form-hint">Posts are only assigned on the days you select.</p>
+            <div class="platform-checkboxes" id="schedule-all-weekdays" role="group" aria-label="Days of the week"></div>
+          </div>
+          <div class="form-group">
+            <label for="schedule-all-start-date">Start date</label>
+            <input type="date" id="schedule-all-start-date" class="text-input" required />
+          </div>
+          <p class="schedule-all-preview" id="schedule-all-preview" aria-live="polite"></p>
+          <p class="form-error hidden" id="schedule-all-error"></p>
+          <div class="admin-form-actions">
+            <button type="button" class="btn btn-outline" id="schedule-all-cancel">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="schedule-all-submit">Schedule posts</button>
           </div>
         </form>
       </div>

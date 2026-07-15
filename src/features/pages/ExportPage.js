@@ -12,6 +12,8 @@ import {
 } from '../rendering/exporter.js';
 import { exportBucketImage } from '../rendering/socialExporter.js';
 import { api, ApiError } from '../auth/api.js';
+import { ScheduleAllModal } from '../modules/ScheduleAllModal.js';
+import { summarizeSchedule } from '../domain/schedulePlanner.js';
 
 /**
  * @description Formats milliseconds into a short human-readable duration.
@@ -134,13 +136,25 @@ export class ExportPage {
     this.progressText = document.getElementById('progress-text');
     this.exportBtn = document.getElementById('btn-export');
     this.saveBtn = document.getElementById('btn-save-post');
+    this.scheduleAllBtn = document.getElementById('btn-schedule-all');
     this.exportCountEl = this.exportBtn?.querySelector('.btn-export-count');
     this.saveCountEl = this.saveBtn?.querySelector('.btn-save-count');
+    this.scheduleCountEl = this.scheduleAllBtn?.querySelector('.btn-schedule-count');
     this.formatTag = document.getElementById('export-format-tag');
     this._exportStartedAt = null;
 
+    this.scheduleAllModal = new ScheduleAllModal({
+      onConfirm: ({ platforms, scheduledDates }) =>
+        this.handleSaveClick({
+          platforms,
+          scheduledDates,
+          status: 'ready',
+        }),
+    });
+
     this.exportBtn?.addEventListener('click', () => this.handleExport());
     this.saveBtn?.addEventListener('click', () => this.handleSaveClick());
+    this.scheduleAllBtn?.addEventListener('click', () => this.handleScheduleAllClick());
   }
 
   syncFormatTag() {
@@ -156,12 +170,16 @@ export class ExportPage {
     const selectedCount = this.selection.getSelectedCount();
     const buckets = this.getSelectedBuckets();
     const disabled = buckets.length === 0 || selectedCount === 0;
+    const scheduleDisabled = disabled || selectedCount < 2;
 
     if (this.exportCountEl) {
       this.exportCountEl.textContent = `(${selectedCount})`;
     }
     if (this.saveCountEl) {
       this.saveCountEl.textContent = `(${selectedCount})`;
+    }
+    if (this.scheduleCountEl) {
+      this.scheduleCountEl.textContent = `(${selectedCount})`;
     }
 
     if (this.exportBtn) {
@@ -171,6 +189,15 @@ export class ExportPage {
     if (this.saveBtn) {
       this.saveBtn.disabled = disabled;
       this.saveBtn.setAttribute('aria-label', `Save selected (${selectedCount})`);
+    }
+    if (this.scheduleAllBtn) {
+      this.scheduleAllBtn.disabled = scheduleDisabled;
+      this.scheduleAllBtn.setAttribute(
+        'aria-label',
+        selectedCount < 2
+          ? 'Schedule all (select at least 2 posts)'
+          : `Schedule all selected (${selectedCount})`
+      );
     }
 
     if (!disabled) {
@@ -219,6 +246,7 @@ export class ExportPage {
     this._showExportProgress(0, 0, 'Preparing export…');
     if (this.exportBtn) this.exportBtn.disabled = true;
     if (this.saveBtn) this.saveBtn.disabled = true;
+    if (this.scheduleAllBtn) this.scheduleAllBtn.disabled = true;
 
     const hasSubscription = await this.requireSubscription();
     if (!hasSubscription) {
@@ -285,9 +313,32 @@ export class ExportPage {
   }
 
   /**
-   * Save all selected posts immediately. Caption/platform/schedule can be edited later in My Posts.
+   * Open Schedule All modal when 2+ posts are selected.
    */
-  async handleSaveClick() {
+  async handleScheduleAllClick() {
+    const hasSubscription = await this.requireSubscription();
+    if (!hasSubscription) return;
+
+    const selectedBuckets = this.getSelectedBuckets();
+    const selectedRows = this.exportGrid.getSelectedRows();
+
+    if (selectedBuckets.length === 0 || selectedRows.length < 2) {
+      window.dispatchEvent(
+        new CustomEvent('toast', {
+          detail: { message: 'Select at least two posts to schedule all', type: 'error' },
+        })
+      );
+      return;
+    }
+
+    this.scheduleAllModal.open({ postCount: selectedRows.length });
+  }
+
+  /**
+   * Save all selected posts. Optional schedulePlan applies platforms + per-post datetimes.
+   * @param {{ platforms?: string[], scheduledDates?: Date[], status?: string }} [schedulePlan]
+   */
+  async handleSaveClick(schedulePlan = null) {
     const hasSubscription = await this.requireSubscription();
     if (!hasSubscription) return;
 
@@ -303,17 +354,34 @@ export class ExportPage {
       return;
     }
 
+    const isScheduled = Array.isArray(schedulePlan?.scheduledDates);
+    if (isScheduled && schedulePlan.scheduledDates.length !== selectedRows.length) {
+      window.dispatchEvent(
+        new CustomEvent('toast', {
+          detail: { message: 'Schedule length does not match selected posts', type: 'error' },
+        })
+      );
+      return;
+    }
+
     if (this.exportBtn) this.exportBtn.disabled = true;
     if (this.saveBtn) this.saveBtn.disabled = true;
+    if (this.scheduleAllBtn) this.scheduleAllBtn.disabled = true;
 
     const template = this.getTemplate();
     const bucket = this.getCurrentBucket();
     const templateId = this.getTemplateId() || template.id;
     const total = selectedRows.length;
-    const scheduledAt = defaultScheduleIso();
+    const platforms = isScheduled ? schedulePlan.platforms ?? [] : [];
+    const status = isScheduled ? schedulePlan.status || 'ready' : 'preparing';
+    const fallbackScheduleIso = defaultScheduleIso();
 
     this._exportStartedAt = Date.now();
-    this._updateExportProgress(0, total, 'Preparing export…');
+    this._updateExportProgress(
+      0,
+      total,
+      isScheduled ? 'Preparing scheduled save…' : 'Preparing export…'
+    );
 
     let saved = 0;
     let failed = 0;
@@ -322,7 +390,13 @@ export class ExportPage {
     try {
       for (let i = 0; i < selectedRows.length; i += 1) {
         const { rowData } = selectedRows[i];
-        this._updateExportProgress(saved, total, `Saving post ${i + 1} of ${total}…`);
+        this._updateExportProgress(
+          saved,
+          total,
+          isScheduled
+            ? `Scheduling post ${i + 1} of ${total}…`
+            : `Saving post ${i + 1} of ${total}…`
+        );
 
         try {
           const { blob } = await exportBucketImage(
@@ -332,15 +406,19 @@ export class ExportPage {
             (b) => this.getBucketCss(b)
           );
 
+          const scheduledAt = isScheduled
+            ? schedulePlan.scheduledDates[i].toISOString()
+            : fallbackScheduleIso;
+
           const formData = new FormData();
           formData.append('image', blob, `post-${i + 1}.png`);
           formData.append('template_id', templateId);
           formData.append('caption', findCaption(rowData));
-          formData.append('platforms', JSON.stringify([]));
+          formData.append('platforms', JSON.stringify(platforms));
           formData.append('scheduled_at', scheduledAt);
           formData.append('format_bucket', bucket);
           formData.append('field_data', JSON.stringify(sanitizeFieldDataForUpload(rowData)));
-          formData.append('status', 'preparing');
+          formData.append('status', status);
 
           await api.createPost(formData);
           saved += 1;
@@ -355,15 +433,24 @@ export class ExportPage {
 
       if (saved > 0 && failed === 0) {
         this._updateExportProgress(total, total, 'Export complete');
+        let message;
+        if (isScheduled) {
+          const summary = summarizeSchedule(schedulePlan.scheduledDates);
+          message =
+            saved === 1
+              ? `Post scheduled${summary ? ` for ${summary.firstLabel}` : ''}.`
+              : `${saved} posts scheduled${
+                  summary ? ` from ${summary.firstLabel} to ${summary.lastLabel}` : ''
+                }.`;
+        } else {
+          message =
+            saved === 1
+              ? 'Post saved. Edit caption, platform, and schedule in My Posts.'
+              : `${saved} posts saved. Edit details in My Posts.`;
+        }
         window.dispatchEvent(
           new CustomEvent('toast', {
-            detail: {
-              message:
-                saved === 1
-                  ? 'Post saved. Edit caption, platform, and schedule in My Posts.'
-                  : `${saved} posts saved. Edit details in My Posts.`,
-              type: 'success',
-            },
+            detail: { message, type: 'success' },
           })
         );
       } else if (saved > 0) {

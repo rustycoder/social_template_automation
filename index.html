@@ -342,6 +342,9 @@
           <button type="button" class="btn btn-outline btn-export" id="btn-save-post" aria-label="Save selected" disabled>
             <span class="btn-text">Save <span class="btn-save-count">(0)</span></span>
           </button>
+          <button type="button" class="btn btn-outline btn-export" id="btn-schedule-all" aria-label="Schedule all selected" disabled>
+            <span class="btn-text">Schedule All <span class="btn-schedule-count">(0)</span></span>
+          </button>
           <button type="button" class="btn btn-primary btn-export" id="btn-export" aria-label="Download selected">
             <span class="btn-text">Download <span class="btn-export-count">(0)</span></span>
             <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -403,6 +406,47 @@
         <p class="modal-desc" id="subscribe-modal-desc">Get unlimited access to the full template library and all export downloads.</p>
         <div class="subscribe-plans" id="subscribe-plans"></div>
         <p class="form-error hidden" id="subscribe-error"></p>
+      </div>
+    </div>
+
+    <!-- Schedule All modal -->
+    <div class="modal-overlay hidden" id="schedule-all-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="schedule-all-modal-title">
+      <div class="modal-card schedule-all-modal">
+        <button type="button" class="modal-close" id="schedule-all-modal-close" aria-label="Close">✕</button>
+        <h2 id="schedule-all-modal-title">Schedule all posts</h2>
+        <p class="modal-desc" id="schedule-all-desc">Assign platforms and schedule times across selected posts.</p>
+        <form id="schedule-all-form" class="auth-form schedule-all-form">
+          <div class="form-group">
+            <span class="form-label">Platforms</span>
+            <p class="form-hint">Select one or more platforms for every post.</p>
+            <div class="platform-checkboxes" id="schedule-all-platforms" role="group" aria-label="Platforms"></div>
+          </div>
+          <div class="form-group">
+            <label for="schedule-all-frequency">Posts per day</label>
+            <p class="form-hint">How many posts to schedule on each selected day.</p>
+            <input type="number" id="schedule-all-frequency" class="text-input" min="1" max="24" value="1" required />
+          </div>
+          <div class="form-group">
+            <span class="form-label">Time slots</span>
+            <p class="form-hint">One time for each post of the day, in order.</p>
+            <div class="schedule-slots-grid" id="schedule-all-slots"></div>
+          </div>
+          <div class="form-group">
+            <span class="form-label">Days of the week</span>
+            <p class="form-hint">Posts are only assigned on the days you select.</p>
+            <div class="platform-checkboxes" id="schedule-all-weekdays" role="group" aria-label="Days of the week"></div>
+          </div>
+          <div class="form-group">
+            <label for="schedule-all-start-date">Start date</label>
+            <input type="date" id="schedule-all-start-date" class="text-input" required />
+          </div>
+          <p class="schedule-all-preview" id="schedule-all-preview" aria-live="polite"></p>
+          <p class="form-error hidden" id="schedule-all-error"></p>
+          <div class="admin-form-actions">
+            <button type="button" class="btn btn-outline" id="schedule-all-cancel">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="schedule-all-submit">Schedule posts</button>
+          </div>
+        </form>
       </div>
     </div>
 
