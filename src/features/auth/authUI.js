@@ -31,6 +31,7 @@ export class AuthUI {
     this.dropdownUserName = document.getElementById('dropdown-user-name');
     this.dropdownUserEmail = document.getElementById('dropdown-user-email');
     this.dropdownSubBadge = document.getElementById('dropdown-sub-badge');
+    this.dropdownSubExpires = document.getElementById('dropdown-sub-expires');
 
     this.mode = 'login';
     this._resolveOpen = null;
@@ -330,6 +331,7 @@ export class AuthUI {
   }
 
   _openDropdown() {
+    this._syncCurrentPageSelection();
     this._dropdownOpen = true;
     this.profileDropdown?.classList.remove('hidden');
     this.profileTrigger?.setAttribute('aria-expanded', 'true');
@@ -341,6 +343,50 @@ export class AuthUI {
     this.profileDropdown?.classList.add('hidden');
     this.profileTrigger?.setAttribute('aria-expanded', 'false');
     this.userMenu?.classList.remove('open');
+  }
+
+  /**
+   * Resolves which profile-menu navigation targets the current document.
+   * @returns {'studio'|'posts'|'templates'|'categories'|'billing'|null}
+   * @private
+   */
+  _currentNavKey() {
+    const path = (window.location.pathname || '/').replace(/\/+$/, '') || '/';
+    const file = path.split('/').pop() || '';
+    if (!file || file === 'index.html') return 'studio';
+    if (file === 'post.html') return 'posts';
+    if (file === 'template.html') return 'templates';
+    if (file === 'categories.html') return 'categories';
+    if (file === 'billing.html') return 'billing';
+    return null;
+  }
+
+  /**
+   * Marks the active profile-menu item for the current page.
+   * @returns {void}
+   * @private
+   */
+  _syncCurrentPageSelection() {
+    /** @type {Array<{ key: string, el: HTMLElement|null }>} */
+    const items = [
+      { key: 'studio', el: this.studioBtn },
+      { key: 'posts', el: this.postsBtn },
+      { key: 'templates', el: this.adminBtn },
+      { key: 'categories', el: this.adminCategoriesBtn },
+      { key: 'billing', el: this.billingBtn },
+    ];
+    const current = this._currentNavKey();
+
+    for (const { key, el } of items) {
+      if (!el) continue;
+      const isCurrent = key === current;
+      el.classList.toggle('active', isCurrent);
+      if (isCurrent) {
+        el.setAttribute('aria-current', 'page');
+      } else {
+        el.removeAttribute('aria-current');
+      }
+    }
   }
 
   _getInitials(name) {
@@ -357,10 +403,12 @@ export class AuthUI {
     const sub = user.subscription;
     let planName = 'No subscription';
     let badgeClass = 'user-sub-badge inactive';
+    let expiresLabel = '';
 
     if (user.hasActiveSubscription && sub) {
       planName = sub.planName || 'Pro';
       badgeClass = 'user-sub-badge active';
+      expiresLabel = this._formatExpiresIn(sub.expiresAt);
     } else if (user.subscriptionExpired) {
       planName = 'Expired';
       badgeClass = 'user-sub-badge expired';
@@ -370,6 +418,35 @@ export class AuthUI {
       this.dropdownSubBadge.textContent = planName;
       this.dropdownSubBadge.className = badgeClass;
     }
+
+    if (!this.dropdownSubExpires) {
+      this.dropdownSubExpires = document.getElementById('dropdown-sub-expires');
+    }
+    if (this.dropdownSubExpires) {
+      if (expiresLabel) {
+        this.dropdownSubExpires.textContent = expiresLabel;
+        this.dropdownSubExpires.classList.remove('hidden');
+      } else {
+        this.dropdownSubExpires.textContent = '';
+        this.dropdownSubExpires.classList.add('hidden');
+      }
+    }
+  }
+
+  /**
+   * @param {string | null | undefined} expiresAt
+   * @returns {string}
+   * @private
+   */
+  _formatExpiresIn(expiresAt) {
+    if (!expiresAt) return '';
+    const end = new Date(expiresAt);
+    if (Number.isNaN(end.getTime())) return '';
+    const days = Math.ceil((end.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+    if (days > 1) return `Expires in ${days} days`;
+    if (days === 1) return 'Expires in 1 day';
+    if (days === 0) return 'Expires today';
+    return '';
   }
 
   _renderHeader(user) {
@@ -386,6 +463,7 @@ export class AuthUI {
       this.postsBtn?.classList.toggle('hidden', isAdmin);
       this.adminBtn?.classList.toggle('hidden', !isAdmin);
       this.adminCategoriesBtn?.classList.toggle('hidden', !isAdmin);
+      this._syncCurrentPageSelection();
     } else {
       this._closeDropdown();
       this.loginBtn?.classList.remove('hidden');
