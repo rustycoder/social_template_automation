@@ -262,6 +262,19 @@
       </div>
     </div>
 
+    <!-- Disconnect Confirmation modal -->
+    <div class="modal-overlay hidden" id="disconnect-confirm-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="disconnect-confirm-title">
+      <div class="modal-card disconnect-confirm-modal">
+        <button type="button" class="modal-close" id="disconnect-confirm-close" aria-label="Close">✕</button>
+        <h2 id="disconnect-confirm-title">Disconnect Account</h2>
+        <p class="modal-desc" id="disconnect-confirm-desc">Are you sure you want to disconnect your account?</p>
+        <div class="admin-form-actions">
+          <button type="button" class="btn btn-outline" id="disconnect-confirm-cancel">Cancel</button>
+          <button type="button" class="btn btn-danger" id="disconnect-confirm-submit">Disconnect</button>
+        </div>
+      </div>
+    </div>
+
     <div class="modal-overlay hidden" id="auth-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
       <div class="modal-card auth-modal" id="auth-modal">
         <button type="button" class="modal-close" id="auth-modal-close" aria-label="Close">✕</button>

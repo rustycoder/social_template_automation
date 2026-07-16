@@ -9,15 +9,6 @@ const router = Router();
 
 const PLATFORMS = new Set(['facebook', 'instagram', 'linkedin', 'youtube', 'tiktok']);
 
-// Helpers to check placeholder configurations
-function isMockConfigured(platform) {
-  const creds = config.oauth[platform];
-  if (!creds || !creds.clientId || creds.clientId.startsWith('your_') || creds.clientId === '') {
-    return true;
-  }
-  return false;
-}
-
 // Get user's social connections
 router.get('/', authenticate, async (req, res) => {
   try {
@@ -59,12 +50,6 @@ router.get('/auth/:platform', async (req, res) => {
   // Generate secure signed state token carrying the user ID
   const stateToken = jwt.sign({ userId }, config.jwtSecret, { expiresIn: '15m' });
   const redirectUri = `${config.oauth.redirectBase}/${platform}`;
-
-  // Fallback to mock callback flow if credentials are placeholders or blank
-  if (isMockConfigured(platform)) {
-    console.log(`[OAuth] Credentials for ${platform} are not configured in .env. Simulating OAuth callback...`);
-    return res.redirect(`/api/social-connections/callback/${platform}?code=mock_code_simulated&state=${stateToken}`);
-  }
 
   try {
     let authUrl = '';
@@ -121,22 +106,8 @@ router.get('/callback/:platform', async (req, res) => {
   let profilePicture = '';
 
   try {
-    if (code === 'mock_code_simulated') {
-      // Simulate connected profile data
-      token = `mock_token_${platform}_${Math.random().toString(36).slice(2, 10)}`;
-      const profiles = {
-        facebook: { name: 'Devilprat FB Page', pic: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80' },
-        instagram: { name: 'Devilprat Designs', pic: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&h=150&q=80' },
-        linkedin: { name: 'Devilprat Developer', pic: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&h=150&q=80' },
-        youtube: { name: 'Devilprat Vlogs', pic: 'https://images.unsplash.com/photo-1628157582853-a796fa650a6a?auto=format&fit=crop&w=150&h=150&q=80' },
-        tiktok: { name: 'Devilprat TikToks', pic: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=150&h=150&q=80' }
-      };
-      const p = profiles[platform] || { name: 'Social User', pic: '' };
-      profileName = p.name;
-      profilePicture = p.pic;
-    } else {
-      // Live API code exchange
-      switch (platform) {
+    // Live API code exchange
+    switch (platform) {
         case 'facebook': {
           const tokenRes = await axios.get('https://graph.facebook.com/v19.0/oauth/access_token', {
             params: {
@@ -223,7 +194,6 @@ router.get('/callback/:platform', async (req, res) => {
           break;
         }
       }
-    }
 
     // Save/Update connection in database
     await query(

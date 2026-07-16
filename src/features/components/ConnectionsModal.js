@@ -10,6 +10,16 @@ export class ConnectionsModal {
     this.activeConnections = [];
     this.platforms = ['facebook', 'instagram', 'linkedin', 'youtube', 'tiktok'];
     
+    // Disconnect Confirm Modal Elements
+    this.confirmOverlay = document.getElementById('disconnect-confirm-modal-overlay');
+    this.confirmCloseBtn = document.getElementById('disconnect-confirm-close');
+    this.confirmCancelBtn = document.getElementById('disconnect-confirm-cancel');
+    this.confirmSubmitBtn = document.getElementById('disconnect-confirm-submit');
+    this.confirmDesc = document.getElementById('disconnect-confirm-desc');
+    
+    this._pendingDisconnectId = null;
+    this._pendingDisconnectPlatform = null;
+
     this._bindEvents();
   }
 
@@ -28,6 +38,14 @@ export class ConnectionsModal {
         await this._handleConnectSuccess(platform, profileName, profilePicture);
       }
     });
+
+    // Disconnect confirm bindings
+    this.confirmCloseBtn?.addEventListener('click', () => this.closeConfirm());
+    this.confirmCancelBtn?.addEventListener('click', () => this.closeConfirm());
+    this.confirmOverlay?.addEventListener('click', (e) => {
+      if (e.target === this.confirmOverlay) this.closeConfirm();
+    });
+    this.confirmSubmitBtn?.addEventListener('click', () => this._handleConfirmSubmit());
   }
 
   async open() {
@@ -55,26 +73,36 @@ export class ConnectionsModal {
   }
 
   async _handleConnectSuccess(platform, name, pic) {
-    try {
-      await api.connectSocialConnection(platform, name, pic);
-      window.dispatchEvent(
-        new CustomEvent('toast', {
-          detail: { message: `Connected to ${platform.charAt(0).toUpperCase() + platform.slice(1)} successfully!`, type: 'success' },
-        })
-      );
-      await this.loadConnections();
-    } catch (error) {
-      window.dispatchEvent(
-        new CustomEvent('toast', {
-          detail: { message: `Failed to link connection: ${error.message}`, type: 'error' },
-        })
-      );
-    }
+    window.dispatchEvent(
+      new CustomEvent('toast', {
+        detail: { message: `Connected to ${platform.charAt(0).toUpperCase() + platform.slice(1)} successfully!`, type: 'success' },
+      })
+    );
+    await this.loadConnections();
   }
 
-  async disconnect(connectionId, platformName) {
-    if (!window.confirm(`Are you sure you want to disconnect your ${platformName} account?`)) return;
+  disconnect(connectionId, platformName) {
+    this._pendingDisconnectId = connectionId;
+    this._pendingDisconnectPlatform = platformName;
+    if (this.confirmDesc) {
+      this.confirmDesc.textContent = `Are you sure you want to disconnect your ${platformName} account?`;
+    }
+    this.confirmOverlay?.classList.remove('hidden');
+  }
+
+  closeConfirm() {
+    this.confirmOverlay?.classList.add('hidden');
+    this._pendingDisconnectId = null;
+    this._pendingDisconnectPlatform = null;
+  }
+
+  async _handleConfirmSubmit() {
+    if (!this._pendingDisconnectId) return;
     
+    const connectionId = this._pendingDisconnectId;
+    const platformName = this._pendingDisconnectPlatform;
+    this.closeConfirm();
+
     try {
       await api.deleteSocialConnection(connectionId);
       window.dispatchEvent(
