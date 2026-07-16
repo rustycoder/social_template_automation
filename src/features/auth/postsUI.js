@@ -164,6 +164,8 @@ export class PostsUI {
     this.editTime = document.getElementById('post-edit-time');
     this.editImage = document.getElementById('post-edit-image');
     this.editMeta = document.getElementById('post-edit-meta');
+    this.editLogsGroup = document.getElementById('post-edit-logs-group');
+    this.editLogsContainer = document.getElementById('post-edit-logs-container');
 
     /** @type {number|null} */
     this._editingId = null;
@@ -900,6 +902,45 @@ export class PostsUI {
     }
     if (this.editMeta) {
       this.editMeta.textContent = `#${post.id} · ${post.formatBucket || 'square'}`;
+    }
+
+    if (this.editLogsGroup && this.editLogsContainer) {
+      if (post.publishLog && typeof post.publishLog === 'object' && Object.keys(post.publishLog).length > 0) {
+        this.editLogsGroup.classList.remove('hidden');
+        this.editLogsContainer.innerHTML = '';
+        
+        for (const [platform, result] of Object.entries(post.publishLog)) {
+          const item = document.createElement('div');
+          item.className = `publish-log-item publish-log-item--${platform}`;
+          
+          const title = platform.charAt(0).toUpperCase() + platform.slice(1);
+          const icon = result.success ? '✓' : '✕';
+          const badgeClass = result.success ? 'success' : 'failed';
+          const badgeText = result.success ? 'Success' : 'Failed';
+          
+          let detailHtml = '';
+          if (result.success) {
+            detailHtml = `<a href="${result.publishedUrl}" target="_blank" class="publish-log-link">View Post on ${title}</a>`;
+          } else {
+            detailHtml = `<span class="publish-log-error">${escapeHtml(result.error || 'Unknown error')}</span>`;
+          }
+          
+          item.innerHTML = `
+            <div class="publish-log-item__header">
+              <span class="publish-log-item__icon publish-log-item__icon--${badgeClass}">${icon}</span>
+              <strong class="publish-log-item__platform">${title}</strong>
+              <span class="publish-log-badge publish-log-badge--${badgeClass}">${badgeText}</span>
+            </div>
+            <div class="publish-log-item__body">
+              ${detailHtml}
+            </div>
+          `;
+          this.editLogsContainer.appendChild(item);
+        }
+      } else {
+        this.editLogsGroup.classList.add('hidden');
+        this.editLogsContainer.innerHTML = '';
+      }
     }
 
     this.editOverlay?.classList.remove('hidden');

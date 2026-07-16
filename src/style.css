@@ -4813,4 +4813,160 @@ html:has(body.billing-standalone) {
   background: var(--color-bg-card);
 }
 
+/* ---------- Social Media Connections Modal & Row Styles ---------- */
+.connections-modal {
+  max-width: 480px;
+}
+.connections-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+.connection-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-radius: var(--radius-lg);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  transition: all 0.2s ease;
+}
+.connection-row:hover {
+  border-color: var(--color-border-hover);
+  background: var(--color-primary-soft);
+}
+.connection-row__info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.connection-row__icon-wrap {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-border);
+  overflow: hidden;
+}
+.connection-row__avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.connection-row__icon-badge {
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+}
+.connection-row__icon-badge svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+.connection-row--facebook .connection-row__icon-badge { background-color: #1877f2; }
+.connection-row--instagram .connection-row__icon-badge { background-color: #e1306c; }
+.connection-row--linkedin .connection-row__icon-badge { background-color: #0a66c2; }
+.connection-row--youtube .connection-row__icon-badge { background-color: #ff0000; }
+.connection-row--tiktok .connection-row__icon-badge { background-color: #000000; }
+
+.connection-row__details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.connection-row__name {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+.connection-row__status {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+.connection-row__status.is-connected {
+  color: var(--color-success);
+  font-weight: 500;
+}
+
+/* ---------- Publication Status Logs ---------- */
+.publish-logs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+.publish-log-item {
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+}
+.publish-log-item__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: 0.85rem;
+}
+.publish-log-item__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  font-size: 0.7rem;
+  font-weight: bold;
+}
+.publish-log-item__icon--success {
+  background-color: var(--color-success-soft);
+  color: var(--color-success);
+}
+.publish-log-item__icon--failed {
+  background-color: rgba(220, 38, 38, 0.1);
+  color: var(--color-error);
+}
+.publish-log-item__platform {
+  font-weight: 600;
+  color: var(--color-text);
+}
+.publish-log-badge {
+  font-size: 0.7rem;
+  padding: 1px 6px;
+  border-radius: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+.publish-log-badge--success {
+  background-color: var(--color-success-soft);
+  color: var(--color-success);
+}
+.publish-log-badge--failed {
+  background-color: rgba(220, 38, 38, 0.1);
+  color: var(--color-error);
+}
+.publish-log-item__body {
+  font-size: 0.8rem;
+  padding-left: 26px;
+}
+.publish-log-link {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 500;
+}
+.publish-log-link:hover {
+  text-decoration: underline;
+}
+.publish-log-error {
+  color: var(--color-error);
+}
+
 

@@ -205,13 +205,14 @@ function mapPostRow(row) {
     fieldData: parseJsonText(row.field_data, {}),
     formatBucket: row.format_bucket,
     status: coerceStatus(row.status),
+    publishLog: parseJsonText(row.publish_log, null),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
 }
 
 const POST_SELECT = `id, user_id, template_id, caption, platforms, scheduled_at, image_path,
-            field_data, format_bucket, status, created_at, updated_at`;
+            field_data, format_bucket, status, publish_log, created_at, updated_at`;
 
 export async function listPostsForUser(userId) {
   const rows = await query(
@@ -230,7 +231,7 @@ export async function listPostsForUser(userId) {
 export async function listAllPosts() {
   const rows = await query(
     `SELECT p.id, p.user_id, p.template_id, p.caption, p.platforms, p.scheduled_at,
-            p.image_path, p.field_data, p.format_bucket, p.status, p.created_at, p.updated_at,
+            p.image_path, p.field_data, p.format_bucket, p.status, p.publish_log, p.created_at, p.updated_at,
             u.email AS user_email, u.name AS user_name,
             t.name AS template_name
      FROM saved_posts p
@@ -250,7 +251,7 @@ export async function getPostById(id, userId = null) {
       )
     : await query(
         `SELECT p.id, p.user_id, p.template_id, p.caption, p.platforms, p.scheduled_at,
-                p.image_path, p.field_data, p.format_bucket, p.status, p.created_at, p.updated_at,
+                p.image_path, p.field_data, p.format_bucket, p.status, p.publish_log, p.created_at, p.updated_at,
                 u.email AS user_email, u.name AS user_name,
                 t.name AS template_name
          FROM saved_posts p

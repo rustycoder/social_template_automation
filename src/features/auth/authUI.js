@@ -1,6 +1,7 @@
 import { authService } from './auth.js';
 import { ApiError } from './api.js';
 import { getButtonText, setButtonText } from '../shared/uiIcons.js';
+import { ConnectionsModal } from '../components/ConnectionsModal.js';
 
 export class AuthUI {
   constructor() {
@@ -32,6 +33,9 @@ export class AuthUI {
     this.dropdownUserEmail = document.getElementById('dropdown-user-email');
     this.dropdownSubBadge = document.getElementById('dropdown-sub-badge');
     this.dropdownSubExpires = document.getElementById('dropdown-sub-expires');
+    this.socialConnectionsBtn = document.getElementById('btn-social-connections');
+
+    this.connectionsModal = new ConnectionsModal();
 
     this.mode = 'login';
     this._resolveOpen = null;
@@ -57,6 +61,9 @@ export class AuthUI {
 
   _bindEvents() {
     this.loginBtn?.addEventListener('click', () => this.open('login'));
+    this.socialConnectionsBtn?.addEventListener('click', () => {
+      this._navigateAway(() => this.connectionsModal.open());
+    });
     this.logoutBtn?.addEventListener('click', async () => {
       this._closeDropdown();
       await authService.logout();
@@ -461,6 +468,7 @@ export class AuthUI {
       const isAdmin = user.role === 'admin';
       this.studioBtn?.classList.remove('hidden');
       this.postsBtn?.classList.toggle('hidden', isAdmin);
+      this.socialConnectionsBtn?.classList.remove('hidden');
       this.adminBtn?.classList.toggle('hidden', !isAdmin);
       this.adminCategoriesBtn?.classList.toggle('hidden', !isAdmin);
       this._syncCurrentPageSelection();
@@ -470,6 +478,7 @@ export class AuthUI {
       this.userMenu?.classList.add('hidden');
       this.studioBtn?.classList.add('hidden');
       this.postsBtn?.classList.add('hidden');
+      this.socialConnectionsBtn?.classList.add('hidden');
       this.adminBtn?.classList.add('hidden');
       this.adminCategoriesBtn?.classList.add('hidden');
     }

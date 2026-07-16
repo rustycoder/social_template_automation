@@ -110,6 +110,12 @@
               </svg>
               Categories
             </button>
+            <button type="button" class="profile-dropdown-item" id="btn-social-connections" role="menuitem">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M12 5.5a2.5 2.5 0 1 1-3.75-2.165m-2.5 9.33a2.5 2.5 0 1 1-3.75-2.165M12 10.5a2.5 2.5 0 1 1-3.75 2.165m-2.5-4.33a2.5 2.5 0 1 1 3.75 2.165" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/>
+              </svg>
+              Social Connections
+            </button>
             <button type="button" class="profile-dropdown-item" id="btn-my-billing" role="menuitem">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                 <path d="M2.667 4.667h10.666M4.667 2.667h6.666a1.333 1.333 0 0 1 1.334 1.333v9.334a1.333 1.333 0 0 1-1.334 1.333H4.667a1.333 1.333 0 0 1-1.334-1.333V4a1.333 1.333 0 0 1 1.334-1.333Z" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
@@ -351,6 +357,16 @@
     </footer>
 
     <div class="toast-container" id="toast-container"></div>
+
+    <!-- Social Connections modal -->
+    <div class="modal-overlay hidden" id="connections-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="connections-modal-title">
+      <div class="modal-card connections-modal" id="connections-modal">
+        <button type="button" class="modal-close" id="connections-modal-close" aria-label="Close">✕</button>
+        <h2 id="connections-modal-title">Social Connections</h2>
+        <p class="modal-desc">Connect your profiles to publish scheduled posts directly from Content Studio.</p>
+        <div class="connections-list" id="connections-list-container"></div>
+      </div>
+    </div>
 
     <!-- Auth modal -->
     <div class="modal-overlay hidden" id="auth-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">

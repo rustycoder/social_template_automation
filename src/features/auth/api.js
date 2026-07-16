@@ -152,6 +152,21 @@ export const api = {
     return request(`/posts/${encodeURIComponent(id)}`, { method: 'DELETE' });
   },
 
+  getSocialConnections() {
+    return request('/social-connections');
+  },
+
+  connectSocialConnection(platform, profileName, profilePicture) {
+    return request('/social-connections/connect', {
+      method: 'POST',
+      body: JSON.stringify({ platform, profileName, profilePicture }),
+    });
+  },
+
+  deleteSocialConnection(id) {
+    return request(`/social-connections/${encodeURIComponent(id)}`, { method: 'DELETE' });
+  },
+
   // —— Admin ——
   adminListCategories() {
     return request('/admin/categories');

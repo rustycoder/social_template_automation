@@ -32,4 +32,23 @@ export const config = {
     password: process.env.ADMIN_PASSWORD || '',
   },
   uploadsDir: process.env.UPLOADS_DIR || '',
+  oauth: {
+    redirectBase: process.env.OAUTH_REDIRECT_BASE || 'http://localhost:3001/api/social-connections/callback',
+    facebook: {
+      clientId: process.env.OAUTH_FB_CLIENT_ID || '',
+      clientSecret: process.env.OAUTH_FB_CLIENT_SECRET || '',
+    },
+    linkedin: {
+      clientId: process.env.OAUTH_LI_CLIENT_ID || '',
+      clientSecret: process.env.OAUTH_LI_CLIENT_SECRET || '',
+    },
+    youtube: {
+      clientId: process.env.OAUTH_YT_CLIENT_ID || '',
+      clientSecret: process.env.OAUTH_YT_CLIENT_SECRET || '',
+    },
+    tiktok: {
+      clientId: process.env.OAUTH_TT_CLIENT_ID || '',
+      clientSecret: process.env.OAUTH_TT_CLIENT_SECRET || '',
+    },
+  },
 };

@@ -9,6 +9,7 @@ import subscriptionRoutes from './routes/subscriptions.js';
 import templateRoutes from './routes/templates.js';
 import adminRoutes from './routes/admin.js';
 import postRoutes from './routes/posts.js';
+import socialConnectionsRoutes from './routes/socialConnections.js';
 import { ensureUploadsDir, getUploadsRoot } from './services/postService.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -30,6 +31,7 @@ app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api', templateRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/posts', postRoutes);
+app.use('/api/social-connections', socialConnectionsRoutes);
 
 app.use((err, _req, res, _next) => {
   console.error('Unhandled error:', err);
