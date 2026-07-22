@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Fact Post - Logo & Social Row</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{width:1080px;height:1350px;overflow:hidden;font-family:'Inter',sans-serif;}
+  .card{position:relative;width:1080px;height:1350px;background:#000;}
+  .photo-area{position:absolute;inset:0;overflow:hidden;}
+  .t-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  .photo-scrim{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.25) 0%,rgba(0,0,0,0.15) 40%,rgba(0,0,0,0.85) 70%,rgba(0,0,0,0.98) 100%);}
+  .t-logo{position:absolute;top:36px;left:36px;height:56px;width:auto;object-fit:contain;z-index:3;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.5));}
+  .content-area{position:absolute;left:40px;right:40px;bottom:120px;z-index:2;}
+  .t-headline{font-family:'Inter',sans-serif;font-weight:800;font-size:44px;line-height:1.32;color:#fff;}
+  .t-headline mark{background:#F5A623;color:#111;box-decoration-break:clone;-webkit-box-decoration-break:clone;padding:2px 8px;}
+  .social-row{position:absolute;left:0;right:0;bottom:36px;z-index:2;display:flex;align-items:center;justify-content:center;gap:22px;}
+  .social-row a,.social-row span{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;}
+  .social-row svg{width:18px;height:18px;fill:#fff;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="photo-area">
+      <img class="t-photo" src="{{PHOTO}}" alt="">
+      <div class="photo-scrim"></div>
+    </div>
+    <img class="t-logo" src="{{LOGO}}" alt="logo">
+    <div class="content-area">
+      <div class="t-headline">{{HEADLINE}}</div>
+    </div>
+    <div class="social-row">
+      <span title="Facebook"><svg viewBox="0 0 24 24"><path d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.5h-1.3c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 2.9h-2.4v7A10 10 0 0 0 22 12z"/></svg></span>
+      <span title="Instagram"><svg viewBox="0 0 24 24"><path d="M12 2c2.7 0 3.05.01 4.12.06 1.06.05 1.79.22 2.43.47.66.26 1.21.6 1.76 1.15.5.5.85 1.1 1.15 1.76.25.64.42 1.37.47 2.43.05 1.07.06 1.42.06 4.13s-.01 3.06-.06 4.13c-.05 1.06-.22 1.79-.47 2.43-.26.66-.6 1.21-1.15 1.76-.5.5-1.1.85-1.76 1.15-.64.25-1.37.42-2.43.47-1.07.05-1.42.06-4.13.06s-3.06-.01-4.13-.06c-1.06-.05-1.79-.22-2.43-.47a4.9 4.9 0 0 1-1.76-1.15 4.9 4.9 0 0 1-1.15-1.76c-.25-.64-.42-1.37-.47-2.43C2.01 15.06 2 14.7 2 12s.01-3.06.06-4.13c.05-1.06.22-1.79.47-2.43.26-.66.6-1.21 1.15-1.76A4.9 4.9 0 0 1 5.44 2.53c.64-.25 1.37-.42 2.43-.47C8.94 2.01 9.3 2 12 2zm0 5a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0 8.2a3.2 3.2 0 1 1 0-6.4 3.2 3.2 0 0 1 0 6.4zm5.2-8.4a1.17 1.17 0 1 0 0-2.34 1.17 1.17 0 0 0 0 2.34z"/></svg></span>
+      <span title="X / Twitter"><svg viewBox="0 0 24 24"><path d="M17.5 3h3.3l-7.2 8.2L22 21h-6.6l-5.2-6.8L4.3 21H1l7.7-8.8L2 3h6.8l4.7 6.2L17.5 3zm-1.2 16h1.8L7.8 4.9H5.9L16.3 19z"/></svg></span>
+      <span title="LinkedIn"><svg viewBox="0 0 24 24"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3V9zm7 0h3.8v1.7h.05c.53-1 1.83-2 3.77-2 4.03 0 4.78 2.6 4.78 6V21h-4v-5.4c0-1.3-.02-2.9-1.8-2.9-1.8 0-2.07 1.4-2.07 2.8V21h-4V9z"/></svg></span>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Celeb List - Content</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{width:1080px;height:1350px;overflow:hidden;font-family:'Archivo Black',sans-serif;}
+  .card{position:relative;width:1080px;height:1350px;background:#000;}
+  .photo-area{position:absolute;inset:0;overflow:hidden;}
+  .t-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;}
+  .photo-scrim{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0) 45%,rgba(0,0,0,0.55) 70%,rgba(0,0,0,0.9) 100%);}
+  .content-area{position:absolute;left:56px;right:56px;bottom:64px;z-index:2;}
+  .t-name{font-family:'Archivo Black',sans-serif;font-weight:400;font-size:54px;line-height:1.1;letter-spacing:-.005em;text-transform:uppercase;color:#FFE600;margin-bottom:10px;}
+  .t-caption{font-family:'Archivo Black',sans-serif;font-weight:400;font-size:42px;line-height:1.22;letter-spacing:-.005em;text-transform:uppercase;color:#fff;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="photo-area">
+      <img class="t-photo" src="{{PHOTO}}" alt="">
+      <div class="photo-scrim"></div>
+    </div>
+    <div class="content-area">
+      <div class="t-name">{{NAME}}</div>
+      <div class="t-caption">{{CAPTION}}</div>
+    </div>
+  </div>
+</body>
+</html>

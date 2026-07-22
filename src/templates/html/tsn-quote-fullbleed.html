@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>TSN Quote Card - Full Bleed</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{width:1080px;height:1080px;overflow:hidden;font-family:'Inter',sans-serif;}
+  .card{position:relative;width:1080px;height:1080px;background:#000;}
+  .photo-area{position:absolute;inset:0;overflow:hidden;}
+  .t-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;}
+  .photo-scrim{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0) 0%,rgba(0,0,0,0.15) 35%,rgba(0,0,0,0.55) 55%,rgba(0,0,0,0.92) 72%,rgba(0,0,0,0.98) 100%);}
+  .top-bar{position:absolute;top:44px;left:48px;right:48px;display:flex;align-items:center;justify-content:space-between;z-index:3;}
+  .t-logo{height:38px;width:auto;object-fit:contain;object-position:left center;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.5));}
+  .top-tag{font-family:'Inter',sans-serif;font-weight:700;font-size:16px;letter-spacing:.06em;color:rgba(255,255,255,0.85);text-transform:uppercase;text-shadow:0 2px 6px rgba(0,0,0,0.5);}
+  .quote-mark{position:absolute;left:44px;bottom:340px;z-index:2;font-family:Georgia,'Times New Roman',serif;font-weight:900;font-size:150px;line-height:1;color:#fff;}
+  .content-area{position:absolute;left:48px;right:48px;bottom:56px;z-index:2;}
+  .t-headline{font-family:'Inter',sans-serif;font-weight:900;font-size:56px;line-height:1.08;letter-spacing:-.01em;text-transform:uppercase;color:#fff;}
+  .t-headline mark{background:transparent;color:#FFD400;padding:0;}
+  .caption{margin-top:26px;font-family:'Inter',sans-serif;font-weight:800;font-size:20px;line-height:1.5;letter-spacing:.02em;text-transform:uppercase;color:rgba(255,255,255,0.85);}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="photo-area">
+      <img class="t-photo" src="{{PHOTO}}" alt="">
+      <div class="photo-scrim"></div>
+    </div>
+    <div class="top-bar">
+      <img class="t-logo" src="{{LOGO}}" alt="logo">
+      <div class="top-tag">{{TOP_TAG}}</div>
+    </div>
+    <div class="quote-mark">&#8220;</div>
+    <div class="content-area">
+      <div class="t-headline">{{QUOTE}}</div>
+      <div class="caption">{{CAPTION}}</div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>TSN Quote Card - Split</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{width:1080px;height:1080px;overflow:hidden;font-family:'Inter',sans-serif;}
+  .card{position:relative;width:1080px;height:1080px;background:#000;}
+  .photo-area{position:absolute;top:0;right:0;bottom:0;width:62%;overflow:hidden;}
+  .t-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;}
+  .photo-scrim{position:absolute;inset:0;background:linear-gradient(to right,rgba(0,0,0,1) 0%,rgba(0,0,0,0.85) 8%,rgba(0,0,0,0) 38%);}
+  .t-logo{position:absolute;top:52px;left:48px;height:40px;width:auto;object-fit:contain;object-position:left center;z-index:3;}
+  .quote-mark{position:absolute;top:150px;left:44px;z-index:3;font-family:Georgia,'Times New Roman',serif;font-weight:900;font-size:110px;line-height:1;color:#fff;}
+  .content-area{position:absolute;top:270px;left:48px;right:40%;bottom:60px;z-index:3;display:flex;align-items:flex-start;}
+  .t-headline{font-family:'Inter',sans-serif;font-weight:900;font-size:54px;line-height:1.08;letter-spacing:-.01em;text-transform:uppercase;color:#fff;}
+  .t-headline mark{background:transparent;color:#FFD400;padding:0;}
+  .caption{position:absolute;left:48px;right:40%;bottom:48px;z-index:3;font-family:'Inter',sans-serif;font-weight:800;font-size:18px;line-height:1.5;letter-spacing:.02em;text-transform:uppercase;color:rgba(255,255,255,0.75);}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="photo-area">
+      <img class="t-photo" src="{{PHOTO}}" alt="">
+      <div class="photo-scrim"></div>
+    </div>
+    <img class="t-logo" src="{{LOGO}}" alt="logo">
+    <div class="quote-mark">&#8220;</div>
+    <div class="content-area">
+      <div class="t-headline">{{QUOTE}}</div>
+    </div>
+    <div class="caption">{{CAPTION}}</div>
+  </div>
+</body>
+</html>

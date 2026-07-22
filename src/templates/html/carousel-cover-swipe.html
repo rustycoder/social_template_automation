@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Carousel Cover - Swipe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{width:1080px;height:1350px;overflow:hidden;font-family:'Archivo Black',sans-serif;}
+  .card{position:relative;width:1080px;height:1350px;background:#000;}
+  .photo-area{position:absolute;top:0;left:0;right:0;height:62%;overflow:hidden;}
+  .t-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;}
+  .swipe-pill{position:absolute;top:34px;left:36px;z-index:3;display:flex;align-items:center;gap:12px;background:rgba(0,0,0,0.45);padding:8px 20px 8px 8px;border-radius:20px;}
+  .swipe-track{width:70px;height:8px;border-radius:4px;background:rgba(255,255,255,0.35);overflow:hidden;}
+  .swipe-fill{width:35%;height:100%;background:#fff;border-radius:4px;}
+  .swipe-label{font-family:'Inter',sans-serif;font-weight:700;font-size:16px;letter-spacing:.08em;text-transform:uppercase;color:#fff;}
+  .watermark{position:absolute;top:calc(62% - 30px);left:0;right:0;display:flex;align-items:center;justify-content:center;z-index:3;}
+  .watermark img{height:30px;width:auto;object-fit:contain;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.6));}
+  .divider{position:absolute;top:62%;left:48px;right:48px;height:2px;background:rgba(255,255,255,0.3);}
+  .content-area{position:absolute;top:calc(62% + 2px);left:48px;right:48px;bottom:0;display:flex;align-items:center;justify-content:center;text-align:center;}
+  .t-headline{font-family:'Archivo Black',sans-serif;font-weight:400;font-size:58px;line-height:1.16;letter-spacing:-.01em;text-transform:uppercase;color:#fff;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="photo-area">
+      <img class="t-photo" src="{{PHOTO}}" alt="">
+    </div>
+    <div class="swipe-pill">
+      <div class="swipe-track"><div class="swipe-fill"></div></div>
+      <div class="swipe-label">{{SWIPE_LABEL}}</div>
+    </div>
+    <div class="watermark"><img src="{{LOGO}}" alt="logo"></div>
+    <div class="divider"></div>
+    <div class="content-area">
+      <div class="t-headline">{{HEADLINE}}</div>
+    </div>
+  </div>
+</body>
+</html>

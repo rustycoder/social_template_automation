@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Story Card - Badge & Insets</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{width:1080px;height:1350px;overflow:hidden;font-family:'Inter',sans-serif;}
+  .card{position:relative;width:1080px;height:1350px;background:#000;}
+  .photo-area{position:absolute;inset:0;overflow:hidden;}
+  .t-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 25%;}
+  .photo-scrim{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0) 48%,rgba(0,0,0,0.75) 72%,rgba(0,0,0,0.97) 100%);}
+  .brand-badge{position:absolute;top:36px;left:36px;z-index:4;display:flex;flex-direction:column;align-items:flex-start;gap:10px;}
+  .brand-row{display:flex;align-items:center;background:rgba(0,0,0,0.55);padding:8px 16px 8px 8px;border-radius:6px;gap:10px;}
+  .brand-row img{height:44px;width:44px;object-fit:cover;border-radius:50%;border:2px solid #E4173F;}
+  .brand-name{font-family:'Inter',sans-serif;font-weight:900;font-size:22px;line-height:1.1;color:#fff;text-transform:uppercase;letter-spacing:.01em;}
+  .follow-btn{background:#E4173F;color:#fff;font-family:'Inter',sans-serif;font-weight:800;font-size:20px;text-transform:uppercase;padding:6px 22px;border-radius:4px;letter-spacing:.03em;}
+  .inset{position:absolute;border-radius:50%;overflow:hidden;border:5px solid rgba(255,255,255,0.9);box-shadow:0 8px 20px rgba(0,0,0,0.45);z-index:3;}
+  .inset img{width:100%;height:100%;object-fit:cover;}
+  .inset-1{top:56px;right:56px;width:220px;height:220px;}
+  .inset-2{top:590px;right:24px;width:210px;height:210px;}
+  .content-area{position:absolute;left:40px;right:40px;bottom:56px;z-index:2;}
+  .t-caption{font-family:'Inter',sans-serif;font-weight:800;font-size:42px;line-height:1.28;color:#fff;}
+  .t-caption mark{background:transparent;color:#E4173F;padding:0;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="photo-area">
+      <img class="t-photo" src="{{PHOTO_MAIN}}" alt="">
+      <div class="photo-scrim"></div>
+    </div>
+    <div class="inset inset-1"><img src="{{PHOTO_INSET_1}}" alt=""></div>
+    <div class="inset inset-2"><img src="{{PHOTO_INSET_2}}" alt=""></div>
+    <div class="brand-badge">
+      <div class="brand-row">
+        <img src="{{LOGO}}" alt="logo">
+        <div class="brand-name">{{BRAND}}</div>
+      </div>
+      <div class="follow-btn">{{FOLLOW_TEXT}}</div>
+    </div>
+    <div class="content-area">
+      <div class="t-caption">{{CAPTION}}</div>
+    </div>
+  </div>
+</body>
+</html>

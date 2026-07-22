@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Split Before/After</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{width:1080px;height:1350px;overflow:hidden;font-family:'Inter',sans-serif;}
+  .card{position:relative;width:1080px;height:1350px;background:#000;border:3px solid #E4173F;}
+  .row{position:relative;width:100%;height:calc(50% - 32px);overflow:hidden;}
+  .row-bottom{margin-top:2px;}
+  .row img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  .row-scrim{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0) 40%,rgba(0,0,0,0.55) 72%,rgba(0,0,0,0.92) 100%);}
+  .row-text{position:absolute;left:40px;right:40px;bottom:26px;z-index:2;}
+  .row-label{font-family:'Inter',sans-serif;font-weight:900;font-size:38px;line-height:1.1;color:#FFE600;text-transform:uppercase;}
+  .row-caption{font-family:'Inter',sans-serif;font-weight:800;font-size:34px;line-height:1.22;color:#fff;text-transform:uppercase;margin-top:4px;}
+  .footer{position:absolute;left:0;right:0;bottom:0;height:32px;display:flex;align-items:center;justify-content:center;gap:10px;background:#000;}
+  .footer img{height:20px;width:20px;object-fit:contain;border-radius:50%;}
+  .footer span{font-family:'Inter',sans-serif;font-weight:700;font-size:13px;letter-spacing:.08em;color:rgba(255,255,255,0.85);text-transform:uppercase;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="row">
+      <img src="{{PHOTO_1}}" alt="">
+      <div class="row-scrim"></div>
+      <div class="row-text">
+        <div class="row-label">{{LABEL_1}}</div>
+        <div class="row-caption">{{CAPTION_1}}</div>
+      </div>
+    </div>
+    <div class="row row-bottom">
+      <img src="{{PHOTO_2}}" alt="">
+      <div class="row-scrim"></div>
+      <div class="row-text">
+        <div class="row-label">{{LABEL_2}}</div>
+        <div class="row-caption">{{CAPTION_2}}</div>
+      </div>
+    </div>
+    <div class="footer">
+      <img src="{{LOGO}}" alt="logo">
+      <span>{{HANDLE}}</span>
+    </div>
+  </div>
+</body>
+</html>

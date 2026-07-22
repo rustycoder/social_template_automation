@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>News Bulletin - Ribbon & Banner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{width:1080px;height:1350px;overflow:hidden;font-family:'Inter',sans-serif;}
+  .card{position:relative;width:1080px;height:1350px;background:#000;}
+  .photo-area{position:absolute;top:0;left:0;right:0;height:56%;overflow:hidden;}
+  .t-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  .photo-scrim{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0) 60%,rgba(0,0,0,0.85) 100%);}
+  .t-logo{position:absolute;top:32px;right:32px;height:64px;width:64px;object-fit:contain;border-radius:50%;z-index:3;box-shadow:0 4px 14px rgba(0,0,0,0.4);}
+  .watermark{position:absolute;top:220px;left:0;right:0;text-align:center;z-index:2;font-family:'Inter',sans-serif;font-weight:700;font-size:22px;letter-spacing:.25em;text-transform:uppercase;color:rgba(255,255,255,0.85);text-shadow:0 2px 6px rgba(0,0,0,0.5);}
+  .ribbon-tag{position:absolute;top:calc(56% - 34px);left:0;z-index:3;background:#7A0C1E;color:#fff;font-family:'Inter',sans-serif;font-weight:800;font-size:24px;letter-spacing:.02em;text-transform:uppercase;padding:12px 32px 12px 28px;clip-path:polygon(0 0,100% 0,92% 100%,0% 100%);}
+  .banner{position:absolute;top:calc(56% + 26px);left:40px;right:40px;background:#B8880B;padding:16px 28px;z-index:3;}
+  .banner-text{font-family:'Inter',sans-serif;font-weight:900;font-size:38px;color:#FFE600;text-transform:uppercase;letter-spacing:.01em;}
+  .content-area{position:absolute;left:40px;right:40px;top:calc(56% + 118px);bottom:70px;background:#000;padding-top:26px;}
+  .t-body{font-family:'Inter',sans-serif;font-weight:700;font-size:28px;line-height:1.6;color:#fff;}
+  .t-body mark{background:transparent;color:#E8792B;padding:0;font-weight:800;}
+  .url-text{position:absolute;left:0;right:0;bottom:24px;text-align:center;font-family:'Inter',sans-serif;font-weight:500;font-size:16px;color:rgba(255,255,255,0.6);}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="photo-area">
+      <img class="t-photo" src="{{PHOTO}}" alt="">
+      <div class="photo-scrim"></div>
+    </div>
+    <img class="t-logo" src="{{LOGO}}" alt="logo">
+    <div class="watermark">{{WATERMARK_TEXT}}</div>
+    <div class="ribbon-tag">{{TAG}}</div>
+    <div class="banner"><div class="banner-text">{{HEADLINE}}</div></div>
+    <div class="content-area">
+      <div class="t-body">{{BODY}}</div>
+    </div>
+    <div class="url-text">{{URL}}</div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Facts Carousel - Cover</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{width:1080px;height:1080px;overflow:hidden;font-family:'Archivo Black',sans-serif;}
+  .card{position:relative;width:1080px;height:1080px;background:#000;}
+  .grid-area{position:absolute;top:0;left:0;right:0;height:58%;display:flex;}
+  .grid-cell{position:relative;flex:1;overflow:hidden;}
+  .grid-cell img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  .watermark{position:absolute;top:calc(58% - 34px);left:0;right:0;display:flex;align-items:center;justify-content:center;z-index:3;}
+  .watermark img{height:34px;width:auto;object-fit:contain;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.6));}
+  .divider{position:absolute;top:58%;left:48px;right:48px;height:2px;background:rgba(255,255,255,0.35);}
+  .content-area{position:absolute;top:58%;left:48px;right:48px;bottom:0;display:flex;align-items:center;justify-content:center;text-align:center;}
+  .t-headline{font-family:'Archivo Black',sans-serif;font-weight:400;font-size:58px;line-height:1.18;letter-spacing:-.01em;text-transform:uppercase;color:#fff;}
+  .t-headline mark{background:transparent;color:#FFE600;padding:0;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="grid-area">
+      <div class="grid-cell"><img src="{{PHOTO_1}}" alt=""></div>
+      <div class="grid-cell"><img src="{{PHOTO_2}}" alt=""></div>
+      <div class="grid-cell"><img src="{{PHOTO_3}}" alt=""></div>
+    </div>
+    <div class="watermark"><img src="{{LOGO}}" alt="logo"></div>
+    <div class="divider"></div>
+    <div class="content-area">
+      <div class="t-headline">{{HEADLINE}}</div>
+    </div>
+  </div>
+</body>
+</html>
