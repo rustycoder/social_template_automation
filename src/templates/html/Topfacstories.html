@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>
+      Topfacstories
+    </title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+      * {
+                                box-sizing:border-box;
+                                margin:0;
+                                padding:0;
+      }
+                        html,body {
+                                width:1080px;
+                                height:1080px;
+                                overflow:hidden;
+                                font-family:'Inter',sans-serif;
+      }
+                        .card {
+                                position:relative;
+                                width:1080px;
+                                height:1080px;
+                                background:#1B1F3B;
+      }
+                        .photo-area {
+                                position:absolute;
+                                top:0;
+                                left:0;
+                                right:0;
+                                height:58%;
+                                overflow:hidden;
+      }
+                        .t-photo {
+                                position:absolute;
+                                inset:0;
+                                width:100%;
+                                height:100%;
+                                object-fit:cover;
+                                object-position:center top;
+      }
+                        /* Single full-card gradient panel, replaces the old photo-only scrim.         It blends the photo seamlessly into the navy background no matter         how tall the text block below ends up being. */      .panel {
+                                position:absolute;
+                                inset:0;
+                                z-index:1;
+                                background:linear-gradient(          to top,          #1B1F3B 0%,          #1B1F3B 34%,          rgba(27,31,59,0.97) 44%,          rgba(27,31,59,0.82) 54%,          rgba(27,31,59,0.55) 63%,          rgba(27,31,59,0.25) 72%,          rgba(27,31,59,0) 82%        );
+                                pointer-events:none;
+      }
+                        /* Fixed TOP anchor for tag + headline, right where the gradient         solidifies into flat navy. This position never moves — it does         NOT depend on subtitle length. Only the subtitle (below) flexes,         and it's clamped so it can never push into the brand text. */      .content-top {
+                                position:absolute;
+                                left:48px;
+                                right:48px;
+                                top:648px;
+                                z-index:2;
+                                display:flex;
+                                flex-direction:column;
+                                align-items:flex-start;
+                                gap:18px;
+      }
+                        .tag-row {
+                                display:flex;
+                                flex-direction:row;
+      }
+                        .tag-badge {
+                                background:#FFDE21;
+                                color:#1B1F3B;
+                                font-family:'Inter',sans-serif;
+                                font-weight:800;
+                                font-size:26px;
+                                letter-spacing:.12em;
+                                padding:12px 32px 10px;
+                                text-transform:uppercase;
+      }
+                        .tag-badge.tag-red {
+                                background:#D32F2F;
+                                color:#fff;
+      }
+                        .t-headline {
+                                font-family:'Inter',sans-serif;
+                                font-weight:900;
+                                font-size:50px;
+                                line-height:1.18;
+                                color:#fff;
+      }
+                        .t-headline mark {
+                                background:#D32F2F;
+                                color:#fff;
+                                padding:2px 8px;
+                                border-radius:2px;
+      }
+                        /* Subtitle lives in its own fixed box below content-top, capped at         3 lines no matter how much text is passed in. It will never grow         taller than this box, so it can never collide with the brand         text below — long copy gets a trailing ellipsis instead. */      .subtitle-box {
+                                position:absolute;
+                                left:48px;
+                                right:48px;
+                                top:838px;
+                                max-height:128px;
+                                overflow:hidden;
+                                z-index:2;
+      }
+                        .subtitle {
+                                font-family:'Inter',sans-serif;
+                                font-weight:400;
+                                font-size:34px;
+                                line-height:1.35;
+                                color:rgba(255,255,255,0.75);
+                                display:-webkit-box;
+                                -webkit-line-clamp:3;
+                                -webkit-box-orient:vertical;
+                                overflow:hidden;
+      }
+                        .brand-text {
+                                position:absolute;
+                                bottom:40px;
+                                left:0;
+                                right:0;
+                                text-align:center;
+                                font-family:'Inter',sans-serif;
+                                font-weight:800;
+                                font-size:20px;
+                                letter-spacing:.35em;
+                                text-transform:uppercase;
+                                color:rgba(255,255,255,0.6);
+                                z-index:3;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="photo-area">
+        <img class="t-photo" src="{{PHOTO}}" alt="">
+      </div>
+      <div class="panel">
+      </div>
+      <div class="content-top">
+        <div class="tag-row">
+          <div class="tag-badge">
+            {{TAG}}
+          </div>
+          <div class="tag-badge tag-red">
+            {{TAG2}}
+          </div>
+        </div>
+        <div class="t-headline">
+          {{HEADLINE}}
+        </div>
+      </div>
+      <div class="subtitle-box">
+        <div class="subtitle">
+          {{SUBTITLE}}
+        </div>
+      </div>
+      <div class="brand-text">
+        {{HANDLE}}
+      </div>
+    </div>
+  </body>
+</html>

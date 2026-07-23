@@ -106,6 +106,7 @@ export async function parseExcelFile(file) {
     if (!headers[i]) headers[i] = `Column ${i + 1}`;
   }
 
+  const imageColumns = new Set();
   const rows = [];
   for (let r = 2; r <= worksheet.rowCount; r++) {
     const row = worksheet.getRow(r);
@@ -121,7 +122,11 @@ export async function parseExcelFile(file) {
       }
 
       if (value && typeof value === 'object') {
-        if (value.richText) {
+        if (value.hyperlink) {
+          // Hyperlink cells — use the actual URL, not display text
+          rowData[header] = value.hyperlink;
+          imageColumns.add(header.toLowerCase());
+        } else if (value.richText) {
           rowData[header] = value.richText.map((rt) => rt.text).join('');
         } else if (value.text) {
           rowData[header] = value.text;
@@ -131,7 +136,12 @@ export async function parseExcelFile(file) {
           rowData[header] = value.toString();
         }
       } else {
-        rowData[header] = value?.toString() ?? '';
+        // Plain string — detect image URLs
+        const strVal = value?.toString() ?? '';
+        rowData[header] = strVal;
+        if (/^https?:\/\/.+\.(jpe?g|png|gif|webp|svg|bmp|avif)(\?.*)?$/i.test(strVal)) {
+          imageColumns.add(header.toLowerCase());
+        }
       }
     });
 
@@ -140,7 +150,6 @@ export async function parseExcelFile(file) {
     }
   }
 
-  const imageColumns = new Set();
   await extractEmbeddedImages(workbook, worksheet, headers, rows, imageColumns);
 
   return { headers, rows, imageColumns, fileName };
