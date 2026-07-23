@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "node src/index.js",
     "dev:watch": "node --watch-path=src/index.js --watch-path=src/routes --watch-path=src/services --watch-path=src/middleware --watch-path=src/jobs --watch-path=src/database --watch-path=src/config.js --watch-path=src/cron.js --watch-path=src/payment-gateway src/index.js",
-    "start": "npm run db:setup && npm run db:migrate && npm run db:seed && node src/index.js",
+    "start": "npm run db:migrate && npm run db:seed && node src/index.js",
     "db:setup": "mysql -u root -p < src/database/schema.sql",
     "db:migrate": "node src/database/migrate.js",
     "db:reset": "node src/database/migrate.js --fresh",
