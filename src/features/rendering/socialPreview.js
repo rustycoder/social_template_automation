@@ -4,6 +4,15 @@
 import { FORMAT_BUCKETS, PLATFORM_PRESETS } from './socialFormats.js';
 import { replacePlaceholders } from './socialRenderHost.js';
 
+const EMOJI_FONT_CSS = `
+/* Emoji font fallback via unicode-range — activates only for emoji codepoints */
+@font-face {
+  font-family: 'EmojiF';
+  src: local('Segoe UI Emoji'), local('Apple Color Emoji'), local('Noto Color Emoji'), local('Segoe UI Symbol');
+  unicode-range: U+200D, U+FE0F, U+2300-23FF, U+2600-26FF, U+2700-27BF, U+FE00-FEFF, U+1F000-1FAFF, U+1F900-1F9FF, U+1F1E0-1F1FF, U+E0020-E007F;
+}
+`;
+
 const SOCIAL_PREVIEW_SHADOW_CSS = `
 :host {
   display: flex;
@@ -179,7 +188,7 @@ export class SocialPreview {
 
     const { htmlContent, cssContent } = this._buildPreviewContent(rowData, cssTemplate);
     const root = this._getPreviewRoot(mount);
-    root.innerHTML = `<style>${cssContent}\n${SOCIAL_PREVIEW_SHADOW_CSS}</style><div class="preview-sheet"><div class="social-frame">${htmlContent}</div></div>`;
+    root.innerHTML = `<style>${EMOJI_FONT_CSS}\n${cssContent}\n${SOCIAL_PREVIEW_SHADOW_CSS}</style><div class="preview-sheet"><div class="social-frame">${htmlContent}</div></div>`;
 
     root.querySelectorAll('img').forEach((img) => {
       const src = img.getAttribute('src');

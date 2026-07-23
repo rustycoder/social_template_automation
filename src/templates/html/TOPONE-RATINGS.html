@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>
+      Ranking Card - Stacked Photos
+    </title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Inter:wght@600;800&display=swap" rel="stylesheet">
+    <style>
+      * {
+                 margin:0;
+                 padding:0;
+                 box-sizing:border-box;
+      }
+              html,body {
+                 width:1080px;
+                 height:1080px;
+                 overflow:hidden;
+                 font-family:'Inter',sans-serif;
+      }
+              .card {
+                 position:relative;
+                 width:1080px;
+                 height:1080px;
+                 background:#000;
+      }
+              .photo-top, .photo-bottom {
+                    position:absolute;
+                 left:0;
+                 width:100%;
+                 height:540px;
+                 overflow:hidden;
+      }
+              .photo-top {
+                 top:0;
+      }
+              .photo-bottom {
+                 top:540px;
+      }
+              .photo-top img, .photo-bottom img {
+                    width:100%;
+                 height:100%;
+                 object-fit:cover;
+                 display:block;
+      }
+              .divider {
+                    position:absolute;
+                 top:536px;
+                 left:0;
+                 width:100%;
+                 height:8px;
+                    background:#fff;
+                 z-index:4;
+      }
+              /* Caption sitting across the seam between the two photos */  .caption-wrap {
+                    position:absolute;
+                    top:480px;
+                    left:0;
+                 right:0;
+                    z-index:5;
+                    display:flex;
+                    flex-direction:column;
+                    align-items:center;
+                    text-align:center;
+                    padding:0 40px;
+      }
+              .t-title {
+                    font-family:'Luckiest Guy', cursive;
+                    font-size:56px;
+                    color:#FFD400;
+                    -webkit-text-stroke: 3px #000;
+                    paint-order: stroke fill;
+                    text-transform:none;
+                    margin-bottom:14px;
+                    line-height:1.1;
+      }
+              .t-subtitle {
+                    font-family:'Luckiest Guy', cursive;
+                    font-size:46px;
+                    color:#fff;
+                    -webkit-text-stroke: 3px #000;
+                    paint-order: stroke fill;
+                    line-height:1.1;
+      }
+              .handle {
+                    position:absolute;
+                 bottom:28px;
+                 right:28px;
+                 z-index:5;
+                    color:#fff;
+                 font-weight:800;
+                 font-size:20px;
+                    text-shadow:0 1px 4px rgba(0,0,0,0.8);
+                    display:flex;
+                 align-items:center;
+                 gap:6px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="photo-top">
+        <img src="{{PHOTO_TOP}}" alt="">
+      </div>
+      <div class="photo-bottom">
+        <img src="{{PHOTO_BOTTOM}}" alt="">
+      </div>
+      <div class="divider">
+      </div>
+      <div class="caption-wrap">
+        <div class="t-title">
+          {{NUMBER}}.{{TITLE}}
+        </div>
+        <div class="t-subtitle">
+          {{RECORD}}
+        </div>
+      </div>
+      <div class="handle">
+        {{HANDLE}}
+      </div>
+    </div>
+  </body>
+</html>

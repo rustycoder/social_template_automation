@@ -38,6 +38,9 @@ function extractBody(rawHtml) {
   return m ? m[1].trim() : '';
 }
 
+/** Emoji @font-face — injected into every layout so emoji codepoints resolve to a color-emoji font. */
+const EMOJI_FACE = `@font-face{font-family:'EmojiF';src:local('Segoe UI Emoji'),local('Apple Color Emoji'),local('Noto Color Emoji'),local('Segoe UI Symbol');unicode-range:U+200D,U+FE0F,U+2300-23FF,U+2600-26FF,U+2700-27BF,U+FE00-FEFF,U+1F000-1FAFF,U+1F900-1F9FF,U+1F1E0-1F1FF,U+E0020-E007F;}`;
+
 function adaptCssToLayout(baseCss, fontImports, width, height) {
   let css = baseCss
     .replace(/(html,\s*body\s*\{[^}]*width:)\s*\d+px/g, `$1${width}px`)
@@ -45,9 +48,17 @@ function adaptCssToLayout(baseCss, fontImports, width, height) {
     .replace(/(\.card\s*\{[^}]*width:)\s*\d+px/g, `$1${width}px`)
     .replace(/(\.card\s*\{[^}]*height:)\s*\d+px/g, `$1${height}px`);
 
+  // Append 'EmojiF' to every font-family declaration so emoji glyphs render
+  css = css.replace(/(font-family\s*:\s*)([^;}\n]+)/gi, (match, prefix, families) => {
+    if (families.includes('EmojiF')) return match;
+    return `${prefix}${families.trimEnd()}, 'EmojiF'`;
+  });
+
   if (fontImports.length) {
     css = `${fontImports.join('\n')}\n${css}`;
   }
+  // Prepend emoji @font-face so 'EmojiF' is available
+  css = `${EMOJI_FACE}\n${css}`;
   return css;
 }
 

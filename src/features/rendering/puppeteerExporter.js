@@ -11,6 +11,12 @@ function buildFullDocument(bodyHtml, css, width, height) {
 <meta charset="UTF-8">
 <style>
 html, body { margin: 0; padding: 0; width: ${width}px; height: ${height}px; overflow: hidden; }
+/* Emoji font fallback via unicode-range */
+@font-face {
+  font-family: 'EmojiF';
+  src: local('Segoe UI Emoji'), local('Apple Color Emoji'), local('Noto Color Emoji'), local('Segoe UI Symbol');
+  unicode-range: U+200D, U+FE0F, U+2300-23FF, U+2600-26FF, U+2700-27BF, U+FE00-FEFF, U+1F000-1FAFF, U+1F900-1F9FF, U+1F1E0-1F1FF, U+E0020-E007F;
+}
 ${css}
 </style>
 </head>
