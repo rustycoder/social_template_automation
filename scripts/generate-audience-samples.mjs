@@ -6,9 +6,12 @@
 import { writeFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import { AUDIENCE_TEMPLATE_REGISTRY } from '../src/templates/audienceTemplateRegistry.js';
+import { AUDIENCE_TEMPLATE_REGISTRY } from '../seed-data/templates/audienceTemplateRegistry.js';
 
-const outPath = join(dirname(fileURLToPath(import.meta.url)), '../src/features/domain/audienceTemplateSamples.js');
+const outPath = join(
+  dirname(fileURLToPath(import.meta.url)),
+  '../../frontend/src/features/domain/audienceTemplateSamples.js'
+);
 
 const u = (id, w = 1080) =>
   `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&q=80`;

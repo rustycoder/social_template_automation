@@ -6,13 +6,13 @@
 import { writeFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import { LEGACY_TEMPLATE_REGISTRY } from '../src/templates/legacyTemplateRegistry.js';
-import { NICHE_TEMPLATE_REGISTRY } from '../src/templates/nicheTemplateRegistry.js';
-import { AUDIENCE_TEMPLATE_REGISTRY } from '../src/templates/audienceTemplateRegistry.js';
-import { AUDIENCE_SAMPLES } from '../src/features/domain/audienceTemplateSamples.js';
+import { LEGACY_TEMPLATE_REGISTRY } from '../seed-data/templates/legacyTemplateRegistry.js';
+import { NICHE_TEMPLATE_REGISTRY } from '../seed-data/templates/nicheTemplateRegistry.js';
+import { AUDIENCE_TEMPLATE_REGISTRY } from '../seed-data/templates/audienceTemplateRegistry.js';
+import { AUDIENCE_SAMPLES } from '../../frontend/src/features/domain/audienceTemplateSamples.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const outPath = join(root, 'src/features/domain/builtinTemplateSamples.js');
+const outPath = join(root, '../frontend/src/features/domain/builtinTemplateSamples.js');
 
 const u = (id, w = 1080) =>
   `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&q=80`;

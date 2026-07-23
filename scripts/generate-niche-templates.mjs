@@ -3,7 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const TEMPLATES_DIR = path.resolve(__dirname, '../src/templates');
+const TEMPLATES_DIR = path.resolve(__dirname, '../seed-data/templates');
 const HTML_DIR = path.join(TEMPLATES_DIR, 'html');
 const REGISTRY_PATH = path.join(TEMPLATES_DIR, 'nicheTemplateRegistry.js');
 
