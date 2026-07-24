@@ -5,8 +5,7 @@
 import { getTemplateById } from '../templateService.js';
 import { materializeFieldDataImages } from '../postService.js';
 import { composeRenderDocument } from './compose.js';
-import { screenshotHtml } from './screenshot.js';
-import { closeBrowser } from './browser.js';
+import { screenshotHtml, closeBrowser } from './screenshot.js';
 import { LAYOUTS } from './layouts.js';
 
 export { closeBrowser, LAYOUTS };

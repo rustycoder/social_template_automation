@@ -12,7 +12,7 @@ import postRoutes from './routes/posts.js';
 import renderRoutes from './routes/render.js';
 import socialConnectionsRoutes from './routes/socialConnections.js';
 import { ensureUploadsDir, getUploadsRoot } from './services/postService.js';
-import { closeBrowser } from './services/render/browser.js';
+import { closeBrowser } from './services/render/screenshot.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();

@@ -48,7 +48,7 @@ See `.env.example`. Important values:
 
 ## Rendering
 
-Pixel-perfect PNG export runs **on the API** with Puppeteer:
+Pixel-perfect PNG export runs **on the API** with Puppeteer in a **child worker** (stdin isolated from the API process — avoids `open EEXIST` on hosts like LiteSpeed):
 
 - `POST /api/render` — `{ template_id, field_data, format_bucket }` → `image/png` (auth + active subscription)
 - `POST /api/posts` — if no `image` file is uploaded, the server renders from `template_id` + `field_data` + `format_bucket`

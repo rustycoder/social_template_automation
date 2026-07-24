@@ -1,45 +1,22 @@
 /**
  * Shared Puppeteer Chromium singleton for PNG screenshots.
+ * Loaded inside the render worker (not the API process) to avoid host stdin conflicts.
  */
 
-import { existsSync } from 'fs';
-import { Readable } from 'stream';
+import './stdinGuard.js';
+import { existsSync } from 'node:fs';
+import puppeteer from 'puppeteer';
 
 let browserInstance = null;
 let launching = null;
 
 /**
- * @puppeteer/browsers CLI imports `stdin` from `node:process` at module load.
- * In some hosts (already-wrapped fd 0), that throws `Error: open EEXIST`.
- * Touch or stub stdin before importing puppeteer.
- */
-function ensureProcessStdin() {
-  try {
-    void process.stdin;
-    return;
-  } catch (error) {
-    const message = String(error?.message || error || '');
-    if (error?.code !== 'EEXIST' && !message.includes('EEXIST')) {
-      throw error;
-    }
-  }
-
-  const stub = new Readable({ read() {} });
-  stub.isTTY = false;
-  Object.defineProperty(process, 'stdin', {
-    configurable: true,
-    enumerable: true,
-    value: stub,
-  });
-}
-
-/**
  * @returns {string | null}
  */
 function findSystemChrome() {
+  // Only auto-detect system Chrome when env did not point at a binary.
+  // (env paths are handled first in resolveExecutablePath)
   const candidates = [
-    process.env.PUPPETEER_EXECUTABLE_PATH,
-    process.env.CHROME_PATH,
     '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
     '/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary',
     '/Applications/Chromium.app/Contents/MacOS/Chromium',
@@ -61,24 +38,32 @@ function findSystemChrome() {
 }
 
 /**
- * @param {typeof import('puppeteer')} puppeteerModule
  * @returns {Promise<string>}
  */
-async function resolveExecutablePath(puppeteerModule) {
-  const systemChrome = findSystemChrome();
-  if (systemChrome) {
-    console.log(`[render] Using system Chrome: ${systemChrome}`);
-    return systemChrome;
+async function resolveExecutablePath() {
+  // Explicit env paths always win.
+  for (const candidate of [process.env.PUPPETEER_EXECUTABLE_PATH, process.env.CHROME_PATH]) {
+    if (candidate && existsSync(candidate)) {
+      console.log(`[render] Using Chrome from env: ${candidate}`);
+      return candidate;
+    }
   }
 
+  // Prefer Puppeteer's Chrome for Testing — more reliable than system Chrome.
   try {
-    const cached = puppeteerModule.default.executablePath();
+    const cached = await puppeteer.executablePath();
     if (cached && existsSync(cached)) {
       console.log(`[render] Using Puppeteer Chrome cache: ${cached}`);
       return cached;
     }
   } catch {
     // Cache miss
+  }
+
+  const systemChrome = findSystemChrome();
+  if (systemChrome) {
+    console.log(`[render] Using system Chrome: ${systemChrome}`);
+    return systemChrome;
   }
 
   throw new Error(
@@ -90,32 +75,54 @@ async function resolveExecutablePath(puppeteerModule) {
  * @returns {Promise<import('puppeteer').Browser>}
  */
 export async function getBrowser() {
-  if (browserInstance) return browserInstance;
+  if (browserInstance?.connected) return browserInstance;
   if (launching) return launching;
 
   launching = (async () => {
-    ensureProcessStdin();
-    const puppeteer = await import('puppeteer');
-    const executablePath = await resolveExecutablePath(puppeteer);
+    const executablePath = await resolveExecutablePath();
 
-    browserInstance = await puppeteer.default.launch({
+    // WebSocket CDP is the default; set RENDER_PIPE=1 to try pipe transport.
+    const usePipe = process.env.RENDER_PIPE === '1';
+
+    const browser = await puppeteer.launch({
       headless: true,
       executablePath,
-      // Prefer WebSocket CDP — pipe mode can re-touch process stdio.
-      pipe: false,
-      dumpio: false,
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+      pipe: usePipe,
+      dumpio: process.env.RENDER_DUMPIO === '1',
+      handleSIGINT: false,
+      handleSIGTERM: false,
+      handleSIGHUP: false,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+        '--disable-software-rasterizer',
+        '--no-first-run',
+        '--no-default-browser-check',
+        '--disable-extensions',
+        '--disable-background-networking',
+        '--disable-sync',
+        '--disable-translate',
+        '--hide-scrollbars',
+        '--mute-audio',
+        '--font-render-hinting=none',
+      ],
     });
 
-    browserInstance.on('disconnected', () => {
-      browserInstance = null;
+    browser.on('disconnected', () => {
+      if (browserInstance === browser) browserInstance = null;
     });
 
-    return browserInstance;
+    browserInstance = browser;
+    return browser;
   })();
 
   try {
     return await launching;
+  } catch (error) {
+    browserInstance = null;
+    throw error;
   } finally {
     launching = null;
   }
@@ -123,7 +130,8 @@ export async function getBrowser() {
 
 export async function closeBrowser() {
   if (browserInstance) {
-    await browserInstance.close().catch(() => {});
+    const browser = browserInstance;
     browserInstance = null;
+    await browser.close().catch(() => {});
   }
 }
