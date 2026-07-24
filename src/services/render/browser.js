@@ -3,9 +3,35 @@
  */
 
 import { existsSync } from 'fs';
+import { Readable } from 'stream';
 
 let browserInstance = null;
 let launching = null;
+
+/**
+ * @puppeteer/browsers CLI imports `stdin` from `node:process` at module load.
+ * In some hosts (already-wrapped fd 0), that throws `Error: open EEXIST`.
+ * Touch or stub stdin before importing puppeteer.
+ */
+function ensureProcessStdin() {
+  try {
+    void process.stdin;
+    return;
+  } catch (error) {
+    const message = String(error?.message || error || '');
+    if (error?.code !== 'EEXIST' && !message.includes('EEXIST')) {
+      throw error;
+    }
+  }
+
+  const stub = new Readable({ read() {} });
+  stub.isTTY = false;
+  Object.defineProperty(process, 'stdin', {
+    configurable: true,
+    enumerable: true,
+    value: stub,
+  });
+}
 
 /**
  * @returns {string | null}
@@ -68,12 +94,16 @@ export async function getBrowser() {
   if (launching) return launching;
 
   launching = (async () => {
+    ensureProcessStdin();
     const puppeteer = await import('puppeteer');
     const executablePath = await resolveExecutablePath(puppeteer);
 
     browserInstance = await puppeteer.default.launch({
       headless: true,
       executablePath,
+      // Prefer WebSocket CDP — pipe mode can re-touch process stdio.
+      pipe: false,
+      dumpio: false,
       args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
     });
 
