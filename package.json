@@ -12,7 +12,9 @@
     "db:reset": "node src/database/migrate.js --fresh",
     "db:seed": "node src/database/seeder/index.js",
     "cron": "node src/cron.js",
-    "cron:expire": "node src/jobs/expireSubscriptions.js"
+    "cron:expire": "node src/jobs/expireSubscriptions.js",
+    "browsers:install": "puppeteer browsers install chrome",
+    "postinstall": "puppeteer browsers install chrome || echo '[postinstall] Chrome install skipped — run npm run browsers:install or set CHROME_PATH'"
   },
   "dependencies": {
     "axios": "^1.18.1",
@@ -23,6 +25,7 @@
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.2.0",
     "mysql2": "^3.12.0",
-    "node-cron": "^3.0.3"
+    "node-cron": "^3.0.3",
+    "puppeteer": "^25.3.0"
   }
 }

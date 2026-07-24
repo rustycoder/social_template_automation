@@ -7,6 +7,8 @@ import {
   listPostsForUser,
   updatePost,
 } from '../services/postService.js';
+import { renderTemplateToPng } from '../services/render/index.js';
+import { LAYOUTS } from '../services/render/layouts.js';
 
 const router = Router();
 const upload = multer({
@@ -32,10 +34,6 @@ router.get('/', async (req, res) => {
 
 router.post('/', upload.single('image'), async (req, res) => {
   try {
-    if (!req.file?.buffer) {
-      return res.status(400).json({ error: 'image file is required' });
-    }
-
     const templateId = req.body?.template_id || req.body?.templateId;
     let platforms = req.body?.platforms;
     if (typeof platforms === 'string') {
@@ -60,6 +58,12 @@ router.post('/', upload.single('image'), async (req, res) => {
       return res.status(400).json({ error: 'template_id is required' });
     }
 
+    if (!LAYOUTS[formatBucket]) {
+      return res.status(400).json({
+        error: `Invalid format_bucket. Allowed: ${Object.keys(LAYOUTS).join(', ')}`,
+      });
+    }
+
     let fieldData = {};
     const rawFieldData = req.body?.field_data || req.body?.fieldData;
     if (rawFieldData) {
@@ -70,14 +74,29 @@ router.post('/', upload.single('image'), async (req, res) => {
       }
     }
 
+    let imageBuffer = req.file?.buffer || null;
+    let storedFieldData = fieldData;
+
+    if (!imageBuffer) {
+      const rendered = await renderTemplateToPng({
+        templateId,
+        fieldData,
+        formatBucket,
+        userId: req.user.id,
+        materializeImages: true,
+      });
+      imageBuffer = rendered.buffer;
+      storedFieldData = rendered.fieldData;
+    }
+
     const post = await createPost({
       userId: req.user.id,
       templateId,
       caption,
       platforms: platforms || [],
       scheduledAt,
-      imageBuffer: req.file.buffer,
-      fieldData,
+      imageBuffer,
+      fieldData: storedFieldData,
       formatBucket,
       status,
     });
