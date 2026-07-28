@@ -7,8 +7,7 @@ import {
   listPostsForUser,
   updatePost,
 } from '../services/postService.js';
-import { renderTemplateToPng } from '../services/render/index.js';
-import { LAYOUTS } from '../services/render/layouts.js';
+import { LAYOUTS } from '../services/templateLayouts.js';
 
 const router = Router();
 const upload = multer({
@@ -74,19 +73,11 @@ router.post('/', upload.single('image'), async (req, res) => {
       }
     }
 
-    let imageBuffer = req.file?.buffer || null;
-    let storedFieldData = fieldData;
-
+    const imageBuffer = req.file?.buffer || null;
     if (!imageBuffer) {
-      const rendered = await renderTemplateToPng({
-        templateId,
-        fieldData,
-        formatBucket,
-        userId: req.user.id,
-        materializeImages: true,
+      return res.status(400).json({
+        error: 'image PNG is required; render client-side before save',
       });
-      imageBuffer = rendered.buffer;
-      storedFieldData = rendered.fieldData;
     }
 
     const post = await createPost({
@@ -96,7 +87,7 @@ router.post('/', upload.single('image'), async (req, res) => {
       platforms: platforms || [],
       scheduledAt,
       imageBuffer,
-      fieldData: storedFieldData,
+      fieldData,
       formatBucket,
       status,
     });

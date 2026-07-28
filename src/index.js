@@ -9,10 +9,8 @@ import subscriptionRoutes from './routes/subscriptions.js';
 import templateRoutes from './routes/templates.js';
 import adminRoutes from './routes/admin.js';
 import postRoutes from './routes/posts.js';
-import renderRoutes from './routes/render.js';
 import socialConnectionsRoutes from './routes/socialConnections.js';
 import { ensureUploadsDir, getUploadsRoot } from './services/postService.js';
-import { closeBrowser } from './services/render/screenshot.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -33,7 +31,6 @@ app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api', templateRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/posts', postRoutes);
-app.use('/api/render', renderRoutes);
 app.use('/api/social-connections', socialConnectionsRoutes);
 
 app.use((err, _req, res, _next) => {
@@ -59,8 +56,7 @@ async function start() {
     console.log(`Uploads served from ${path.resolve(getUploadsRoot() || path.join(__dirname, 'uploads'))}`);
   });
 
-  const shutdown = async () => {
-    await closeBrowser();
+  const shutdown = () => {
     server.close(() => process.exit(0));
   };
   process.on('SIGTERM', shutdown);
