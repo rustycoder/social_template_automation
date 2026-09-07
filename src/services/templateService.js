@@ -57,6 +57,27 @@ export function materializeFieldSampleImages(templateId, fields) {
   });
 }
 
+/** Aspect-ratio buckets that may carry a dedicated HTML layout. */
+export const LAYOUT_BUCKETS = ['square', 'portrait', 'story', 'landscape'];
+
+/**
+ * Normalize a layouts payload into a clean { bucket: htmlString } object.
+ * Ignores unknown buckets and empty values.
+ * @param {unknown} raw
+ * @returns {Record<string, string>}
+ */
+export function normalizeLayouts(raw) {
+  if (!raw || typeof raw !== 'object') return {};
+  const out = {};
+  for (const bucket of LAYOUT_BUCKETS) {
+    const html = raw[bucket];
+    if (typeof html === 'string' && html.trim()) {
+      out[bucket] = html;
+    }
+  }
+  return out;
+}
+
 function mapTemplateRow(row, { includeHtml = false } = {}) {
   if (!row) return null;
   const fields = parseJsonText(row.fields_json ?? row.fieldsJson, []);
@@ -73,6 +94,8 @@ function mapTemplateRow(row, { includeHtml = false } = {}) {
   };
   if (includeHtml) {
     base.htmlSource = row.html_source ?? row.htmlSource ?? '';
+    const rawLayouts = parseJsonText(row.layouts_json ?? row.layoutsJson, {});
+    base.layouts = normalizeLayouts(rawLayouts);
   }
   return base;
 }
@@ -131,7 +154,7 @@ export async function listTemplates({ activeOnly = true, includeHtml = false } =
   const cached = getCached(cacheKey);
   if (cached) return cached;
 
-  const htmlCol = includeHtml ? ', t.html_source' : '';
+  const htmlCol = includeHtml ? ', t.html_source, t.layouts_json' : '';
   const sql = activeOnly
     ? `SELECT t.id, t.name, t.category_id, t.fields_json, t.preview_bucket, t.is_active,
               t.created_at, t.updated_at${htmlCol}
@@ -150,8 +173,9 @@ export async function listTemplates({ activeOnly = true, includeHtml = false } =
 }
 
 export async function getTemplateById(id, { includeHtml = true } = {}) {
+  const layoutsCol = includeHtml ? ', layouts_json' : '';
   const rows = await query(
-    `SELECT id, name, category_id, html_source, fields_json, preview_bucket, is_active,
+    `SELECT id, name, category_id, html_source${layoutsCol}, fields_json, preview_bucket, is_active,
             created_at, updated_at
      FROM templates WHERE id = ? LIMIT 1`,
     [id]
@@ -164,12 +188,18 @@ export async function createTemplate({
   name,
   categoryId,
   htmlSource,
+  layouts,
   fields,
   previewBucket = 'square',
   isActive = 1,
 }) {
   const templateId = id || slugifyId(name);
   validateFieldsAgainstHtml(htmlSource, fields);
+
+  const normalizedLayouts = normalizeLayouts(layouts);
+  for (const html of Object.values(normalizedLayouts)) {
+    validateFieldsAgainstHtml(html, fields);
+  }
 
   const category = await query('SELECT id FROM categories WHERE id = ? LIMIT 1', [categoryId]);
   if (!category[0]) {
@@ -189,13 +219,14 @@ export async function createTemplate({
   const storedFields = materializeFieldSampleImages(templateId, fields);
   await query(
     `INSERT INTO templates
-      (id, name, category_id, html_source, fields_json, preview_bucket, is_active, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      (id, name, category_id, html_source, layouts_json, fields_json, preview_bucket, is_active, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       templateId,
       name,
       categoryId,
       htmlSource,
+      Object.keys(normalizedLayouts).length ? stringifyJsonText(normalizedLayouts) : null,
       stringifyJsonText(storedFields),
       previewBucket || 'square',
       isActive ? 1 : 0,
@@ -220,6 +251,8 @@ export async function updateTemplate(id, patch) {
     patch.previewBucket != null ? patch.previewBucket : existing.previewBucket;
   const isActive =
     patch.isActive != null ? (patch.isActive ? 1 : 0) : existing.isActive ? 1 : 0;
+  const layouts =
+    patch.layouts != null ? normalizeLayouts(patch.layouts) : normalizeLayouts(existing.layouts);
 
   if (patch.categoryId != null) {
     const category = await query('SELECT id FROM categories WHERE id = ? LIMIT 1', [categoryId]);
@@ -231,18 +264,22 @@ export async function updateTemplate(id, patch) {
   }
 
   validateFieldsAgainstHtml(htmlSource, fields);
+  for (const html of Object.values(layouts)) {
+    validateFieldsAgainstHtml(html, fields);
+  }
 
   const now = nowDatetime();
   const storedFields = materializeFieldSampleImages(id, fields);
   await query(
     `UPDATE templates
-     SET name = ?, category_id = ?, html_source = ?, fields_json = ?,
+     SET name = ?, category_id = ?, html_source = ?, layouts_json = ?, fields_json = ?,
          preview_bucket = ?, is_active = ?, updated_at = ?
      WHERE id = ?`,
     [
       name,
       categoryId,
       htmlSource,
+      Object.keys(layouts).length ? stringifyJsonText(layouts) : null,
       stringifyJsonText(storedFields),
       previewBucket,
       isActive,
@@ -299,6 +336,7 @@ export async function upsertTemplateSeed({
   name,
   categoryId,
   htmlSource,
+  layouts,
   fields,
   previewBucket = 'square',
   isActive = 1,
@@ -312,26 +350,31 @@ export async function upsertTemplateSeed({
 
   const now = nowDatetime();
   const fieldsText = stringifyJsonText(fields || []);
+  const normalizedLayouts = normalizeLayouts(layouts);
+  const layoutsText = Object.keys(normalizedLayouts).length
+    ? stringifyJsonText(normalizedLayouts)
+    : null;
   const existing = await query('SELECT id FROM templates WHERE id = ? LIMIT 1', [id]);
 
   if (existing[0]) {
     await query(
       `UPDATE templates
-       SET name = ?, category_id = ?, html_source = ?, fields_json = ?,
+       SET name = ?, category_id = ?, html_source = ?, layouts_json = ?, fields_json = ?,
            preview_bucket = ?, is_active = ?, updated_at = ?
        WHERE id = ?`,
-      [name, categoryId, htmlSource, fieldsText, previewBucket || 'square', isActive ? 1 : 0, now, id]
+      [name, categoryId, htmlSource, layoutsText, fieldsText, previewBucket || 'square', isActive ? 1 : 0, now, id]
     );
   } else {
     await query(
       `INSERT INTO templates
-        (id, name, category_id, html_source, fields_json, preview_bucket, is_active, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        (id, name, category_id, html_source, layouts_json, fields_json, preview_bucket, is_active, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         id,
         name,
         categoryId,
         htmlSource,
+        layoutsText,
         fieldsText,
         previewBucket || 'square',
         isActive ? 1 : 0,
