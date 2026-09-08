@@ -45,6 +45,18 @@ function parseFieldsJson(raw) {
   }
 }
 
+function parseLayoutsJson(raw) {
+  if (raw == null || raw === '') return undefined;
+  if (typeof raw === 'object') return raw;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    const error = new Error('layouts_json must be valid JSON');
+    error.status = 400;
+    throw error;
+  }
+}
+
 router.get('/categories', async (_req, res) => {
   try {
     const categories = await listCategories({ activeOnly: false });
@@ -158,6 +170,7 @@ router.post('/templates', upload.single('html'), async (req, res) => {
       name: String(name).trim(),
       categoryId,
       htmlSource,
+      layouts: parseLayoutsJson(req.body?.layouts_json ?? req.body?.layoutsJson),
       fields,
       previewBucket: req.body?.preview_bucket || req.body?.previewBucket || 'square',
       isActive: req.body?.is_active !== '0' && req.body?.isActive !== false,
@@ -186,6 +199,9 @@ router.patch('/templates/:id', upload.single('html'), async (req, res) => {
     }
     if (req.body?.fields_json != null || req.body?.fieldsJson != null) {
       patch.fields = parseFieldsJson(req.body.fields_json ?? req.body.fieldsJson);
+    }
+    if (req.body?.layouts_json != null || req.body?.layoutsJson != null) {
+      patch.layouts = parseLayoutsJson(req.body.layouts_json ?? req.body.layoutsJson);
     }
     if (req.file?.buffer) {
       patch.htmlSource = req.file.buffer.toString('utf8');
