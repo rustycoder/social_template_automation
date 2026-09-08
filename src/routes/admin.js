@@ -37,7 +37,11 @@ function parseFieldsJson(raw) {
   if (raw == null || raw === '') return null;
   if (typeof raw === 'object') return raw;
   try {
-    return JSON.parse(raw);
+    let str = raw.trim();
+    if (!str.startsWith('{') && !str.startsWith('[')) {
+      str = Buffer.from(str, 'base64').toString('utf8');
+    }
+    return JSON.parse(str);
   } catch {
     const error = new Error('fields_json must be valid JSON');
     error.status = 400;
@@ -49,7 +53,11 @@ function parseLayoutsJson(raw) {
   if (raw == null || raw === '') return undefined;
   if (typeof raw === 'object') return raw;
   try {
-    return JSON.parse(raw);
+    let str = raw.trim();
+    if (!str.startsWith('{') && !str.startsWith('[')) {
+      str = Buffer.from(str, 'base64').toString('utf8');
+    }
+    return JSON.parse(str);
   } catch {
     const error = new Error('layouts_json must be valid JSON');
     error.status = 400;
